@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <title>Document</title>
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+</head>
+<body>
+<a id="open" easy-toggle="#modalWin" easy-class="modal_active" class="btn btn_theme_grab btn_size_m btn_size_l" href="#" role="button">
+ <span class="btn__text">Оставить заявку</span>
+</a>
+
+<div id="modal" class="modal">
+<div class="modal__box">
+<h3 class="modal__box-title">Узнайте о старте реализации первым!</h3>
+<p class="modal__box-text">Мы оповестим Вас за несколько дней до старта реализации с помощью SMS уведомления</p>
+
+<div class="modal__body">
+<label for="name" class="modal__label">Ваше имя</label>
+<input type="tel" class="modal__input" id="name" placeholder="Введите своё имя" required>
+<label for="tel" class="modal__label">Ваш телефон</label>
+<input type="tel" class="modal__input art-stranger" id="tel" placeholder="Введите свой номер" required>
+<a class="btn btn_theme_grab btn_size_m btn_size_l" href="#" role="button" easy-toggle="#modalWin" easy-class="show">
+<span class="btn__text">Оставить заявку</span>
+</a>
+</div>
+<div class="modal__footer">
+<p class="modal__box-text">Нажимая кнопку «Отправить», вы подтверждаете свое <a href="#1">согласие на обработку</a> персональных данных</p>
+</div>
+</div>
+
+<div class="modal__overlay" easy-remove="#modalWin" easy-class="modal_active" easy-rcoe>
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+
+<style>
+ .modal {
+    background-color: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  display: none;
+  padding: 0 20px;
+  z-index: 2;
+ }
+ 
+ .modal__box {
+  
+  background-color: #fff;
+   max-width: 560px;
+   margin: 50px auto;
+   padding: 40px 45px;
+ }
+ 
+ .showing-modal {
+  overflow: hidden;
+}
+ 
+ /* So the scrollbar calculation is correct. */
+body {
+  margin: 0;
+}
+ </style>
+ <script>
+ function openModal($modal) {
+  // Note: fixed elements will also need the margin 
+  // adjustment (like a fixed header, if you have one).
+  var scrollBarWidth = window.innerWidth - document.body.offsetWidth;
+  $('body')
+    .css('margin-right', scrollBarWidth)
+    .addClass('showing-modal');
+  $modal.show();
+};
+
+function closeModal($modal) {
+    $('body')
+      .css('margin-right', '')
+      .removeClass('showing-modal');
+    $modal.hide();
+};
+
+// I prefer to generate and dynamically insert the modal
+// but for this demonstration it is already in the markup.
+var $modal = $('#modal');
+
+// Clicking outside the inner modal content should close it.
+$modal
+	.click(function () {
+		closeModal($modal);
+	})
+  .find('.modal__box').click(function (event) {
+  	event.stopPropagation();
+	});
+
+// Open the modal when open button is pressed.
+$('#open').click(function (event) {
+  event.preventDefault();
+  openModal($modal);
+});
+ </script>
+</body>
+</html>

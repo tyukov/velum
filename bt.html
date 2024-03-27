@@ -1,0 +1,84 @@
+<button id='show' onClick='showDialog()'>Show Dialog</button>
+<div id='text'>
+  <p>It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness, it was the epoch of belief, it was the epoch of incredulity, it was the season of Light, it was the season of Darkness, it was the spring of hope, it was the winter of despair, we had everything before us, we had nothing before us, we were all going direct to Heaven, we were all going direct the other way-- in short, the period was so far like the present period, that some of its noisiest authorities insisted on its being received, for good or for evil, in the superlative degree of comparison only.</p>
+
+<p>There were a king with a large jaw and a queen with a plain face, on the throne of England; there were a king with a large jaw and a queen with a fair face, on the throne of France. In both countries it was clearer than crystal to the lords of the State preserves of loaves and fishes, that things in general were settled for ever.</p>
+
+<p>It was the year of Our Lord one thousand seven hundred and seventy-five. Spiritual revelations were conceded to England at that favoured period, as at this. Mrs. Southcott had recently attained her five-and-twentieth blessed birthday, of whom a prophetic private in the Life Guards had heralded the sublime appearance by announcing that arrangements were made for the swallowing up of London and Westminster. Even the Cock-lane ghost had been laid only a round dozen of years, after rapping out its messages, as the spirits of this very year last past (supernaturally deficient in originality) rapped out theirs. Mere messages in the earthly order of events had lately come to the English Crown and People, from a congress of British subjects in America: which, strange to relate, have proved more important to the human race than any communications yet received through any of the chickens of the Cock-lane brood.</p>
+</div>
+<div id='dialog'>
+  <span>Whatever it is</span>
+  <button id='close' onClick='closeDialog()'>Close Dialog</button>
+</div>
+<style>
+body {
+  font-size: 1.5em;
+  justify-content: center;
+  line-height: 1.5;
+  margin: 0;
+  padding: 1em 3em;
+}
+#text {
+  max-width: 800px;
+}
+#show {
+  position: fixed;
+  top: 30px;
+  left: 10px;
+}
+#show,
+#close {
+  background: #da1b60;
+  border: none;
+  color: #fff;
+  display: block;
+  font-size: 1em;
+  padding: 1em;
+  width: 200px;
+}
+#show:hover,
+#close:hover {
+  background: #ff8a00;
+  cursor: pointer;
+}
+#dialog {
+  display: none;
+  position: fixed;
+  top: 10vh;
+  left: 10vw;
+  width: 80vw;
+  height: 50vh;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  padding: 10px;
+  text-align: center;
+  z-index: 1;
+  background-color: #444;
+  color: #fff;
+}
+#dialog.show {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
+</style>
+<script>
+const showDialog = () => {
+  document.getElementById('dialog').classList.add('show')
+  const scrollY = document.documentElement.style.getPropertyValue('--scroll-y');
+  const body = document.body;
+  body.style.position = 'fixed';
+  body.style.top = `-${scrollY}`;
+};
+const closeDialog = () => {
+  const body = document.body;
+  const scrollY = body.style.top;
+  body.style.position = '';
+  body.style.top = '';
+  window.scrollTo(0, parseInt(scrollY || '0') * -1);
+  document.getElementById('dialog').classList.remove('show');
+}
+window.addEventListener('scroll', () => {
+  document.documentElement.style.setProperty('--scroll-y', `${window.scrollY}px`);
+});
+</script>

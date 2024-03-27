@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <title>Document</title>
+ <script src="https://cdn.jsdelivr.net/npm/easy-toggler@2.1.0/dist/easy-toggler.min.js"></script>
+</head>
+<body id="main">
+    <h1><div>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Maiores atque repellat facere pariatur, debitis quasi cumque, ad sequi, magnam rem quibusdam ipsum quaerat, vero nam ipsam dolorem incidunt perspiciatis? Mollitia.</div>
+    <div>Expedita unde vitae repellat, eos aliquid corporis dolorem nulla asperiores deserunt alias consequuntur rem iste quasi iusto a, fuga at odit? Molestiae blanditiis autem nesciunt, laudantium odio id laborum vero?</div>
+    <div>Cupiditate reiciendis assumenda sunt rerum hic voluptatum repellendus, libero, beatae nam, officia iste debitis. Optio, excepturi. Officia nihil, optio doloremque adipisci eveniet eaque. Consectetur doloremque iure dolorem harum. Beatae, eius.</div>
+    <div>Maxime magni deleniti nemo earum! Quos quasi rem magnam inventore, corporis cumque iste. Officia fugiat atque possimus est cupiditate ad accusantium eius dolore adipisci, necessitatibus voluptates dolorum fuga sed voluptas?</div>
+    <a id="intro_btn" easy-toggle="#modalWin" easy-class="modal_active" class="btn btn_theme_grab btn_size_m btn_size_l" href="#" role="button">
+         <span class="btn__text">Оставить заявку</span>
+        </a>
+    <div>Magni, laborum cumque odit amet accusantium voluptate necessitatibus rem nihil sunt, a in dolore, soluta commodi optio. Omnis provident suscipit quia minima inventore? Quasi laudantium suscipit, molestias repellendus sequi eaque.</div>
+    <div>Eligendi similique eveniet dolorem corporis harum vitae labore, temporibus, ea nesciunt consectetur vel minima libero maxime ratione inventore reprehenderit. A molestiae facilis error odio, nesciunt eaque temporibus sit ad nemo?</div>
+    <div>Distinctio, iste aperiam consectetur consequuntur, odit fugiat quod? Assumenda alias, necessitatibus suscipit a aspernatur quo quia officia aut nulla minima tempore, aliquid dolore voluptas illum illo soluta debitis tempora natus?</div>
+    <div>Voluptatem in, totam, perspiciatis ipsum aut tempora saepe voluptatibus similique impedit itaque molestias delectus illum iste. Voluptatem perspiciatis fugit alias nam! Corrupti a, porro magni ab quia illum ut quas.</div>
+    <div>Ipsam voluptates consequatur dignissimos fuga incidunt itaque quis obcaecati sunt illum quasi voluptas iste, delectus magnam repudiandae ad facere esse quisquam nesciunt sint quod cumque in porro harum distinctio. Doloribus?</div>
+    <div>Odit illo temporibus, ex quas facilis laborum suscipit veniam qui nihil libero recusandae praesentium nesciunt eligendi minus iure. Vero minima, earum necessitatibus. Enim placeat nesciunt quaerat corporis eligendi veniam commodi.</div></h1>
+     
+     <div id="modalWin" class="modal">
+      <div class="modal__box">
+       <h3 class="modal__box-title">Узнайте о старте реализации первым!</h3>
+       <p class="modal__box-text">Мы оповестим Вас за несколько дней до старта реализации с помощью SMS уведомления</p>
+       
+       <div class="modal__body">
+        <label for="name" class="modal__label">Ваше имя</label>
+        <input type="tel" class="modal__input" id="name" placeholder="Введите своё имя" required>
+        <label for="tel" class="modal__label">Ваш телефон</label>
+        <input type="tel" class="modal__input art-stranger" id="tel" placeholder="+7 (___) ___-__-__" required>
+        <a class="btn btn_theme_grab btn_size_m btn_size_l" href="#" role="button" easy-toggle="#modalWin" easy-class="show">
+         <span class="btn__text">Оставить заявку</span>
+        </a>
+       </div>
+       <div class="modal__footer">
+        <p class="modal__box-text">Нажимая кнопку «Отправить», вы подтверждаете свое <a href="#1">согласие на обработку</a> персональных данных</p>
+       </div>
+      </div>
+      
+      <div class="modal__overlay" easy-remove="#modalWin" easy-class="modal_active" easy-rcoe>
+       
+      </div>
+     </div>
+     <div class="modal">
+      <div class="modal__box">
+       y
+      </div>
+     </div>
+     <!-- /.modal-->
+ <style>
+  *, *::before, *::after {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+  body {
+   font-family: gilroy;
+  }
+  .btn {
+   display: inline-block;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    text-decoration: none;
+    border: 0;
+    outline: 0;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+  }
+  .btn_size_l {
+    font-size: 1rem;
+    line-height: 3.5rem;
+}
+  .btn_theme_grab {
+    font-family: "Gilroy", Arial, sans-serif;
+    font-weight: 500;
+    color: #2b2b2b;
+    background-color: #ffcc99;
+    border-radius: 0.1835rem;
+    display: block;
+    width: 100%;
+}
+  
+  
+  .modal {
+   position: fixed;
+   top: 0;
+   left: 0;
+   width: 100vw;
+   height: 100vh;
+   z-index: -1;
+   opacity: 0;
+   visibility: hidden;
+  }
+  
+  .modal_active {
+   z-index: 1000;
+   opacity: 1;
+   visibility: visible;
+  }
+  
+  .modal__overlay {
+   background-color: rgba(0,0,0,.5);
+   position: absolute;
+   top: 0;
+   left: 0;
+   width: 100vw;
+   height: 100vh;
+   z-index: 0;
+   backdrop-filter: blur(5px);
+   overflow-y: auto
+  }
+  
+  .modal__box {
+   background-color: #fff;
+   max-width: 560px;
+   max-height: 100vh;
+   overflow-y: auto;
+   width: 100%;
+   padding: 40px 45px;
+   position: absolute;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+   z-index: 1;
+  }
+  
+  .modal__box-title {
+   font-size: 2.25rem;
+   line-height: 1.23;
+   font-weight: 600;
+   margin: 0 0 1rem;
+  }
+  
+  .modal__box-text {
+   font-size: 1rem;
+   line-height: 1.55;
+   font-weight: 300;
+   margin: 0 0 1.5rem;
+  }
+  
+  .modal__footer .modal__box-text {
+   margin: 1.5rem 0 0;
+  }
+  
+  .modal__input {
+   display: block;
+   margin: 0 0 1.5rem;
+    width: 100%;
+    padding: 1rem 1.25rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #000;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #c9c9c9;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: 0.375rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+  }
+  
+  .modal__label {
+   display: inline-block;
+   margin-bottom: .5rem;
+  }
+ </style>
+ 
+ <script>
+ document.getElementById('intro_btn').onclick = function() {
+  document.getElementById('main').classList.add('main--main-bg');
+}
+ </script>
+ 
+ <script>
+ const showDialog = () => {
+  document.getElementById('dialog').classList.add('show')
+  const scrollY = document.documentElement.style.getPropertyValue('--scroll-y');
+  const body = document.body;
+  body.style.position = 'fixed';
+  body.style.top = `-${scrollY}`;
+};
+const closeDialog = () => {
+  const body = document.body;
+  const scrollY = body.style.top;
+  body.style.position = '';
+  body.style.top = '';
+  window.scrollTo(0, parseInt(scrollY || '0') * -1);
+  document.getElementById('dialog').classList.remove('show');
+}
+window.addEventListener('scroll', () => {
+  document.documentElement.style.setProperty('--scroll-y', `${window.scrollY}px`);
+});
+ </script>
+ 
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<script src="js/maska-nomera.js" type="text/javascript" ></script>
+
+      <script>
+$('.art-stranger').mask('+7 (999) 999-99-99');
+
+$.fn.setCursorPosition = function(pos) {
+  if ($(this).get(0).setSelectionRange) {
+    $(this).get(0).setSelectionRange(pos, pos);
+  } else if ($(this).get(0).createTextRange) {
+    var range = $(this).get(0).createTextRange();
+    range.collapse(true);
+    range.moveEnd('character', pos);
+    range.moveStart('character', pos);
+    range.select();
+  }
+};
+
+
+$('input[type="tel"]').click(function(){
+    $(this).setCursorPosition(4);  // set position number
+  });
+</script>
+</body>
+</html>
