@@ -14,7 +14,7 @@
 <div id="response"></div>
 
  </body>
-  <spript>document.getElementById("feedbackForm").addEventListener("submit", function(event) {
+  <script>document.getElementById("feedbackForm").addEventListener("submit", function(event) {
     event.preventDefault();
     var message = document.getElementById("message").value;
     var token = "ВАШТОКЕНБОТА";
@@ -44,5 +44,5 @@
     .catch(error => {
         console.error('Error:', error);
     });
-});</spript>
+});</script>
 </html>
