@@ -267,8 +267,45 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
       </div>
     )}
 
+    {price && (
+      <div
+        class="calc"
+        data-price={price}
+        data-small-markup={supplierPrices(model, coating).p1 !== undefined ? "" : undefined}
+      >
+        <label class="calc__label" for="calc-area">
+          Сколько нужно на вашу крышу?
+        </label>
+        <div class="calc__field">
+          <input
+            id="calc-area"
+            class="calc__input"
+            type="number"
+            inputmode="decimal"
+            min="1"
+            max="10000"
+            step="any"
+            placeholder="Площадь крыши"
+            autocomplete="off"
+          />
+          <span class="calc__unit">м²</span>
+        </div>
+        <p class="calc__result" aria-live="polite" hidden>
+          Примерно <b class="calc__sum"></b>
+          <span class="calc__detail"></span>
+        </p>
+        <p class="calc__note" hidden>
+          Для заказа до 50 м² цена будет выше: на небольшие заказы действует наценка.
+        </p>
+      </div>
+    )}
+
     <div class="product-view__actions">
-      <a href="#ex1" rel="modal:open" class="btn btn_theme_grab btn_size_l product-view__btn">
+      <a
+        href="#ex1"
+        rel="modal:open"
+        class="btn btn_theme_grab btn_size_l product-view__btn product-view__order"
+      >
         <span class="btn__text">Узнать стоимость</span>
       </a>
       <a

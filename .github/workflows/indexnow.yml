@@ -1,30 +1,27 @@
-# После деплоя на продакшен сообщаем поисковикам (Яндекс, Bing и др.) об обновлённых страницах
+# После обновления сайта сообщаем поисковикам (Яндекс, Bing и др.) об изменённых страницах.
+# Vercel публикует main сам за 1–2 минуты; скрипт ждёт, пока сайт ответит, и только потом отправляет адреса.
 name: IndexNow
 
 permissions:
   contents: read
 
 on:
-  # Vercel присылает это событие после успешного деплоя
-  repository_dispatch:
-    types: [vercel.deployment.success]
-  # Запасной вариант: статус деплоя GitHub (окружение у Vercel называется «Production – velum»)
-  deployment_status:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "public/**"
+      - "astro.config.mjs"
   workflow_dispatch:
 
 jobs:
   ping:
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'repository_dispatch' &&
-      github.event.client_payload.environment == 'production') ||
-      (github.event_name == 'deployment_status' &&
-      github.event.deployment_status.state == 'success' &&
-      startsWith(github.event.deployment.environment, 'Production'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version: 24
+      # Даём Vercel опубликовать новую версию
+      - run: sleep 180
       - run: node scripts/indexnow.mjs

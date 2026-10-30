@@ -358,6 +358,87 @@
   color: #666;
 }
 
+/* Калькулятор стоимости */
+.calc {
+  margin: 0.75rem 0 0;
+  padding: 1rem 1.25rem;
+  border: 1px solid #eee;
+  border-radius: 1rem;
+}
+
+.calc__label {
+  display: block;
+  margin: 0 0 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #111;
+}
+
+.calc__field {
+  position: relative;
+  max-width: 14rem;
+}
+
+.calc__input {
+  width: 100%;
+  height: 3rem;
+  padding: 0 3rem 0 1rem;
+  border: 1px solid #ddd;
+  border-radius: 0.75rem;
+  font: inherit;
+  font-size: 1.0625rem;
+  color: #111;
+  background: #fff;
+  appearance: textfield;
+}
+
+.calc__input::-webkit-outer-spin-button,
+.calc__input::-webkit-inner-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.calc__input:focus {
+  outline: none;
+  border-color: #ebb683;
+  box-shadow: 0 0 0 3px rgb(235 182 131 / 25%);
+}
+
+.calc__unit {
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+  color: #666;
+  pointer-events: none;
+}
+
+.calc__result {
+  margin: 0.75rem 0 0;
+  font-size: 0.9375rem;
+  color: #333;
+}
+
+.calc__sum {
+  font-size: 1.375rem;
+  font-weight: 600;
+  color: #111;
+  white-space: nowrap;
+}
+
+.calc__detail {
+  display: block;
+  margin: 0.125rem 0 0;
+  font-size: 0.8125rem;
+  color: #666;
+}
+
+.calc__note {
+  margin: 0.5rem 0 0;
+  font-size: 0.8125rem;
+  color: #7a4d10;
+}
+
 /* Наличие */
 .stock {
   display: flex;
