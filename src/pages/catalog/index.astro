@@ -2,7 +2,9 @@
 import CatalogLayout from "../../layouts/CatalogLayout.astro";
 import Breadcrumbs from "../../components/catalog/Breadcrumbs.astro";
 import TileVisual from "../../components/catalog/TileVisual.astro";
-import { metalTileModels } from "../../data/catalog/metal-tile";
+import { catalogEntries } from "../../data/catalog/metal-tile";
+
+const entries = catalogEntries();
 ---
 
 <CatalogLayout
@@ -30,8 +32,8 @@ import { metalTileModels } from "../../data/catalog/metal-tile";
       <a href="/catalog/metallocherepitsa" class="model-card__link">
         <TileVisual hex="#45322E" label="Металлочерепица" size="small" />
         <h2 class="model-card__title">Металлочерепица</h2>
-        <p class="model-card__text">{metalTileModels.map((m) => m.name).join(", ")}</p>
-        <p class="model-card__meta">{metalTileModels.length} моделей</p>
+        <p class="model-card__text">{entries.map((e) => e.name).join(", ")}</p>
+        <p class="model-card__meta">{entries.length} модели</p>
       </a>
     </li>
   </ul>

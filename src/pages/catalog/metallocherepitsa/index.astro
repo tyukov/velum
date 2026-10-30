@@ -3,20 +3,20 @@ import CatalogLayout from "../../../layouts/CatalogLayout.astro";
 import Breadcrumbs from "../../../components/catalog/Breadcrumbs.astro";
 import TileVisual from "../../../components/catalog/TileVisual.astro";
 import { colors } from "../../../data/catalog/colors";
-import { metalTileModels, variantsOf } from "../../../data/catalog/metal-tile";
+import { catalogEntries, variantsOf } from "../../../data/catalog/metal-tile";
 
 // Карточки в разных ходовых цветах, чтобы сразу было видно палитру
-const cardPalette = ["8017", "3005", "6005", "7024", "8004", "RR32", "9005"];
-const cardColor = (slug: string) => {
-  const index = metalTileModels.findIndex((m) => m.slug === slug);
-  const codes = variantsOf(metalTileModels[index]!).map((v) => v.color);
+const cardPalette = ["8017", "3005", "6005", "7024"];
+const entries = catalogEntries();
+const cardColor = (index: number) => {
+  const codes = entries[index]!.models.flatMap((m) => variantsOf(m).map((v) => v.color));
   const wanted = cardPalette[index % cardPalette.length]!;
   return colors[codes.includes(wanted) ? wanted : codes[0]!]!;
 };
 ---
 
 <CatalogLayout
-  title="Металлочерепица Металл Профиль в Атырау — 7 моделей | Velum"
+  title="Металлочерепица Металл Профиль в Атырау — модели и цвета | Velum"
   description="Металлочерепица Металл Профиль: Ламонтерра-X, Монтерроса, Трамонтана, Монтекристо. Покрытия от полиэстера до PURMAN, гарантия до 50 лет. Подбор и доставка в Атырау."
   path="/catalog/metallocherepitsa"
 >
@@ -30,26 +30,28 @@ const cardColor = (slug: string) => {
   <header class="catalog-head">
     <h1>Металлочерепица</h1>
     <p>
-      Металлочерепица завода «Металл Профиль»: семь моделей, десять видов покрытия и больше тридцати
-      цветов. Выберите модель, а на её странице — покрытие, толщину и цвет. Стоимость под ваш объём
-      рассчитает менеджер.
+      Металлочерепица завода «Металл Профиль»: четыре модели (Монтерроса — в четырёх исполнениях),
+      десять видов покрытия и больше тридцати цветов. Выберите модель, а на её странице — покрытие,
+      толщину и цвет. Стоимость под ваш объём рассчитает менеджер.
     </p>
   </header>
 
   <ul class="model-grid">
-    {metalTileModels.map((model) => {
-      const color = cardColor(model.slug);
-      const warranties = model.coatings.map((c) => c.warranty);
-      const colorCount = new Set(variantsOf(model).map((v) => v.color)).size;
+    {entries.map((entry, i) => {
+      const color = cardColor(i);
+      const coatings = entry.models.flatMap((m) => m.coatings);
+      const colorCount = new Set(entry.models.flatMap((m) => variantsOf(m).map((v) => v.color)))
+        .size;
       return (
         <li class="model-card">
-          <a href={`/catalog/metallocherepitsa/${model.slug}`} class="model-card__link">
-            <TileVisual hex={color.hex} label={`${model.name}, ${color.name}`} size="small" />
-            <h2 class="model-card__title">{model.name}</h2>
-            <p class="model-card__text">{model.summary}</p>
+          <a href={`/catalog/metallocherepitsa/${entry.slug}`} class="model-card__link">
+            <TileVisual hex={color.hex} label={`${entry.name}, ${color.name}`} size="small" />
+            <h2 class="model-card__title">{entry.name}</h2>
+            <p class="model-card__text">{entry.summary}</p>
             <p class="model-card__meta">
-              {new Set(model.coatings.map((c) => c.name)).size} покрытий · {colorCount} цветов ·
-              гарантия до {Math.max(...warranties)} лет
+              {entry.models.length > 1 && `${entry.models.length} исполнения · `}
+              {new Set(coatings.map((c) => c.name)).size} покрытий · {colorCount} цветов · гарантия
+              до {Math.max(...coatings.map((c) => c.warranty))} лет
             </p>
           </a>
         </li>

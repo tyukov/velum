@@ -4,9 +4,12 @@ import TileVisual from "./TileVisual.astro";
 import Breadcrumbs from "./Breadcrumbs.astro";
 import { colors } from "../../data/catalog/colors";
 import {
+  catalogEntries,
+  defaultVariant,
+  familyOf,
   formatThickness,
-  metalTileModels,
   variantsOf,
+  type Model,
   type Variant,
 } from "../../data/catalog/metal-tile";
 import { business } from "../../lib/business";
@@ -34,7 +37,23 @@ const thicknesses = model.coatings.filter((c) => c.name === coating.name);
 const colorOptions = all.filter(
   (v) => v.coating.name === coating.name && v.coating.thickness === coating.thickness,
 );
-const otherModels = metalTileModels.filter((m) => m.slug !== model.slug);
+// Исполнения семейства (Монтерроса A/S/M/X): сохраняем покрытие, толщину и цвет, если есть
+const versions = familyOf(model);
+const versionLink = (m: Model) => {
+  const vs = variantsOf(m);
+  const pick =
+    vs.find(
+      (v) =>
+        v.coating.name === coating.name &&
+        v.coating.thickness === coating.thickness &&
+        v.color === color,
+    ) ??
+    vs.find((v) => v.coating.name === coating.name && v.color === color) ??
+    vs.find((v) => v.coating.name === coating.name) ??
+    defaultVariant(m);
+  return `/catalog/metallocherepitsa/${m.slug}/${pick.slug}`;
+};
+const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug === model.slug));
 ---
 
 <Breadcrumbs
@@ -74,6 +93,25 @@ const otherModels = metalTileModels.filter((m) => m.slug !== model.slug);
         <b>{model.width} мм</b> ширина листа
       </li>
     </ul>
+
+    {model.family && (
+      <div class="picker" role="group" aria-label="Исполнение">
+        <p class="picker__label">
+          Исполнение: <span>{model.family.versionNote}</span>
+        </p>
+        <div class="picker__options">
+          {versions.map((m) => (
+            <a
+              href={versionLink(m)}
+              class:list={["picker__chip", { picker__chip_active: m.slug === model.slug }]}
+              aria-current={m.slug === model.slug ? "true" : undefined}
+            >
+              {m.family!.version}
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
 
     <div class="picker" role="group" aria-label="Покрытие">
       <p class="picker__label">Покрытие</p>
@@ -190,9 +228,9 @@ const otherModels = metalTileModels.filter((m) => m.slug !== model.slug);
 <section class="other-models">
   <h2>Другие модели металлочерепицы</h2>
   <ul class="other-models__list">
-    {otherModels.map((m) => (
+    {otherEntries.map((e) => (
       <li>
-        <a href={`/catalog/metallocherepitsa/${m.slug}`}>{m.name}</a>
+        <a href={`/catalog/metallocherepitsa/${e.slug}`}>{e.name}</a>
       </li>
     ))}
   </ul>

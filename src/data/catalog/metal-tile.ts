@@ -136,9 +136,20 @@ const coatings = {
   },
 } satisfies Record<string, Coating>;
 
+export interface Family {
+  id: string;
+  name: string;
+  /** Исполнение внутри семейства: A, S, M, X */
+  version: string;
+  /** Чем это исполнение отличается от других */
+  versionNote: string;
+}
+
 export interface Model {
   slug: string;
   name: string;
+  /** Исполнения одной металлочерепицы (Монтерроса A/S/M/X) объединяются в одну модель */
+  family?: Family;
   /** Полная ширина листа, мм */
   width: number;
   /** Короткое описание для карточки */
@@ -174,42 +185,65 @@ export const metalTileModels: Model[] = [
   },
   {
     slug: "monterrosa-a",
-    name: "Монтерроса-A",
+    name: "Монтерроса A",
+    family: {
+      id: "monterrosa",
+      name: "Монтерроса",
+      version: "A",
+      versionNote: "Модульное исполнение: листы удобно возить и монтировать на сложных крышах.",
+    },
     width: 1160,
-    summary: "Модульная металлочерепица: листы удобно возить и монтировать без длинных пролётов.",
+    summary: "Одна металлочерепица в четырёх исполнениях — A, S, M и X — с разной длиной шага.",
     description: [
-      "Монтерроса-A — модульная металлочерепица. Листы короткие, их проще привезти на участок и поднять на крышу, а монтаж под силу небольшой бригаде.",
-      "Подходит для крыш со сложной формой, где длинные листы неудобны.",
+      "Монтерроса — одна металлочерепица в четырёх исполнениях: A, S, M и X. Исполнения отличаются длиной шага, а значит и рисунком крыши. Какое лучше подойдёт под ваши скаты, подскажет менеджер после замера.",
     ],
     coatings: [c.vikingE, c.valori, c.norman, c.viking, c.polyester045],
   },
   {
     slug: "monterrosa-s",
     name: "Монтерроса S",
+    family: {
+      id: "monterrosa",
+      name: "Монтерроса",
+      version: "S",
+      versionNote: "Стандартный рельеф и классический вид.",
+    },
     width: 1170,
-    summary: "Монтерроса в исполнении S: четыре покрытия, гарантия от 10 до 40 лет.",
+    summary: "Одна металлочерепица в четырёх исполнениях — A, S, M и X — с разной длиной шага.",
     description: [
-      "Монтерроса выпускается в трёх исполнениях: S, M и X. Какое подойдёт под размеры ваших скатов, подскажет менеджер после замера.",
+      "Монтерроса — одна металлочерепица в четырёх исполнениях: A, S, M и X. Исполнения отличаются длиной шага, а значит и рисунком крыши. Какое лучше подойдёт под ваши скаты, подскажет менеджер после замера.",
     ],
     coatings: [c.vikingE, c.valori, c.norman, c.viking],
   },
   {
     slug: "monterrosa-m",
     name: "Монтерроса M",
+    family: {
+      id: "monterrosa",
+      name: "Монтерроса",
+      version: "M",
+      versionNote: "Другая длина шага, чем у S.",
+    },
     width: 1170,
-    summary: "Монтерроса в исполнении M: четыре покрытия, гарантия от 10 до 40 лет.",
+    summary: "Одна металлочерепица в четырёх исполнениях — A, S, M и X — с разной длиной шага.",
     description: [
-      "Монтерроса выпускается в трёх исполнениях: S, M и X. Какое подойдёт под размеры ваших скатов, подскажет менеджер после замера.",
+      "Монтерроса — одна металлочерепица в четырёх исполнениях: A, S, M и X. Исполнения отличаются длиной шага, а значит и рисунком крыши. Какое лучше подойдёт под ваши скаты, подскажет менеджер после замера.",
     ],
     coatings: [c.vikingE, c.valori, c.norman, c.viking],
   },
   {
     slug: "monterrosa-x",
     name: "Монтерроса X",
+    family: {
+      id: "monterrosa",
+      name: "Монтерроса",
+      version: "X",
+      versionNote: "Другая длина шага, чем у S и M.",
+    },
     width: 1170,
-    summary: "Монтерроса в исполнении X: четыре покрытия, гарантия от 10 до 40 лет.",
+    summary: "Одна металлочерепица в четырёх исполнениях — A, S, M и X — с разной длиной шага.",
     description: [
-      "Монтерроса выпускается в трёх исполнениях: S, M и X. Какое подойдёт под размеры ваших скатов, подскажет менеджер после замера.",
+      "Монтерроса — одна металлочерепица в четырёх исполнениях: A, S, M и X. Исполнения отличаются длиной шага, а значит и рисунком крыши. Какое лучше подойдёт под ваши скаты, подскажет менеджер после замера.",
     ],
     coatings: [c.vikingE, c.valori, c.norman, c.viking],
   },
@@ -252,6 +286,41 @@ export const variantsOf = (model: Model): Variant[] =>
   model.coatings.flatMap((coating) =>
     coating.colors.map((color) => ({ model, coating, color, slug: variantSlug(coating, color) })),
   );
+
+/** Пункт раздела: отдельная модель или семейство исполнений (Монтерроса A/S/M/X) */
+export interface CatalogEntry {
+  name: string;
+  /** Куда ведёт карточка: для семейства — стандартное исполнение S */
+  slug: string;
+  summary: string;
+  models: Model[];
+}
+
+export const catalogEntries = (): CatalogEntry[] => {
+  const entries: CatalogEntry[] = [];
+  for (const model of metalTileModels) {
+    if (!model.family) {
+      entries.push({ name: model.name, slug: model.slug, summary: model.summary, models: [model] });
+      continue;
+    }
+    const existing = entries.find((e) => e.models[0]?.family?.id === model.family!.id);
+    if (existing) existing.models.push(model);
+    else
+      entries.push({
+        name: model.family.name,
+        slug: model.slug,
+        summary: model.summary,
+        models: [model],
+      });
+  }
+  // Карточка семейства ведёт на исполнение S — стандартный рельеф
+  for (const e of entries)
+    e.slug = (e.models.find((m) => m.family?.version === "S") ?? e.models[0]!).slug;
+  return entries;
+};
+
+export const familyOf = (model: Model) =>
+  model.family ? metalTileModels.filter((m) => m.family?.id === model.family!.id) : [model];
 
 /** Вариант по умолчанию для страницы модели: ходовой NormanMP 8017, иначе первый */
 export const defaultVariant = (model: Model): Variant => {

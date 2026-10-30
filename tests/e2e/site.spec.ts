@@ -179,7 +179,7 @@ test.describe("каталог металлочерепицы", () => {
     await page.goto("/");
     await page.locator(".promo-header__title-link").click();
     await expect(page).toHaveURL(/\/catalog\/metallocherepitsa$/);
-    await expect(page.locator(".model-card")).toHaveCount(7);
+    await expect(page.locator(".model-card")).toHaveCount(4);
     await page
       .getByRole("link", { name: /Трамонтана/ })
       .first()
@@ -215,6 +215,21 @@ test.describe("каталог металлочерепицы", () => {
     expect(sent.text).toContain(
       "<b>Товар:</b> Металлочерепица Трамонтана VikingMP E 0,5 мм, RR 32",
     );
+  });
+
+  test("Монтерроса: исполнения одной модели, цвет и покрытие сохраняются", async ({ page }) => {
+    await page.goto("/catalog/metallocherepitsa");
+    await page
+      .getByRole("link", { name: /Монтерроса/ })
+      .first()
+      .click();
+    await expect(page).toHaveURL(/\/monterrosa-s$/);
+    await page.locator(".picker__chip", { hasText: "VikingMP E" }).click();
+    await page.getByRole("link", { name: "RAL 8004 Медно-коричневый" }).click();
+    await expect(page).toHaveURL(/monterrosa-s\/vikingmp-e-0-5-ral-8004$/);
+    await page.getByRole("group", { name: "Исполнение" }).getByRole("link", { name: "X" }).click();
+    await expect(page).toHaveURL(/monterrosa-x\/vikingmp-e-0-5-ral-8004$/);
+    await expect(page.locator("h1")).toContainText("Монтерроса X");
   });
 
   test("у страницы варианта свой заголовок и canonical", async ({ page }) => {
