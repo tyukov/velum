@@ -228,6 +228,19 @@ export const priceOf = (model: Model, coating: Coating) => {
   return resolvePrice(p1, p2);
 };
 
+/**
+ * Гарантия на сайте: если вариант есть у обоих поставщиков, гарантию не показываем
+ * (неизвестно, у кого возьмём); если только у одного — показываем.
+ */
+export const warrantyOf = (model: Model, coating: Coating): number | undefined => {
+  const { p1, p2 } = supplierPrices(model, coating);
+  return p1 !== undefined && p2 !== undefined ? undefined : coating.warranty;
+};
+
+/** Наибольшая показываемая гарантия среди покрытий моделей */
+export const maxWarranty = (models: Model[]) =>
+  Math.max(0, ...models.flatMap((m) => m.coatings.map((c) => warrantyOf(m, c) ?? 0)));
+
 /** Для менеджера в заявке: цены поставщиков, «П1: 3 280 ₸, П2: 3 300 ₸» */
 export const supplyNote = (model: Model, coating: Coating) => {
   const { p1, p2 } = supplierPrices(model, coating);

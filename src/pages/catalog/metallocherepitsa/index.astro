@@ -6,6 +6,7 @@ import { colors } from "../../../data/catalog/colors";
 import {
   catalogEntries,
   formatPrice,
+  maxWarranty,
   minPrice,
   variantsOf,
 } from "../../../data/catalog/metal-tile";
@@ -65,7 +66,7 @@ const cardColor = (index: number) => {
             <p class="model-card__meta">
               {entry.models.length > 1 && `${entry.models.length} исполнения · `}
               {new Set(coatings.map((c) => c.name)).size} покрытий · {colorCount} цветов · гарантия
-              до {Math.max(...coatings.map((c) => c.warranty))} лет
+              до {maxWarranty(entry.models)} лет
             </p>
           </a>
         </li>

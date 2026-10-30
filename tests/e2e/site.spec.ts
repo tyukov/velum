@@ -2,6 +2,23 @@ import { expect, test } from "@playwright/test";
 import fs from "node:fs";
 import { TELEGRAM_MOCK_LOG } from "../../playwright.config";
 
+// Тесты на телефоне и компьютере идут параллельно и пишут в один журнал заглушки Telegram,
+// поэтому у каждой заявки уникальное имя, а сообщение ищется по нему
+const uniqueName = () => `Тест ${Math.random().toString(36).slice(2, 8)}`;
+const sentMessage = async (name: string): Promise<{ text: string }> => {
+  let found: { text: string } | undefined;
+  await expect
+    .poll(() => {
+      const lines = fs.existsSync(TELEGRAM_MOCK_LOG)
+        ? fs.readFileSync(TELEGRAM_MOCK_LOG, "utf8").trim().split("\n")
+        : [];
+      found = lines.map((l) => JSON.parse(l)).find((m) => m.text.includes(name));
+      return Boolean(found);
+    })
+    .toBe(true);
+  return found!;
+};
+
 test.describe("главная", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
@@ -29,7 +46,6 @@ test.describe("главная", () => {
   });
 
   test("заявка: маска телефона, отправка, закрытие окна", async ({ page }) => {
-    fs.rmSync(TELEGRAM_MOCK_LOG, { force: true });
     await page.locator('.promo-message a[href="#ex1"]').click();
     const modal = page.locator(".blocker .modal");
     await expect(modal).toBeVisible();
@@ -38,7 +54,8 @@ test.describe("главная", () => {
       "/privacy",
     );
 
-    await modal.getByLabel("Ваше имя").fill("Тест");
+    const name = uniqueName();
+    await modal.getByLabel("Ваше имя").fill(name);
     const phone = modal.getByLabel("Ваш телефон");
     await phone.pressSequentially("87011234567");
     await expect(phone).toHaveValue("+7 (701) 123-45-67");
@@ -46,7 +63,7 @@ test.describe("главная", () => {
     await modal.getByRole("button", { name: "Отправить заявку" }).click();
 
     await expect(modal.locator(".form-status")).toHaveText(/Спасибо/);
-    const sent = JSON.parse(fs.readFileSync(TELEGRAM_MOCK_LOG, "utf8").trim().split("\n").pop()!);
+    const sent = await sentMessage(name);
     expect(sent.text).toContain("+7 (701) 123-45-67");
     expect(sent.text).toContain("Нужна черепица &lt;b&gt;");
     expect(sent.text).toContain("<b>Страница:</b> /");
@@ -203,15 +220,15 @@ test.describe("каталог металлочерепицы", () => {
   });
 
   test("заявка с товара уходит с названием варианта", async ({ page }) => {
-    fs.rmSync(TELEGRAM_MOCK_LOG, { force: true });
     await page.goto("/catalog/metallocherepitsa/tramontana/vikingmp-e-0-5-rr32");
     await page.getByRole("link", { name: "Узнать стоимость" }).click();
     const modal = page.locator(".blocker .modal");
-    await modal.getByLabel("Ваше имя").fill("Тест");
+    const name = uniqueName();
+    await modal.getByLabel("Ваше имя").fill(name);
     await modal.getByLabel("Ваш телефон").pressSequentially("7011234567");
     await modal.getByRole("button", { name: "Отправить заявку" }).click();
     await expect(modal.locator(".form-status")).toHaveText(/Спасибо/);
-    const sent = JSON.parse(fs.readFileSync(TELEGRAM_MOCK_LOG, "utf8").trim().split("\n").pop()!);
+    const sent = await sentMessage(name);
     expect(sent.text).toContain(
       "<b>Товар:</b> Металлочерепица Трамонтана VikingMP E 0,5 мм, RR 32",
     );
@@ -290,26 +307,33 @@ test.describe("второй поставщик", () => {
     await page.goto("/catalog/metallocherepitsa/lamonterra-x/vikingmp-0-45-ral-8017");
     await expect(page.locator(".product-view__price-value")).toContainText("3 280");
     await expect(page.locator(".product-view__price-note")).toContainText("12.10.2026");
+    // Есть у обоих поставщиков — гарантию не показываем
+    await expect(page.locator(".product-view__facts")).not.toContainText("гарантия");
+    await expect(page.locator(".product-details dl")).not.toContainText("Гарантия");
+    // Только у одного поставщика — показываем
+    await page.locator(".picker__chip", { hasText: "NormanMP" }).click();
+    await expect(page.locator(".product-view__facts")).toContainText("20 лет гарантия");
   });
 
   test("Stella: модель второго поставщика, в наличии, заявка с ценами поставщиков", async ({
     page,
   }) => {
-    fs.rmSync(TELEGRAM_MOCK_LOG, { force: true });
     await page.goto("/catalog/metallocherepitsa/stella/polyester-0-45-ral-5021");
     await expect(page.locator("h1")).toContainText("Stella");
     await expect(page.locator(".stock")).toContainText("В наличии в Атырау");
     await expect(page.locator(".product-view__price-value")).toContainText("3 075");
     await expect(page.locator(".product-view__price-note")).not.toContainText("наценка");
     await expect(page.locator(".product-view__facts")).not.toContainText("ширина листа");
+    await expect(page.locator(".product-view__facts")).toContainText("5 лет гарантия");
 
     await page.getByRole("link", { name: "Узнать стоимость" }).click();
     const modal = page.locator(".blocker .modal");
-    await modal.getByLabel("Ваше имя").fill("Тест");
+    const name = uniqueName();
+    await modal.getByLabel("Ваше имя").fill(name);
     await modal.getByLabel("Ваш телефон").pressSequentially("7011234567");
     await modal.getByRole("button", { name: "Отправить заявку" }).click();
     await expect(modal.locator(".form-status")).toHaveText(/Спасибо/);
-    const sent = JSON.parse(fs.readFileSync(TELEGRAM_MOCK_LOG, "utf8").trim().split("\n").pop()!);
+    const sent = await sentMessage(name);
     expect(sent.text).toMatch(/<b>Цены поставщиков:<\/b> П2: 3\s075\s₸/);
   });
 });

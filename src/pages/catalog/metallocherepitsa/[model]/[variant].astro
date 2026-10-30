@@ -8,6 +8,7 @@ import {
   formatThickness,
   priceOf,
   supplyNote,
+  warrantyOf,
   metalTileModels,
   variantsOf,
   type Variant,
@@ -28,6 +29,7 @@ const color = colors[variant.color]!;
 const colorText = color.label === color.name ? color.name : `${color.label} ${color.name}`;
 const name = `Металлочерепица ${model.name} ${coating.name} ${formatThickness(coating.thickness)}, ${colorText}`;
 const price = priceOf(model, coating);
+const warranty = warrantyOf(model, coating);
 const modelPath = `/catalog/metallocherepitsa/${model.slug}`;
 // Первый вариант модели совпадает со страницей модели: каноническим считаем адрес модели
 const isDefault = defaultVariant(model).slug === variant.slug;
@@ -35,7 +37,7 @@ const isDefault = defaultVariant(model).slug === variant.slug;
 
 <CatalogLayout
   title={`${name} в Атырау | Velum`}
-  description={`${name}${price ? ` — ${formatPrice(price)} за м²` : ""}. Покрытие класса «${coating.class}», гарантия ${coating.warranty} лет. Доставка по Атырау, расчёт под ваш объём в Velum.`}
+  description={`${name}${price ? ` — ${formatPrice(price)} за м²` : ""}. Покрытие класса «${coating.class}»${warranty ? `, гарантия ${warranty} лет` : ""}. Доставка по Атырау, расчёт под ваш объём в Velum.`}
   path={`${modelPath}/${variant.slug}`}
   canonicalPath={isDefault ? modelPath : undefined}
   product={name}

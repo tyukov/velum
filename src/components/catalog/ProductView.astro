@@ -12,6 +12,7 @@ import {
   priceDateOf,
   priceOf,
   supplierPrices,
+  warrantyOf,
   stockInfo,
   variantsOf,
   type Model,
@@ -59,6 +60,7 @@ const versionLink = (m: Model) => {
   return `/catalog/metallocherepitsa/${m.slug}/${pick.slug}`;
 };
 const price = priceOf(model, coating);
+const warranty = warrantyOf(model, coating);
 const stock = stockInfo[coating.stock];
 // Покрытия, которые есть в Атырау (хотя бы в одной толщине)
 const inStockNames = new Set(model.coatings.filter((c) => c.stock === "atyrau").map((c) => c.name));
@@ -120,9 +122,11 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
     </p>
 
     <ul class="product-view__facts">
-      <li>
-        <b>{coating.warranty} лет</b> гарантия
-      </li>
+      {warranty && (
+        <li>
+          <b>{warranty} лет</b> гарантия
+        </li>
+      )}
       <li>
         <b>{coating.class}</b> класс покрытия
       </li>
@@ -259,7 +263,8 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
     ))}
     <p>
       Покрытие {coating.name} относится к классу «{coating.class}»: толщина полимерного слоя{" "}
-      {coating.layer}, гарантия производителя {coating.warranty} лет.
+      {coating.layer}
+      {warranty ? `, гарантия ${warranty} лет` : ""}.
     </p>
   </div>
   <div class="product-details__specs">
@@ -286,8 +291,12 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
           <dd>{model.width} мм</dd>
         </>
       )}
-      <dt>Гарантия</dt>
-      <dd>{coating.warranty} лет</dd>
+      {warranty && (
+        <>
+          <dt>Гарантия</dt>
+          <dd>{warranty} лет</dd>
+        </>
+      )}
       {price && (
         <>
           <dt>Цена за м²</dt>
