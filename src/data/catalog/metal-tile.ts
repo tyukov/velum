@@ -1,5 +1,8 @@
 // Металлочерепица «Металл Профиль»: ассортимент по прайс-листу ТОО «Завод Металл Профиль»
-// (Атырау) от 21.09.2026, прайс-лист №1 и приложение №1 (перечень цветов). Цены не публикуются.
+// (Атырау) от 21.09.2026, прайс-лист №1 и приложение №1 (перечень цветов).
+// Цены — за м² в тенге с НДС, по прайсу завода.
+
+export const PRICE_DATE = "21.09.2026";
 
 import { colorSlug } from "./colors";
 
@@ -156,7 +159,14 @@ export interface Model {
   summary: string;
   description: string[];
   coatings: Coating[];
+  /** Цена за м², ₸ с НДС: ключ — priceKey(покрытие) */
+  prices: Record<string, number>;
+  /** Примечание к цене из прайса */
+  priceNote?: string;
 }
+
+export const priceKey = (coating: Coating) => `${coating.id}@${coating.thickness}`;
+export const priceOf = (model: Model, coating: Coating) => model.prices[priceKey(coating)];
 
 const c = coatings;
 
@@ -182,6 +192,18 @@ export const metalTileModels: Model[] = [
       c.polyester045,
       c.polyester04,
     ],
+    prices: {
+      "agneta@0.5": 8140,
+      "purman@0.5": 8420,
+      "vikingmp-e@0.5": 6040,
+      "cloudy@0.5": 8140,
+      "puretan@0.5": 6965,
+      "valori@0.5": 5355,
+      "normanmp@0.5": 3875,
+      "vikingmp@0.45": 3280,
+      "polyester@0.45": 3115,
+      "polyester@0.4": 2405,
+    },
   },
   {
     slug: "monterrosa-a",
@@ -198,6 +220,13 @@ export const metalTileModels: Model[] = [
       "Монтерроса — одна металлочерепица в четырёх исполнениях: A, S, M и X. Исполнения отличаются длиной шага, а значит и рисунком крыши. Какое лучше подойдёт под ваши скаты, подскажет менеджер после замера.",
     ],
     coatings: [c.vikingE, c.valori, c.norman, c.viking, c.polyester045],
+    prices: {
+      "vikingmp-e@0.5": 6405,
+      "valori@0.5": 5700,
+      "normanmp@0.5": 3835,
+      "vikingmp@0.45": 3185,
+      "polyester@0.45": 3090,
+    },
   },
   {
     slug: "monterrosa-s",
@@ -214,6 +243,12 @@ export const metalTileModels: Model[] = [
       "Монтерроса — одна металлочерепица в четырёх исполнениях: A, S, M и X. Исполнения отличаются длиной шага, а значит и рисунком крыши. Какое лучше подойдёт под ваши скаты, подскажет менеджер после замера.",
     ],
     coatings: [c.vikingE, c.valori, c.norman, c.viking],
+    prices: {
+      "vikingmp-e@0.5": 6365,
+      "valori@0.5": 5630,
+      "normanmp@0.5": 4050,
+      "vikingmp@0.45": 3505,
+    },
   },
   {
     slug: "monterrosa-m",
@@ -230,6 +265,12 @@ export const metalTileModels: Model[] = [
       "Монтерроса — одна металлочерепица в четырёх исполнениях: A, S, M и X. Исполнения отличаются длиной шага, а значит и рисунком крыши. Какое лучше подойдёт под ваши скаты, подскажет менеджер после замера.",
     ],
     coatings: [c.vikingE, c.valori, c.norman, c.viking],
+    prices: {
+      "vikingmp-e@0.5": 6440,
+      "valori@0.5": 5700,
+      "normanmp@0.5": 4125,
+      "vikingmp@0.45": 3550,
+    },
   },
   {
     slug: "monterrosa-x",
@@ -246,6 +287,12 @@ export const metalTileModels: Model[] = [
       "Монтерроса — одна металлочерепица в четырёх исполнениях: A, S, M и X. Исполнения отличаются длиной шага, а значит и рисунком крыши. Какое лучше подойдёт под ваши скаты, подскажет менеджер после замера.",
     ],
     coatings: [c.vikingE, c.valori, c.norman, c.viking],
+    prices: {
+      "vikingmp-e@0.5": 6520,
+      "valori@0.5": 5770,
+      "normanmp@0.5": 4175,
+      "vikingmp@0.45": 3590,
+    },
   },
   {
     slug: "tramontana",
@@ -257,6 +304,16 @@ export const metalTileModels: Model[] = [
       "Выпускается только с покрытиями классов «Премиум» и «Премьер», поэтому срок гарантии начинается от 20 лет.",
     ],
     coatings: [c.agneta, c.purman, c.vikingE, c.cloudy, c.puretan, c.valori, c.norman],
+    prices: {
+      "agneta@0.5": 8590,
+      "purman@0.5": 8870,
+      "vikingmp-e@0.5": 7555,
+      "cloudy@0.5": 8590,
+      "puretan@0.5": 7525,
+      "valori@0.5": 6715,
+      "normanmp@0.5": 6010,
+    },
+    priceNote: "Для высоты ступеньки 30 и 35 мм цена выше на 55 и 85 ₸/м² соответственно.",
   },
   {
     slug: "montecristo",
@@ -268,6 +325,15 @@ export const metalTileModels: Model[] = [
       "Как и Трамонтана, выпускается только с покрытиями классов «Премиум» и «Премьер», поэтому гарантия начинается от 20 лет.",
     ],
     coatings: [c.agneta, c.vikingE, c.cloudy, c.puretan, c.valori, c.norman],
+    prices: {
+      "agneta@0.5": 8590,
+      "vikingmp-e@0.5": 7555,
+      "cloudy@0.5": 8590,
+      "puretan@0.5": 7525,
+      "valori@0.5": 6715,
+      "normanmp@0.5": 6010,
+    },
+    priceNote: "Для высоты ступеньки 30 и 35 мм цена выше на 55 и 85 ₸/м² соответственно.",
   },
 ];
 
@@ -327,5 +393,13 @@ export const defaultVariant = (model: Model): Variant => {
   const all = variantsOf(model);
   return all.find((v) => v.coating.id === "normanmp" && v.color === "8017") ?? all[0]!;
 };
+
+/** 8140 → «8 140 ₸» */
+export const formatPrice = (value: number) =>
+  `${new Intl.NumberFormat("ru-RU").format(value).replace(/\s/g, "\u00a0")}\u00a0₸`;
+
+/** Минимальная цена за м² среди всех покрытий моделей */
+export const minPrice = (models: Model[]) =>
+  Math.min(...models.flatMap((m) => Object.values(m.prices)));
 
 export const formatThickness = (t: number) => `${String(t).replace(".", ",")} мм`;

@@ -321,3 +321,39 @@
 .other-models__list a:hover {
   background: #faf2e4;
 }
+
+/* Цена */
+.model-card__price {
+  margin: 0 0.5rem 0.5rem;
+  font-weight: 600;
+  color: #111;
+}
+
+.product-view__price {
+  margin: 0.5rem 0 0;
+  padding: 1rem 1.25rem;
+  border-radius: 1rem;
+  background: #faf7f5;
+}
+
+.product-view__price-value {
+  margin: 0 0 0.25rem;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #111;
+  letter-spacing: -0.015em;
+}
+
+.product-view__price-value span {
+  font-size: 1rem;
+  font-weight: 400;
+  color: #555;
+  letter-spacing: 0;
+}
+
+.product-view__price-note {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: #666;
+}

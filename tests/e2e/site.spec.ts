@@ -241,3 +241,19 @@ test.describe("каталог металлочерепицы", () => {
     );
   });
 });
+
+test("цены по прайсу: вариант и раздел", async ({ page }) => {
+  await page.goto("/catalog/metallocherepitsa/lamonterra-x/polyester-0-4-ral-3005");
+  await expect(page.locator(".product-view__price-value")).toContainText("2 405");
+  await page.locator(".picker__chip", { hasText: "PURMAN" }).click();
+  await expect(page.locator(".product-view__price-value")).toContainText("8 420");
+  const ld = await page
+    .locator('script[type="application/ld+json"]')
+    .evaluateAll((els) => els.map((e) => JSON.parse(e.textContent ?? "{}")));
+  const product = ld.find((d) => d["@type"] === "Product");
+  expect(product.offers).toMatchObject({ price: 8420, priceCurrency: "KZT" });
+
+  await page.goto("/catalog/metallocherepitsa");
+  await expect(page.locator(".model-card", { hasText: "Ламонтерра-X" })).toContainText("от 2 405");
+  await expect(page.locator(".model-card", { hasText: "Монтерроса" })).toContainText("от 3 090");
+});
