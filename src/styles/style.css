@@ -1528,6 +1528,16 @@ textarea.modal__input {
   }
 }
 
+/* Увеличенное фото (medium-zoom) — выше закреплённой шапки на мобильных */
+.medium-zoom-overlay,
+.medium-zoom-image--opened {
+  z-index: 10000;
+}
+
 .promo-faq .promo-header__text a {
-  color: #ebb683;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: #ebb683;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
 }

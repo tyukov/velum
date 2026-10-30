@@ -85,11 +85,20 @@ test.describe("главная", () => {
     await expect(question).toHaveClass(/active/);
   });
 
-  test("фото в галерее увеличивается", async ({ page }) => {
+  test("фото в галерее увеличивается", async ({ page, isMobile }) => {
     const photo = page.locator(".zoom").first();
     await photo.scrollIntoViewIfNeeded();
     await photo.click();
     await expect(page.locator("body")).toHaveClass(/medium-zoom--opened/);
+    // На телефоне шапка закреплена: затемнение с фото должно быть поверх неё
+    if (!isMobile) return;
+    const header = page.locator(".header");
+    const box = await header.boundingBox();
+    const topEl = await page.evaluate(
+      ([x, y]) => document.elementFromPoint(x, y)?.className ?? "",
+      [box!.x + 5, box!.y + 5],
+    );
+    expect(topEl).toContain("medium-zoom");
   });
 
   test("в подвале есть ссылка на политику", async ({ page }) => {

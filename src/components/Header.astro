@@ -3,7 +3,7 @@ import Logo from "./Logo.astro";
 ---
 
 <header class="header">
-  <nav class="header-nav">
+  <nav class="header-nav" aria-label="Основное меню">
     <div class="wrap header__wrap">
       <div class="header-logo">
         <Logo class="logo header__logo" />
@@ -12,12 +12,6 @@ import Logo from "./Logo.astro";
         8&nbsp;701&nbsp;013&nbsp;13&nbsp;59
       </a>
       <ul class="list header-list">
-        <li class="header-list__item" style="display: none">
-          <span class="header-list__link header-list__link_state_active">Физическим лицам</span>
-        </li>
-        <li class="header-list__item" style="display: none">
-          <span class="header-list__link">Компаниям</span>
-        </li>
         <li class="header-list__item header-list__item_push_right">
           <a
             href="#ex2"

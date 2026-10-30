@@ -38,7 +38,7 @@ const ogImage = new URL("/og.jpg", site).href;
     ) : (
       <meta name="robots" content="index, follow, max-image-preview:large" />
     )}
-    <link rel="canonical" href={canonical} />
+    {!noindex && <link rel="canonical" href={canonical} />}
     <meta name="theme-color" content="#ffffff" />
     <meta name="format-detection" content="telephone=no" />
 
