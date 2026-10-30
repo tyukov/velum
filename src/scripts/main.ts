@@ -1,0 +1,145 @@
+// Модальные окна, маска телефона, FAQ и отправка заявок без перезагрузки.
+// Astro собирает этот модуль и подключает его с type="module" (отложенная загрузка).
+import { formatPhone } from "../lib/phone";
+
+// ---------- Модальные окна ----------
+// Разметка совместима со стилями: .blocker > .modal + a.close-modal
+let current: { modal: HTMLElement; blocker: HTMLElement } | null = null;
+let lastFocus: HTMLElement | null = null;
+
+function openModal(modal: HTMLElement | null) {
+  if (!modal) return;
+  if (current) closeModal();
+  lastFocus = document.activeElement as HTMLElement | null;
+
+  const blocker = document.createElement("div");
+  blocker.className = "jquery-modal blocker current";
+  blocker.addEventListener("click", (e) => {
+    if (e.target === blocker) closeModal();
+  });
+
+  if (!modal.querySelector(".close-modal")) {
+    const close = document.createElement("a");
+    close.href = "#close-modal";
+    close.className = "close-modal";
+    close.setAttribute("aria-label", "Закрыть");
+    close.textContent = "Закрыть";
+    close.addEventListener("click", (e) => {
+      e.preventDefault();
+      closeModal();
+    });
+    modal.appendChild(close);
+  }
+
+  modal.setAttribute("role", "dialog");
+  modal.setAttribute("aria-modal", "true");
+  blocker.appendChild(modal);
+  document.body.appendChild(blocker);
+  document.body.style.overflow = "hidden";
+  modal.style.display = "inline-block";
+  current = { modal, blocker };
+
+  modal.querySelector<HTMLElement>("input:not([type=hidden]):not(.honeypot), button")?.focus();
+}
+
+function closeModal() {
+  if (!current) return;
+  const { modal, blocker } = current;
+  modal.style.display = "none";
+  document.body.appendChild(modal);
+  blocker.remove();
+  document.body.style.overflow = "";
+  current = null;
+  lastFocus?.focus();
+}
+
+document.addEventListener("click", (e) => {
+  const trigger = (e.target as Element).closest<HTMLAnchorElement>('a[rel~="modal:open"]');
+  if (!trigger) return;
+  e.preventDefault();
+  openModal(document.querySelector<HTMLElement>(trigger.getAttribute("href") || "#ex2"));
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeModal();
+});
+
+// ---------- Маска телефона: +7 (999) 999-99-99 ----------
+document.querySelectorAll<HTMLInputElement>('input[type="tel"]').forEach((input) => {
+  input.inputMode = "tel";
+  input.autocomplete = "tel";
+  input.pattern = "\\+7 \\(\\d{3}\\) \\d{3}-\\d{2}-\\d{2}";
+  input.title = "Номер в формате +7 (701) 000-00-00";
+  input.addEventListener("focus", () => {
+    if (!input.value) input.value = "+7 (";
+    requestAnimationFrame(() => input.setSelectionRange(input.value.length, input.value.length));
+  });
+  input.addEventListener("input", () => {
+    input.value = formatPhone(input.value);
+  });
+  input.addEventListener("blur", () => {
+    if (input.value.replace(/\D/g, "").length <= 1) input.value = "";
+  });
+});
+
+// ---------- FAQ ----------
+document.querySelectorAll<HTMLElement>(".faq-list__question").forEach((question) => {
+  question.addEventListener("click", () => {
+    const active = document.querySelector<HTMLElement>(".faq-list__question.active");
+    if (active && active !== question) {
+      active.classList.remove("active");
+      (active.nextElementSibling as HTMLElement).style.maxHeight = "0";
+    }
+    question.classList.toggle("active");
+    const answer = question.nextElementSibling as HTMLElement;
+    answer.style.maxHeight = question.classList.contains("active")
+      ? answer.scrollHeight + "px"
+      : "0";
+  });
+});
+
+// ---------- Отправка заявок ----------
+document.querySelectorAll<HTMLFormElement>('form[action="/api/send"]').forEach((form) => {
+  const page = document.createElement("input");
+  page.type = "hidden";
+  page.name = "page";
+  page.value = location.pathname + location.search;
+  form.appendChild(page);
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const button = form.querySelector<HTMLButtonElement>('[type="submit"]');
+    let status = form.querySelector<HTMLElement>(".form-status");
+    if (!status) {
+      status = document.createElement("p");
+      status.className = "form-status modal__box-text";
+      status.setAttribute("role", "status");
+      form.appendChild(status);
+    }
+    status.textContent = "Отправляем…";
+    if (button) button.disabled = true;
+
+    try {
+      const res = await fetch(form.action, {
+        method: "POST",
+        body: new FormData(form),
+        headers: { Accept: "application/json" },
+      });
+      const data: { ok?: boolean; error?: string } = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data.error);
+      form.reset();
+      status.textContent = "Спасибо! Заявка отправлена, менеджер скоро перезвонит.";
+    } catch (err) {
+      status.textContent =
+        (err instanceof Error && err.message) ||
+        "Не удалось отправить заявку. Позвоните нам: 8 701 013 13 59";
+    } finally {
+      if (button) button.disabled = false;
+    }
+  });
+});
+
+// ---------- Увеличение фото в галерее (загружается только если есть галерея) ----------
+if (document.querySelector(".zoom")) {
+  import("medium-zoom").then(({ default: mediumZoom }) => mediumZoom(".zoom", { margin: 50 }));
+}

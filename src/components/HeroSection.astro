@@ -1,0 +1,105 @@
+---
+import { Picture } from "astro:assets";
+import hero from "../assets/img/hero.jpeg";
+---
+
+<section class="picture">
+  <div class="wrap-wide">
+    <Picture
+      src={hero}
+      formats={["avif"]}
+      fallbackFormat="webp"
+      widths={[480, 760, 1080, 1380]}
+      sizes="100vw"
+      class="picture__img"
+      alt="Крыша с металлочерепицей"
+      loading="eager"
+      fetchpriority="high"
+    />
+  </div>
+</section>
+<section class="promo promo-message promo_theme_default">
+  <div class="promo__content">
+    <header class="promo-header">
+      <p class="promo-header__subtitle HomeTIMIHero_fadeSlideIn__5PcBa" style="--stagger:0">
+        Продажа кровельных и фасадных материалов
+      </p>
+      <h1 class="promo-header__title">
+        <span class="HomeTIMIHero_fadeSlideIn__5PcBa" style="--stagger:1">
+          Металлочерепица
+        </span>
+        <br />{" "}
+        <span class="HomeTIMIHero_fadeSlideIn__5PcBa" style="--stagger:2">
+          Профилированные листы
+        </span>
+        <br />
+        <span class="HomeTIMIHero_fadeSlideIn__5PcBa" style="--stagger:3">
+          Водосточная система
+        </span>
+      </h1>
+      <ul class="list promo-list">
+        <li class="promo-list__item HomeTIMIHero_fadeSlideIn__5PcBa" style="--stagger:4">
+          Сайдинг
+        </li>
+        <li class="promo-list__item HomeTIMIHero_fadeSlideIn__5PcBa" style="--stagger:5">
+          Пленки
+        </li>
+        <li class="promo-list__item HomeTIMIHero_fadeSlideIn__5PcBa" style="--stagger:6">
+          Саморезы
+        </li>
+        <li
+          class="promo-list__item promo-list__item_pos_last HomeTIMIHero_fadeSlideIn__5PcBa"
+          style="--stagger:7"
+        >
+          Подконструкция
+        </li>
+      </ul>
+      <p class="promo-header__text HomeTIMIHero_heroAssetEnter__bjsJ8">
+        Приобретая продукцию в нашей компании вы получаете: гарантию качества по стандартам ГОСТ,
+        консультации менеджеров, доставку до дома и персональные скидки. Оставьте заявку или
+        закажите обратный звонок
+      </p>
+      <a
+        href="#ex1"
+        rel="modal:open"
+        class="promo-header__btn btn btn_theme_grab btn_size_l HomeTIMIHero_heroAssetEnter__bjsJ8"
+        role="button"
+      >
+        <span class="btn__text">Оставить заявку</span>
+      </a>
+      <a
+        href="#ex2"
+        rel="modal:open"
+        class="promo-header__btn promo-header__btn-additional btn btn_theme_outline-grab btn_size_l"
+        role="button"
+      >
+        <span class="btn__text">
+          <span class="promo-header__btn-icon" aria-hidden="true">
+            📞
+          </span>{" "}
+          Перезвоните мне
+        </span>
+      </a>
+      <small class="promo-header_do">Сэкономь до 50% при покупке на velum.kz</small>
+
+      <ul
+        class="list promo-list promo-list_tab HomeTIMIHero_fadeSlideIn__5PcBa"
+        style="--stagger:9"
+      >
+        <li class="promo-list__tab">
+          <div class="promo-list__tab-meta">2 000</div>
+          <div class="promo-list__tab-lead">Завершенных домов</div>
+        </li>
+        <li class="promo-list__tab">
+          <div class="promo-list__tab-meta">6</div>
+          <div class="promo-list__tab-lead">Лет опыта</div>
+        </li>
+        <li class="promo-list__tab">
+          <div class="promo-list__tab-meta">5</div>
+          <div class="promo-list__tab-lead">Монтажных бригад</div>
+        </li>
+      </ul>
+    </header>
+  </div>
+  <div class="promo__illustration HomeTIMIHero_illustration__X"></div>
+</section>

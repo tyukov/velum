@@ -1,0 +1,86 @@
+---
+import { Image } from "astro:assets";
+import ava1 from "../assets/img/ava1.jpg";
+import ava2 from "../assets/img/ava2.jpg";
+import ava3 from "../assets/img/ava3.jpg";
+import stars from "../assets/img/stars.png";
+---
+
+<section class="promo promo-feedback">
+  <div class="promo__content wrap">
+    <header class="promo-header">
+      <div class="promo-projects__title">
+        <h2 class="promo-header__title">Что люди говорят о&nbsp;нас и&nbsp;нашей работе</h2>
+      </div>
+      <div class="promo-projects__text">
+        <p class="promo-header__text">
+          Мы стремимся быть прозрачными и открытости перед своими клиентами, поэтому здесь могут
+          быть размещены как положительные, так и отрицательные отзывы.
+        </p>
+        <span class="promo-header__link">Смотреть еще →</span>
+      </div>
+    </header>
+    <div class="promo-box__content">
+      <div class="promo-box promo-box_pos_first">
+        <span class="promo-box__date">23/5/19</span>
+        <p class="promo-box__description">
+          Всё планировали менять крышу . Менеджера помогли с выбором металлочерепицы . Теперь крыша
+          просто великолепно выглядит , качество просто класс, всем теперь советую только их))
+        </p>
+        <div class="promo-box__info">
+          <div class="promo-box__user">
+            <Image
+              src={ava1}
+              width={33}
+              height={33}
+              class="avatar user__avatar"
+              alt="Фото автора отзыва"
+            />
+            <span class="user__username">Сая Айткужина</span>
+          </div>
+          <Image src={stars} class="promo-box__stars" alt="Оценка 5 из 5" />
+        </div>
+      </div>
+      <div class="promo-box">
+        <span class="promo-box__date">23/4/12</span>
+        <p class="promo-box__description">
+          Уже давно я планировал обновить на даче забор, но никак руки не доходили. Как всё таки
+          решился, появилась другая проблема - закупка качественного материала.
+        </p>
+        <div class="promo-box__info">
+          <div class="promo-box__user">
+            <Image
+              src={ava2}
+              width={33}
+              height={33}
+              class="avatar user__avatar"
+              alt="Фото автора отзыва"
+            />
+            <span class="user__username">Акылжан Анаев</span>
+          </div>
+          <Image src={stars} class="promo-box__stars" alt="Оценка 5 из 5" />
+        </div>
+      </div>
+      <div class="promo-box promo-box_pos_last">
+        <span class="promo-box__date">23/3/11</span>
+        <p class="promo-box__description">
+          Очень отзывчивые коультанты, заказы быстро обрабатывают, вовремя делают заказы, метал
+          соответствует параметрам, часто здесь заказываю.
+        </p>
+        <div class="promo-box__info">
+          <div class="promo-box__user">
+            <Image
+              src={ava3}
+              width={33}
+              height={33}
+              class="avatar user__avatar"
+              alt="Фото автора отзыва"
+            />
+            <span class="user__username">Жансая Нугманова</span>
+          </div>
+          <Image src={stars} class="promo-box__stars" alt="Оценка 5 из 5" />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

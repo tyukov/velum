@@ -1,0 +1,81 @@
+---
+import { Picture } from "astro:assets";
+import work1 from "../assets/img/work-1.jpg";
+import work2 from "../assets/img/work-2.jpg";
+import work3 from "../assets/img/work-3.jpg";
+import work4 from "../assets/img/work-4.jpg";
+import work5 from "../assets/img/work-5.jpg";
+---
+
+<section class="promo promo-projects">
+  <div class="promo__content wrap">
+    <header class="promo-header">
+      <div class="promo-projects__title">
+        <h2 class="promo-header__title">Реализованные проекты нашей компании</h2>
+      </div>
+      <div class="promo-projects__text">
+        <p class="promo-header__text">
+          Если вы желаете приобрести строительные материалы высокого качества, обращайтесь в отдел
+          продаж компании Velum. Вас проконсультируют по всем интересующим вопросам
+        </p>
+      </div>
+    </header>
+    <div class="promo-project-gallery">
+      <figure class="promo-project-gallery__item gallery__item--1">
+        <Picture
+          src={work1}
+          formats={["avif"]}
+          fallbackFormat="webp"
+          widths={[480, 800, 1200]}
+          sizes="(max-width: 768px) 100vw, 50vw"
+          class="zoom gallery__img"
+          alt="Проект компании в выполненном состоянии"
+        />
+      </figure>
+      <figure class="promo-project-gallery__item gallery__item--2">
+        <Picture
+          src={work2}
+          formats={["avif"]}
+          fallbackFormat="webp"
+          widths={[480, 800, 1200]}
+          sizes="(max-width: 768px) 100vw, 50vw"
+          class="zoom gallery__img"
+          alt="Завершенная работа по установке кровли"
+        />
+      </figure>
+      <figure class="promo-project-gallery__item gallery__item--3">
+        <Picture
+          src={work3}
+          formats={["avif"]}
+          fallbackFormat="webp"
+          widths={[480, 800, 1200]}
+          sizes="(max-width: 768px) 100vw, 50vw"
+          class="zoom gallery__img"
+          alt="Монтаж кровельной системы"
+        />
+      </figure>
+      <figure class="promo-project-gallery__item gallery__item--4">
+        <Picture
+          src={work4}
+          formats={["avif"]}
+          fallbackFormat="webp"
+          widths={[480, 800, 1200]}
+          sizes="(max-width: 768px) 100vw, 50vw"
+          class="zoom gallery__img"
+          alt="Пример выполненного строительного проекта"
+        />
+      </figure>
+      <figure class="promo-project-gallery__item gallery__item--5">
+        <Picture
+          src={work5}
+          formats={["avif"]}
+          fallbackFormat="webp"
+          widths={[480, 800, 1200]}
+          sizes="(max-width: 768px) 100vw, 50vw"
+          class="zoom gallery__img"
+          alt="Готовый строительный объект"
+        />
+      </figure>
+    </div>
+  </div>
+</section>

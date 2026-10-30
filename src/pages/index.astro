@@ -1,0 +1,57 @@
+---
+import Base from "../layouts/Base.astro";
+import Header from "../components/Header.astro";
+import HeroSection from "../components/HeroSection.astro";
+import BrandsSection from "../components/BrandsSection.astro";
+import StepsSection from "../components/StepsSection.astro";
+import FeaturesSection from "../components/FeaturesSection.astro";
+import FaqSection from "../components/FaqSection.astro";
+import ProjectsSection from "../components/ProjectsSection.astro";
+import ReviewsSection from "../components/ReviewsSection.astro";
+import PromoAdvSection from "../components/PromoAdvSection.astro";
+import LeadModal from "../components/LeadModal.astro";
+import { business } from "../lib/business";
+import "../styles/style.css";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "HomeAndConstructionBusiness",
+  name: business.name,
+  url: business.url,
+  logo: new URL("/logo-x1.png", business.url).href,
+  image: new URL("/og.jpg", business.url).href,
+  description: business.description,
+  telephone: business.phoneE164,
+  priceRange: "₸₸",
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: business.city,
+    addressCountry: "KZ",
+  },
+  areaServed: "KZ",
+};
+---
+
+<Base
+  title="Velum | Металлочерепица, профлист и водостоки в Атырау"
+  description="Velum — магазин кровельных и фасадных материалов в Атырау: металлочерепица, профнастил, водосточные системы, сайдинг. Доставка, консультация, скидки до 50%."
+  ogTitle="Velum — кровельные и фасадные материалы в Атырау"
+>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  <Header />
+  <main class="main">
+    <HeroSection />
+    <BrandsSection />
+    <StepsSection />
+    <FeaturesSection />
+    <FaqSection />
+    <ProjectsSection />
+    <ReviewsSection />
+    <PromoAdvSection />
+  </main>
+  <LeadModal id="ex1" title="Оставьте заявку" submitText="Отправить заявку" withMessage />
+  <LeadModal id="ex2" title="Заказать звонок" submitText="Заказать звонок" />
+  <script>
+    import "../scripts/main.ts";
+  </script>
+</Base>
