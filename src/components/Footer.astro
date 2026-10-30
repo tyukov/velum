@@ -1,0 +1,44 @@
+---
+import { business } from "../lib/business";
+
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="wrap footer__wrap">
+    <p class="footer__text">
+      © {year} {business.name}. Кровельные и фасадные материалы, {business.city}
+    </p>
+    <nav class="footer__links" aria-label="Дополнительно">
+      <a href={`tel:${business.phoneE164}`}>{business.phoneDisplay}</a>
+      <a href="/privacy">Политика конфиденциальности</a>
+    </nav>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    padding: 2rem 20px;
+    font-size: 14px;
+    color: #666;
+    border-top: 1px solid #eee;
+  }
+  .footer__wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 2rem;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer__text {
+    margin: 0;
+  }
+  .footer__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+  }
+  .footer a {
+    color: inherit;
+  }
+</style>

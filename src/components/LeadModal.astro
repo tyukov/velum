@@ -1,4 +1,5 @@
 ---
+import { PUBLIC_TURNSTILE_SITE_KEY } from "astro:env/client";
 // Модальное окно с формой заявки. Открывается ссылками rel="modal:open" href="#<id>"
 interface Props {
   id: string;
@@ -67,14 +68,20 @@ const { id, title, submitText, withMessage = false } = Astro.props;
           </label>
         </div>
       )}
+      {PUBLIC_TURNSTILE_SITE_KEY && (
+        <div class="turnstile" data-sitekey={PUBLIC_TURNSTILE_SITE_KEY} />
+      )}
       <button type="submit" class="btn btn_theme_grab btn_size_l btn_wide">
         <span class="btn__text">{submitText}</span>
       </button>
     </div>
     <div class="modal__footer">
       <p class="modal__box-text">
-        Нажимая кнопку «{submitText}», вы подтверждаете свое согласие на обработку персональных
-        данных
+        Нажимая кнопку «{submitText}», вы даёте согласие на обработку персональных данных
+        в&nbsp;соответствии с{" "}
+        <a href="/privacy" target="_blank">
+          политикой конфиденциальности
+        </a>
       </p>
     </div>
   </form>

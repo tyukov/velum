@@ -35,11 +35,36 @@
 
 > Для доменов **.kz** уточните у регистратора, требуют ли правила размещать сервер в Казахстане.
 
-## 4. После запуска
+## 4. Политика конфиденциальности
+
+Перед публикацией заполните реквизиты в `src/lib/business.ts` (блок `legal`): юридическое
+название, БИН/ИИН, адрес и e-mail. Они выводятся на странице `/privacy`. Текст политики —
+шаблон по Закону РК № 94-V, его стоит показать юристу.
+
+## 5. Защита форм от спама
+
+Уже работает: скрытое поле-ловушка и проверка телефона на сервере.
+
+**Cloudflare Turnstile** (невидимая капча, бесплатно):
+
+1. dash.cloudflare.com → **Turnstile** → **Add widget**, домены `velum.kz` и `*.vercel.app`,
+   режим **Managed**.
+2. В Vercel добавьте переменные `PUBLIC_TURNSTILE_SITE_KEY` (Site Key) и `TURNSTILE_SECRET_KEY`
+   (Secret Key), затем Redeploy.
+3. Без этих переменных форма работает как раньше, без капчи.
+
+**Ограничение частоты запросов** (Vercel Firewall):
+
+1. Проект → **Firewall** → **Configure** → **New Rule**.
+2. If: `Request Path` equals `/api/send`. Then: **Rate Limit**, 5 запросов за 60 секунд
+   по IP, действие **Deny** (429).
+3. **Save** → **Review Changes** → **Publish**.
+
+## 6. После запуска
 
 - Google Search Console и Яндекс Вебмастер: подтвердите сайт и отправьте `https://velum.kz/sitemap-index.xml`.
 - Проверьте скорость в PageSpeed Insights: https://pagespeed.web.dev/
 
-## Структура проекта
+## 7. Структура проекта
 
 См. [README.md](README.md).

@@ -10,6 +10,7 @@ import ProjectsSection from "../components/ProjectsSection.astro";
 import ReviewsSection from "../components/ReviewsSection.astro";
 import PromoAdvSection from "../components/PromoAdvSection.astro";
 import LeadModal from "../components/LeadModal.astro";
+import Footer from "../components/Footer.astro";
 import { business } from "../lib/business";
 import "../styles/style.css";
 
@@ -49,6 +50,7 @@ const jsonLd = {
     <ReviewsSection />
     <PromoAdvSection />
   </main>
+  <Footer />
   <LeadModal id="ex1" title="Оставьте заявку" submitText="Отправить заявку" withMessage />
   <LeadModal id="ex2" title="Заказать звонок" submitText="Заказать звонок" />
   <script>
