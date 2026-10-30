@@ -173,3 +173,110 @@ test("переходы между страницами без перезагру
   await phone.pressSequentially("7011234567");
   await expect(phone).toHaveValue("+7 (701) 123-45-67");
 });
+
+test.describe("каталог металлочерепицы", () => {
+  test("с главной в раздел и на страницу модели", async ({ page }) => {
+    await page.goto("/");
+    await page.locator(".promo-header__title-link").click();
+    await expect(page).toHaveURL(/\/catalog\/metallocherepitsa$/);
+    await expect(page.locator(".model-card")).toHaveCount(4);
+    await page
+      .getByRole("link", { name: /Трамонтана/ })
+      .first()
+      .click();
+    await expect(page.locator("h1")).toContainText("Трамонтана");
+    // По умолчанию открывается NormanMP, RAL 8017
+    await expect(page.locator(".product-view__subtitle")).toContainText("NormanMP");
+    await expect(page.locator(".product-view__subtitle")).toContainText("RAL 8017");
+  });
+
+  test("выбор покрытия и цвета переводит на страницу варианта", async ({ page }) => {
+    await page.goto("/catalog/metallocherepitsa/lamonterra-x");
+    await page.locator(".picker__chip", { hasText: "Полиэстер" }).click();
+    await expect(page).toHaveURL(/\/lamonterra-x\/polyester-0-45-ral-8017$/);
+    await page.locator(".picker__chip", { hasText: "0,4 мм" }).click();
+    await expect(page).toHaveURL(/polyester-0-4-ral-8017$/);
+    await page.getByRole("link", { name: "RAL 3005 Красное вино" }).click();
+    await expect(page).toHaveURL(/polyester-0-4-ral-3005$/);
+    await expect(page.locator("h1")).toContainText("Ламонтерра-X");
+    await expect(page.locator(".product-view__subtitle")).toContainText("0,4 мм");
+  });
+
+  test("заявка с товара уходит с названием варианта", async ({ page }) => {
+    fs.rmSync(TELEGRAM_MOCK_LOG, { force: true });
+    await page.goto("/catalog/metallocherepitsa/tramontana/vikingmp-e-0-5-rr32");
+    await page.getByRole("link", { name: "Узнать стоимость" }).click();
+    const modal = page.locator(".blocker .modal");
+    await modal.getByLabel("Ваше имя").fill("Тест");
+    await modal.getByLabel("Ваш телефон").pressSequentially("7011234567");
+    await modal.getByRole("button", { name: "Отправить заявку" }).click();
+    await expect(modal.locator(".form-status")).toHaveText(/Спасибо/);
+    const sent = JSON.parse(fs.readFileSync(TELEGRAM_MOCK_LOG, "utf8").trim().split("\n").pop()!);
+    expect(sent.text).toContain(
+      "<b>Товар:</b> Металлочерепица Трамонтана VikingMP E 0,5 мм, RR 32",
+    );
+  });
+
+  test("Монтерроса: исполнения одной модели, цвет и покрытие сохраняются", async ({ page }) => {
+    await page.goto("/catalog/metallocherepitsa");
+    await page
+      .getByRole("link", { name: /Монтерроса/ })
+      .first()
+      .click();
+    await expect(page).toHaveURL(/\/monterrosa-s$/);
+    await page.locator(".picker__chip", { hasText: "VikingMP E" }).click();
+    await page.getByRole("link", { name: "RAL 8004 Медно-коричневый" }).click();
+    await expect(page).toHaveURL(/monterrosa-s\/vikingmp-e-0-5-ral-8004$/);
+    await page.getByRole("group", { name: "Исполнение" }).getByRole("link", { name: "X" }).click();
+    await expect(page).toHaveURL(/monterrosa-x\/vikingmp-e-0-5-ral-8004$/);
+    await expect(page.locator("h1")).toContainText("Монтерроса X");
+  });
+
+  test("у страницы варианта свой заголовок и canonical", async ({ page }) => {
+    await page.goto("/catalog/metallocherepitsa/monterrosa-s/vikingmp-0-45-ral-7021");
+    await expect(page).toHaveTitle(/Монтерроса S VikingMP 0,45 мм, RAL 7021/);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      "href",
+      "https://velum.kz/catalog/metallocherepitsa/monterrosa-s/vikingmp-0-45-ral-7021",
+    );
+  });
+});
+
+test("цены по прайсу: вариант и раздел", async ({ page }) => {
+  await page.goto("/catalog/metallocherepitsa/lamonterra-x/polyester-0-4-ral-3005");
+  await expect(page.locator(".product-view__price-value")).toContainText("2 405");
+  await page.locator(".picker__chip", { hasText: "PURMAN" }).click();
+  await expect(page.locator(".product-view__price-value")).toContainText("8 420");
+  const ld = await page
+    .locator('script[type="application/ld+json"]')
+    .evaluateAll((els) => els.map((e) => JSON.parse(e.textContent ?? "{}")));
+  const product = ld.find((d) => d["@type"] === "Product");
+  expect(product.offers).toMatchObject({ price: 8420, priceCurrency: "KZT" });
+
+  await page.goto("/catalog/metallocherepitsa");
+  await expect(page.locator(".model-card", { hasText: "Ламонтерра-X" })).toContainText("от 2 405");
+  await expect(page.locator(".model-card", { hasText: "Монтерроса" })).toContainText("от 3 090");
+});
+
+test("наличие: полиэстер и VikingMP в Атырау, остальное под заказ", async ({ page }) => {
+  await page.goto("/catalog/metallocherepitsa/lamonterra-x/polyester-0-45-ral-3005");
+  await expect(page.locator(".stock")).toContainText("В наличии в Атырау");
+  await page.locator(".picker__chip", { hasText: "PURMAN" }).click();
+  await expect(page.locator(".stock")).toContainText("Под заказ");
+  await expect(page.locator(".stock")).toContainText("из Караганды");
+  await expect(page.locator(".picker__chip", { hasText: "VikingMP" }).last()).toContainText(
+    "в наличии в Атырау",
+  );
+  const ld = await page
+    .locator('script[type="application/ld+json"]')
+    .evaluateAll((els) => els.map((e) => JSON.parse(e.textContent ?? "{}")));
+  expect(ld.find((d) => d["@type"] === "Product").offers.availability).toBe(
+    "https://schema.org/BackOrder",
+  );
+
+  await page.goto("/catalog/metallocherepitsa");
+  await expect(page.locator(".model-card", { hasText: "Трамонтана" })).toContainText("Под заказ");
+  await expect(page.locator(".model-card", { hasText: "Ламонтерра-X" })).toContainText(
+    "В наличии в Атырау: VikingMP, Полиэстер",
+  );
+});

@@ -1,0 +1,40 @@
+---
+import CatalogLayout from "../../layouts/CatalogLayout.astro";
+import Breadcrumbs from "../../components/catalog/Breadcrumbs.astro";
+import TileVisual from "../../components/catalog/TileVisual.astro";
+import { catalogEntries } from "../../data/catalog/metal-tile";
+
+const entries = catalogEntries();
+---
+
+<CatalogLayout
+  title="Каталог кровельных и фасадных материалов в Атырау | Velum"
+  description="Каталог Velum: металлочерепица и другие кровельные и фасадные материалы. Подбор цвета и покрытия, расчёт стоимости и доставка в Атырау."
+  path="/catalog"
+>
+  <Breadcrumbs
+    items={[
+      { name: "Главная", href: "/" },
+      { name: "Каталог", href: "/catalog" },
+    ]}
+  />
+  <header class="catalog-head">
+    <h1>Каталог</h1>
+    <p>
+      Кровельные и фасадные материалы. Каталог пополняется: профнастил, водосточные системы, сайдинг
+      и доборные элементы появятся в ближайшее время. Если нужного товара нет в списке, позвоните —
+      подберём из полного ассортимента.
+    </p>
+  </header>
+
+  <ul class="model-grid">
+    <li class="model-card">
+      <a href="/catalog/metallocherepitsa" class="model-card__link">
+        <TileVisual hex="#45322E" label="Металлочерепица" size="small" />
+        <h2 class="model-card__title">Металлочерепица</h2>
+        <p class="model-card__text">{entries.map((e) => e.name).join(", ")}</p>
+        <p class="model-card__meta">{entries.length} модели</p>
+      </a>
+    </li>
+  </ul>
+</CatalogLayout>

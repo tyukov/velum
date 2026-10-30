@@ -1616,3 +1616,16 @@ textarea.modal__input {
     display: none;
   }
 }
+
+/* «Металлочерепица» в заголовке первого экрана ведёт в каталог */
+.promo-header__title-link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: #ebb683;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 6px;
+}
+
+.promo-header__title-link:hover {
+  text-decoration-color: currentColor;
+}

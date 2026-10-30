@@ -6,9 +6,11 @@ interface Props {
   title: string;
   submitText: string;
   withMessage?: boolean;
+  /** Товар, о котором спрашивают: уходит в заявку скрытым полем */
+  product?: string;
 }
 
-const { id, title, submitText, withMessage = false } = Astro.props;
+const { id, title, submitText, withMessage = false, product } = Astro.props;
 ---
 
 <div id={id} class="modal">
@@ -21,9 +23,14 @@ const { id, title, submitText, withMessage = false } = Astro.props;
       autocomplete="off"
       aria-hidden="true"
     />
+    {product && <input type="hidden" name="product" value={product} />}
     <div class="modal__header">
       <h2 class="modal__box-title">{title}</h2>
-      <p class="modal__box-text">Менеджер перезвонит вам и ответит на вопросы</p>
+      <p class="modal__box-text">
+        {product
+          ? `${product}. Менеджер перезвонит и рассчитает стоимость под ваш объём`
+          : "Менеджер перезвонит вам и ответит на вопросы"}
+      </p>
     </div>
     <div class="modal__body">
       <div class="form form_required">

@@ -1,0 +1,28 @@
+---
+import CatalogLayout from "../../../../layouts/CatalogLayout.astro";
+import ProductView from "../../../../components/catalog/ProductView.astro";
+import {
+  defaultVariant,
+  formatPrice,
+  metalTileModels,
+  minPrice,
+  type Model,
+} from "../../../../data/catalog/metal-tile";
+
+export function getStaticPaths() {
+  return metalTileModels.map((model) => ({ params: { model: model.slug }, props: { model } }));
+}
+
+const { model } = Astro.props as { model: Model };
+const variant = defaultVariant(model);
+const warranties = model.coatings.map((c) => c.warranty);
+---
+
+<CatalogLayout
+  title={`Металлочерепица ${model.name} в Атырау — цвета и покрытия | Velum`}
+  description={`Металлочерепица ${model.name}: от ${formatPrice(minPrice([model]))} за м², ${model.coatings.length} вариантов покрытия, гарантия от ${Math.min(...warranties)} до ${Math.max(...warranties)} лет. Подбор цвета и расчёт стоимости в Velum, Атырау.`}
+  path={`/catalog/metallocherepitsa/${model.slug}`}
+  product={`Металлочерепица ${model.name}`}
+>
+  <ProductView variant={variant} />
+</CatalogLayout>

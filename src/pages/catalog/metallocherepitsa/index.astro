@@ -1,0 +1,75 @@
+---
+import CatalogLayout from "../../../layouts/CatalogLayout.astro";
+import Breadcrumbs from "../../../components/catalog/Breadcrumbs.astro";
+import TileVisual from "../../../components/catalog/TileVisual.astro";
+import { colors } from "../../../data/catalog/colors";
+import {
+  catalogEntries,
+  formatPrice,
+  minPrice,
+  variantsOf,
+} from "../../../data/catalog/metal-tile";
+
+// Карточки в разных ходовых цветах, чтобы сразу было видно палитру
+const cardPalette = ["8017", "3005", "6005", "7024"];
+const entries = catalogEntries();
+const cardColor = (index: number) => {
+  const codes = entries[index]!.models.flatMap((m) => variantsOf(m).map((v) => v.color));
+  const wanted = cardPalette[index % cardPalette.length]!;
+  return colors[codes.includes(wanted) ? wanted : codes[0]!]!;
+};
+---
+
+<CatalogLayout
+  title="Металлочерепица в Атырау — модели, цвета и цены | Velum"
+  description="Металлочерепица Ламонтерра-X, Монтерроса, Трамонтана, Монтекристо. Покрытия от полиэстера до PURMAN, гарантия до 50 лет. Подбор и доставка в Атырау."
+  path="/catalog/metallocherepitsa"
+>
+  <Breadcrumbs
+    items={[
+      { name: "Главная", href: "/" },
+      { name: "Каталог", href: "/catalog" },
+      { name: "Металлочерепица", href: "/catalog/metallocherepitsa" },
+    ]}
+  />
+  <header class="catalog-head">
+    <h1>Металлочерепица</h1>
+    <p>
+      Металлочерепица: четыре модели (Монтерроса — в четырёх исполнениях), десять видов покрытия и
+      больше тридцати цветов. Выберите модель, а на её странице — покрытие, толщину и цвет. Цены за
+      м² указаны с НДС, точную сумму с доставкой под ваш объём рассчитает менеджер.
+    </p>
+  </header>
+
+  <ul class="model-grid">
+    {entries.map((entry, i) => {
+      const color = cardColor(i);
+      const coatings = entry.models.flatMap((m) => m.coatings);
+      const colorCount = new Set(entry.models.flatMap((m) => variantsOf(m).map((v) => v.color)))
+        .size;
+      return (
+        <li class="model-card">
+          <a href={`/catalog/metallocherepitsa/${entry.slug}`} class="model-card__link">
+            <TileVisual hex={color.hex} label={`${entry.name}, ${color.name}`} size="small" />
+            <h2 class="model-card__title">{entry.name}</h2>
+            <p class="model-card__text">{entry.summary}</p>
+            <p class="model-card__price">от {formatPrice(minPrice(entry.models))} за м²</p>
+            <p class="model-card__stock">
+              {(() => {
+                const names = [
+                  ...new Set(coatings.filter((c) => c.stock === "atyrau").map((c) => c.name)),
+                ];
+                return names.length ? `В наличии в Атырау: ${names.join(", ")}` : "Под заказ";
+              })()}
+            </p>
+            <p class="model-card__meta">
+              {entry.models.length > 1 && `${entry.models.length} исполнения · `}
+              {new Set(coatings.map((c) => c.name)).size} покрытий · {colorCount} цветов · гарантия
+              до {Math.max(...coatings.map((c) => c.warranty))} лет
+            </p>
+          </a>
+        </li>
+      );
+    })}
+  </ul>
+</CatalogLayout>
