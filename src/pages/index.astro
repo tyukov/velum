@@ -13,6 +13,8 @@ import LeadModal from "../components/LeadModal.astro";
 import Footer from "../components/Footer.astro";
 import { business } from "../lib/business";
 import "../styles/style.css";
+// Фон первого экрана на компьютере (CSS background) — самый крупный элемент, грузим заранее
+import desktopHero from "../assets/img/def.webp";
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -38,6 +40,14 @@ const jsonLd = {
   description="Velum — магазин кровельных и фасадных материалов в Атырау: металлочерепица, профнастил, водосточные системы, сайдинг. Доставка, консультация, скидки до 50%."
   ogTitle="Velum — кровельные и фасадные материалы в Атырау"
 >
+  <link
+    slot="head"
+    rel="preload"
+    as="image"
+    href={desktopHero.src}
+    media="(min-width: 67.5rem)"
+    fetchpriority="high"
+  />
   <script slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   <Header />
   <main class="main">

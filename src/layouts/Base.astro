@@ -1,4 +1,5 @@
 ---
+import { ClientRouter } from "astro:transitions";
 import "../styles/global.css";
 import interCyrillic from "../assets/fonts/inter-cyrillic-wght-normal.woff2?url";
 
@@ -38,7 +39,7 @@ const ogImage = new URL("/og.jpg", site).href;
     ) : (
       <meta name="robots" content="index, follow, max-image-preview:large" />
     )}
-    <link rel="canonical" href={canonical} />
+    {!noindex && <link rel="canonical" href={canonical} />}
     <meta name="theme-color" content="#ffffff" />
     <meta name="format-detection" content="telephone=no" />
 
@@ -58,6 +59,7 @@ const ogImage = new URL("/og.jpg", site).href;
     <link rel="sitemap" href="/sitemap-index.xml" />
     <link rel="preload" href={interCyrillic} as="font" type="font/woff2" crossorigin />
 
+    <ClientRouter />
     <slot name="head" />
   </head>
   <body class={bodyClass}>

@@ -1376,7 +1376,8 @@ textarea.modal__input {
   width: 100%;
   height: 100%;
   overflow: auto;
-  z-index: 1000;
+  /* Выше закреплённой шапки на мобильных (z-index: 9999), иначе она закрывает крестик */
+  z-index: 10000;
   padding: 20px 0;
   box-sizing: border-box;
   background-color: #000;
@@ -1527,6 +1528,91 @@ textarea.modal__input {
   }
 }
 
+/* Увеличенное фото (medium-zoom) — выше закреплённой шапки на мобильных */
+.medium-zoom-overlay,
+.medium-zoom-image--opened {
+  z-index: 10000;
+}
+
 .promo-faq .promo-header__text a {
-  color: #ebb683;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: #ebb683;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+/***
+**
+
+ПЕРВЫЙ ЭКРАН: вид из макета (style-test.css)
+
+**
+*/
+
+.promo-message .promo-header__title {
+  font-weight: 600;
+  color: #111;
+  letter-spacing: -0.015em;
+  line-height: 1.45;
+}
+
+.promo-message .promo-list__item {
+  color: #111;
+}
+
+.promo-message .promo-header__btn.btn_theme_grab {
+  box-shadow: 0 8px 20px rgb(214 168 96 / 35%);
+}
+
+@media (min-width: 67.5rem) {
+  .header-list__btn {
+    color: #fff;
+    font-weight: 600;
+    background-color: rgb(30 30 30 / 78%);
+    border-radius: 0.875rem;
+  }
+  .header-list__btn:hover {
+    background-color: rgb(30 30 30 / 92%);
+  }
+  /* Текст первого экрана выровнен по логотипу (сетка .wrap шириной 76.875rem) */
+  .promo-message .promo-header {
+    margin: 5.25rem 1.25rem 0 max(1.875rem, calc((100vw - 76.875rem) / 2));
+  }
+  .promo-message .promo-header__title {
+    font-size: 2.3125rem;
+    line-height: 1.4;
+    margin: 0 0 1.25rem;
+  }
+  .promo-message .promo-list__item {
+    font-size: 1rem;
+    margin-right: 2rem;
+  }
+  .promo-message .promo-header__text {
+    line-height: 1.65;
+    max-width: 29rem;
+  }
+  .promo-message .promo-header__btn {
+    font-size: 1rem;
+  }
+}
+
+/* На телефоне фото стоит над текстом: точки уходят за правый верхний угол фото,
+   чтобы не наезжать на заголовок под ним */
+@media (max-width: 767px) {
+  .promo-steps .promo-illustration::after {
+    top: -24px;
+    right: -12px;
+    bottom: auto;
+    width: 120px;
+    height: 120px;
+  }
+}
+
+/* На телефоне кнопка «Заказать звонок» в шапке не помещается рядом с номером:
+   звонок заказывают кнопкой «Перезвоните мне» на первом экране */
+@media (max-width: 767px) {
+  .header-list__item_push_right {
+    display: none;
+  }
 }

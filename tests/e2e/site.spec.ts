@@ -55,6 +55,15 @@ test.describe("главная", () => {
     await expect(page.locator(".blocker")).toHaveCount(0);
   });
 
+  test("крестик окна не закрыт шапкой на маленьком экране", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 568 });
+    await page.locator('.promo-message a[href="#ex1"]').click();
+    await page.locator(".blocker").evaluate((el) => (el.scrollTop = 0));
+    const close = page.locator(".close-modal");
+    await close.click();
+    await expect(page.locator(".blocker")).toHaveCount(0);
+  });
+
   test("неполный телефон не отправляется", async ({ page }) => {
     // На телефоне кнопка «Перезвоните мне» на баннере, на компьютере — «Заказать звонок» в шапке
     const hero = page.locator('.promo-message a[href="#ex2"]');
@@ -76,11 +85,20 @@ test.describe("главная", () => {
     await expect(question).toHaveClass(/active/);
   });
 
-  test("фото в галерее увеличивается", async ({ page }) => {
+  test("фото в галерее увеличивается", async ({ page, isMobile }) => {
     const photo = page.locator(".zoom").first();
     await photo.scrollIntoViewIfNeeded();
     await photo.click();
     await expect(page.locator("body")).toHaveClass(/medium-zoom--opened/);
+    // На телефоне шапка закреплена: затемнение с фото должно быть поверх неё
+    if (!isMobile) return;
+    const header = page.locator(".header");
+    const box = await header.boundingBox();
+    const topEl = await page.evaluate(
+      ([x, y]) => document.elementFromPoint(x, y)?.className ?? "",
+      [box!.x + 5, box!.y + 5],
+    );
+    expect(topEl).toContain("medium-zoom");
   });
 
   test("в подвале есть ссылка на политику", async ({ page }) => {
@@ -138,4 +156,20 @@ test("нет ошибок в консоли", async ({ page }) => {
   page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
   for (const path of ["/", "/taplink", "/privacy"]) await page.goto(path);
   expect(errors).toEqual([]);
+});
+
+test("переходы между страницами без перезагрузки", async ({ page }) => {
+  await page.goto("/privacy");
+  await page.evaluate(() => ((window as unknown as { marker: number }).marker = 1));
+  await page.locator("a.logo").first().click();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.locator("h1")).toContainText("Металлочерепица");
+  // Тот же документ: страница не перезагружалась
+  expect(await page.evaluate(() => (window as unknown as { marker?: number }).marker)).toBe(1);
+
+  // Скрипты страницы работают после перехода
+  await page.locator('.promo-message a[href="#ex1"]').click();
+  const phone = page.locator(".blocker").getByLabel("Ваш телефон");
+  await phone.pressSequentially("7011234567");
+  await expect(phone).toHaveValue("+7 (701) 123-45-67");
 });
