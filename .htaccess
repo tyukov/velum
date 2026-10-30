@@ -1,0 +1,6 @@
+# Для PHP-хостинга (Apache): формы отправляются на /api/send
+RewriteEngine On
+RewriteRule ^api/send/?$ telegram.php [L]
+<Files "config.php">
+  Require all denied
+</Files>
