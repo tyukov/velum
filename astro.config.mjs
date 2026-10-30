@@ -32,7 +32,8 @@ export default defineConfig({
   devToolbar: { enabled: process.env.E2E !== "1" },
   integrations: [
     sitemap({
-      filter: (page) => !page.includes("/thanks"),
+      // Только канонические страницы: варианты товаров ссылаются canonical на страницу модели
+      filter: (page) => !page.includes("/thanks") && !/\/catalog\/[^/]+\/[^/]+\/[^/]+$/.test(page),
     }),
   ],
   env: {

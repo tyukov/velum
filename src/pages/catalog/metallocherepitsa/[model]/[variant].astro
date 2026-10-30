@@ -3,11 +3,11 @@ import CatalogLayout from "../../../../layouts/CatalogLayout.astro";
 import ProductView from "../../../../components/catalog/ProductView.astro";
 import { colors } from "../../../../data/catalog/colors";
 import {
-  defaultVariant,
   formatPrice,
   formatThickness,
   priceOf,
   supplyNote,
+  stockInfo,
   warrantyOf,
   metalTileModels,
   variantsOf,
@@ -31,15 +31,24 @@ const name = `Металлочерепица ${model.name} ${coating.name} ${for
 const price = priceOf(model, coating);
 const warranty = warrantyOf(model, coating);
 const modelPath = `/catalog/metallocherepitsa/${model.slug}`;
-// Первый вариант модели совпадает со страницей модели: каноническим считаем адрес модели
-const isDefault = defaultVariant(model).slug === variant.slug;
+// Толщину пишем в заголовке, только если у покрытия модели их несколько (полиэстер 0,4 и 0,45)
+const multiThickness = model.coatings.filter((c) => c.id === coating.id).length > 1;
+const shortName = [
+  "Металлочерепица",
+  model.name,
+  coating.name,
+  multiThickness ? formatThickness(coating.thickness) : "",
+  color.label,
+]
+  .filter(Boolean)
+  .join(" ");
 ---
 
 <CatalogLayout
-  title={`${name} в Атырау | Velum`}
-  description={`${name}${price ? ` — ${formatPrice(price)} за м²` : ""}. Покрытие класса «${coating.class}»${warranty ? `, гарантия ${warranty} лет` : ""}. Доставка по Атырау, расчёт под ваш объём в Velum.`}
+  title={`${shortName} | Velum`}
+  description={`${name}${price ? `: ${formatPrice(price)} за м²` : ""}${warranty ? `, гарантия ${warranty} лет` : ""}. ${stockInfo[coating.stock].label}. Расчёт и доставка по Атырау.`}
   path={`${modelPath}/${variant.slug}`}
-  canonicalPath={isDefault ? modelPath : undefined}
+  canonicalPath={modelPath}
   product={name}
   supply={supplyNote(model, coating)}
 >

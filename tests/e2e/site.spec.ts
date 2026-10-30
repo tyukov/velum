@@ -249,13 +249,22 @@ test.describe("каталог металлочерепицы", () => {
     await expect(page.locator("h1")).toContainText("Монтерроса X");
   });
 
-  test("у страницы варианта свой заголовок и canonical", async ({ page }) => {
+  test("вариант: свой заголовок, canonical на модель; модель — ProductGroup", async ({ page }) => {
     await page.goto("/catalog/metallocherepitsa/monterrosa-s/vikingmp-0-45-ral-7021");
-    await expect(page).toHaveTitle(/Монтерроса S VikingMP 0,45 мм, RAL 7021/);
+    await expect(page).toHaveTitle("Металлочерепица Монтерроса S VikingMP RAL 7021 | Velum");
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
       "href",
-      "https://velum.kz/catalog/metallocherepitsa/monterrosa-s/vikingmp-0-45-ral-7021",
+      "https://velum.kz/catalog/metallocherepitsa/monterrosa-s",
     );
+
+    await page.goto("/catalog/metallocherepitsa/monterrosa-s");
+    const ld = await page
+      .locator('script[type="application/ld+json"]')
+      .evaluateAll((els) => els.map((e) => JSON.parse(e.textContent ?? "{}")));
+    const group = ld.find((d) => d["@type"] === "ProductGroup");
+    expect(group.hasVariant.length).toBe(31);
+    expect(group.hasVariant[0].offers.priceCurrency).toBe("KZT");
+    await expect(page.locator(".coatings-table tbody tr")).toHaveCount(4);
   });
 });
 

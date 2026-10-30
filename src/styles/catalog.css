@@ -423,3 +423,64 @@
   white-space: nowrap;
   border: 0;
 }
+
+/* Таблица покрытий модели */
+.coatings-table {
+  margin: 3rem 0 0;
+}
+
+.coatings-table h2 {
+  font-size: 1.375rem;
+  margin: 0 0 1rem;
+}
+
+.coatings-table__scroll {
+  overflow-x: auto;
+}
+
+.coatings-table table {
+  width: 100%;
+  min-width: 40rem;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+.coatings-table th,
+.coatings-table td {
+  padding: 0.75rem 0.75rem 0.75rem 0;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+  vertical-align: top;
+}
+
+.coatings-table thead th {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #666;
+}
+
+.coatings-table tbody th a {
+  color: #111;
+  font-weight: 600;
+}
+
+.coatings-table tbody th span {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: #666;
+}
+
+.coatings-table td:last-child {
+  color: #555;
+  font-size: 0.875rem;
+}
+
+.coatings-table tbody th {
+  min-width: 11rem;
+}
+
+.coatings-table td:nth-child(2),
+.coatings-table td:nth-child(3) {
+  white-space: nowrap;
+}
