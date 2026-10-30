@@ -1,0 +1,74 @@
+---
+import { Picture } from "astro:assets";
+import sheets from "../assets/img/def-2.jpeg";
+---
+
+<section class="promo promo-steps">
+  <div class="promo__content wrap">
+    <div class="promo-illustration">
+      <Picture
+        src={sheets}
+        formats={["avif"]}
+        fallbackFormat="webp"
+        widths={[480, 720]}
+        sizes="(max-width: 768px) 100vw, 560px"
+        class="promo-illustration__img"
+        alt="Профилированные листы для кровли и облицовки стен"
+      />
+    </div>
+    <header class="promo-header">
+      <h2 class="promo-header__title">Поможем подобрать решение под&nbsp;вашу потребность</h2>
+      <p class="promo-header__text">
+        Строите дом и ищите крышу, забор или фасад? Хотите не ошибиться с размерами и получить
+        лучшее решение для конкретно вашего случая? Позвольте познакомить вас с этапами нашей
+        работы:
+      </p>
+      <ol class="list steps-list">
+        <li class="steps-list__item">
+          <div class="steps-list__copy">
+            <strong class="steps-list__title">Выявление потребности</strong>
+            <p class="steps-list__text">Формируем заявку, уточняем детали</p>
+          </div>
+        </li>
+        <li class="steps-list__item">
+          <div class="steps-list__copy">
+            <strong class="steps-list__title">Замер объекта</strong>
+            <p class="steps-list__text">Выезжаем на замер</p>
+          </div>
+        </li>
+        <li class="steps-list__item">
+          <div class="steps-list__copy">
+            <strong class="steps-list__title">Составление сметы</strong>
+            <p class="steps-list__text">Рассчитываем стоимость продукции</p>
+          </div>
+        </li>
+        <li class="steps-list__item">
+          <div class="steps-list__copy">
+            <strong class="steps-list__title">Оплата продукции</strong>
+            <p class="steps-list__text">Оплата товара или услуг для старта работ</p>
+          </div>
+        </li>
+        <li class="steps-list__item">
+          <div class="steps-list__copy">
+            <strong class="steps-list__title">Доставка продукции</strong>
+            <p class="steps-list__text">Доставляем товар до вашего дома</p>
+          </div>
+        </li>
+        <li class="steps-list__item">
+          <div class="steps-list__copy">
+            <strong class="steps-list__title">Монтаж продукции</strong>
+            <p class="steps-list__text">При необходимости согласно смете</p>
+          </div>
+        </li>
+      </ol>
+      <a
+        href="#ex1"
+        class="promo-header__btn btn btn_theme_grab btn_size_m btn_size_l"
+        rel="modal:open"
+        role="button"
+      >
+        <span class="btn__text">Оставить заявку</span>
+      </a>
+    </header>
+  </div>
+</section>

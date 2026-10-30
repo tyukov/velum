@@ -1,0 +1,6 @@
+drafts
+dist
+.astro
+.vercel
+node_modules
+package-lock.json

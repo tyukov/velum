@@ -1,0 +1,66 @@
+---
+import "../styles/global.css";
+import interCyrillic from "../assets/fonts/inter-cyrillic-wght-normal.woff2?url";
+
+interface Props {
+  title: string;
+  description: string;
+  /** Путь страницы без завершающего слэша, например "/taplink" */
+  path?: string;
+  ogTitle?: string;
+  noindex?: boolean;
+  bodyClass?: string;
+}
+
+const {
+  title,
+  description,
+  path = "/",
+  ogTitle = title,
+  noindex = false,
+  bodyClass = "page",
+} = Astro.props;
+
+const site = Astro.site ?? new URL("https://velum.kz");
+const canonical = new URL(path, site).href;
+const ogImage = new URL("/og.jpg", site).href;
+---
+
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {noindex ? (
+      <meta name="robots" content="noindex" />
+    ) : (
+      <meta name="robots" content="index, follow, max-image-preview:large" />
+    )}
+    <link rel="canonical" href={canonical} />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ru_RU" />
+    <meta property="og:site_name" content="Velum" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={ogTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" href="/logo-x1.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/logo-x1.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="preload" href={interCyrillic} as="font" type="font/woff2" crossorigin />
+
+    <slot name="head" />
+  </head>
+  <body class={bodyClass}>
+    <slot />
+  </body>
+</html>

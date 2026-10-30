@@ -1,11 +1,11 @@
 # Публикация на Vercel и заявки в Telegram
 
-Сайт статический: HTML, CSS и немного JS без зависимостей. Заявки с форм уходят
-на `/api/send` — это функция Vercel (`api/send.js`), которая пересылает их в Telegram.
+Сайт собирается Astro в статические страницы. Заявки с форм уходят на `/api/send` —
+это серверная функция (`src/pages/api/send.ts`), которая пересылает их в Telegram.
 
 ## 1. Telegram-бот
 
-1. В @BotFather: `/mybots` → бот → *API Token* → **Revoke**. Старый токен был в открытом
+1. В @BotFather: `/mybots` → бот → _API Token_ → **Revoke**. Старый токен был в открытом
    коде и остаётся в истории git, его обязательно нужно заменить. Сохраните новый.
 2. Создайте группу для заявок и добавьте туда бота.
 3. Напишите в группе любое сообщение и откройте
@@ -15,9 +15,12 @@
 ## 2. Vercel
 
 1. vercel.com → **Add New… → Project** → импортируйте репозиторий `tyukov/velum`.
-2. Framework Preset: **Other**. Build Command и Output Directory оставьте пустыми.
+2. Framework Preset: **Astro** (определится сам). Build Command и Output Directory не меняйте.
 3. **Environment Variables**: `TELEGRAM_BOT_TOKEN` и `TELEGRAM_CHAT_ID`, затем **Deploy**.
-4. Откройте выданный адрес `*.vercel.app` и отправьте тестовую заявку.
+   Без них сайт откроется, но заявки отправляться не будут: посетитель увидит
+   просьбу позвонить по телефону.
+4. Settings → General → **Node.js Version**: 24.x.
+5. Откройте выданный адрес `*.vercel.app` и отправьте тестовую заявку.
 
 Каждый push в `main` публикует сайт, а каждый pull request получает свой адрес для предпросмотра.
 
@@ -34,17 +37,9 @@
 
 ## 4. После запуска
 
-- Google Search Console и Яндекс Вебмастер: подтвердите сайт и отправьте `https://velum.kz/sitemap.xml`.
+- Google Search Console и Яндекс Вебмастер: подтвердите сайт и отправьте `https://velum.kz/sitemap-index.xml`.
 - Проверьте скорость в PageSpeed Insights: https://pagespeed.web.dev/
 
-## Что где лежит
+## Структура проекта
 
-| Путь | Назначение |
-|---|---|
-| `index.html`, `taplink.html`, `thanks.html` | Страницы сайта |
-| `css/`, `fonts/`, `img/` | Стили, шрифт Inter, изображения (WebP) |
-| `js/main.js` | Модальные окна, маска телефона, FAQ, отправка форм |
-| `api/send.js` | Функция Vercel: заявка → Telegram |
-| `vercel.json` | Чистые адреса, кэширование, заголовки безопасности |
-| `robots.txt`, `sitemap.xml` | Для поисковиков |
-| `.vercelignore` | Черновики, которые не публикуются |
+См. [README.md](README.md).

@@ -1,0 +1,63 @@
+---
+import { Image } from "astro:assets";
+import dotted1 from "../assets/img/dotted-1.png";
+import dotted2 from "../assets/img/dotted-2.png";
+---
+
+<section class="promo promo-features">
+  <div class="promo__content wrap">
+    <header class="promo-header">
+      <h2 class="promo-header__title">Мы компания – VELUM</h2>
+      <p class="promo-header__text">Предприятие, которое помогает людям строить дома</p>
+    </header>
+    <ul class="list features-list">
+      <li class="features-list__item features-list__item_pos_first">
+        <div class="features-list__illustration">
+          <Image
+            src={dotted1}
+            class="features-list__illustration__img"
+            alt=""
+            role="presentation"
+          />
+        </div>
+        <div class="features-list__copy">
+          <h3 class="features-list__title">Качество продукция</h3>
+          <p class="features-list__text">
+            Продаём металл из России и Казахстана. Продукция сертифицирована в соответствии
+            с&nbsp;государственными нормами ГОСТ. Прошла испытания в Национальном исследовательском
+            университете МИСиС. Поэтому компания VELUM предоставляет гарантию на товары и услуги.
+          </p>
+        </div>
+      </li>
+      <li class="features-list__item features-list__item_pos_second">
+        <div class="features-list__illustration">
+          <Image
+            src={dotted2}
+            class="features-list__illustration__img"
+            alt=""
+            role="presentation"
+          />
+        </div>
+        <div class="features-list__copy features-list__copy_pos_second">
+          <h3 class="features-list__title">Профессиональные консультации</h3>
+          <p class="features-list__text">
+            Если необходима консультация по продукции, обратитесь в контакт-центр. Наши сотрудники
+            готовы помочь. Вы получите исчерпывающую информацию по ассортименту кровельных и
+            фасадных материалов.
+          </p>
+        </div>
+      </li>
+      <li class="features-list__item features-list__copy_pos_third">
+        <div class="features-list__illustration"></div>
+        <div class="features-list__copy">
+          <h3 class="features-list__title">Подбор материалов по бюджету</h3>
+          <p class="features-list__text">
+            Мы хотим, чтобы все наши клиенты могли позволить себе качественную продукцию, поэтому
+            предлагаем доступные цены. Также есть возможность выбрать продукцию для любого бюджета –
+            звоните, мы сделам вам предложение от которого вы останетесь довольны!
+          </p>
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>
