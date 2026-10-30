@@ -14,6 +14,8 @@ const RULES = {
   variantTitleMax: 70,
   descriptionMin: 70,
   descriptionMax: 160,
+  /** Доля общих фраз (5 слов подряд) в тексте <main> двух канонических страниц, выше — почти дубль */
+  textSimilarityMax: 0.65,
 };
 
 const htmlFiles = (dir) =>
@@ -39,6 +41,26 @@ const decode = (s) =>
     .replace(/&amp;/g, "&")
     .replace(/&#39;/g, "'");
 
+/** Фразы по 5 слов из основного текста страницы — для поиска почти одинаковых страниц */
+function shingles(html) {
+  const main = html.match(/<main[\s\S]*<\/main>/)?.[0] ?? html;
+  const words =
+    main
+      .replace(/<(script|style)[\s\S]*?<\/\1>/g, " ")
+      .replace(/<[^>]+>/g, " ")
+      .toLowerCase()
+      .match(/[\p{L}\p{N}]+/gu) ?? [];
+  const set = new Set();
+  for (let i = 0; i + 5 <= words.length; i++) set.add(words.slice(i, i + 5).join(" "));
+  return set;
+}
+
+const similarity = (a, b) => {
+  let common = 0;
+  for (const s of a) if (b.has(s)) common++;
+  return common / (a.size + b.size - common || 1);
+};
+
 if (!existsSync(ROOT)) {
   console.error(`Нет папки сборки ${ROOT}: сначала выполните npm run build`);
   process.exit(1);
@@ -54,6 +76,13 @@ const pages = htmlFiles(ROOT).map((file) => {
     description: decode(attr(html, /<meta name="description" content="([^"]*)"/)),
     canonical: attr(html, /<link rel="canonical" href="([^"]*)"/),
     noindex: /<meta name="robots" content="[^"]*noindex/.test(html),
+    h1: decode(
+      attr(html, /<h1[^>]*>([\s\S]*?)<\/h1>/)
+        ?.replace(/<[^>]+>/g, "")
+        .trim(),
+    ),
+    ogTitle: decode(attr(html, /<meta property="og:title" content="([^"]*)"/)),
+    shingles: shingles(html),
   };
   const fail = (msg) => problems.push(`${path}: ${msg}`);
 
@@ -91,13 +120,27 @@ const pages = htmlFiles(ROOT).map((file) => {
   return page;
 });
 
-// Уникальные title и description у канонических страниц
+// Уникальные title, description, h1 и og:title у канонических страниц
 const canonical = pages.filter((p) => !p.noindex && p.isCanonical);
-for (const key of ["title", "description"]) {
+for (const key of ["title", "description", "h1", "ogTitle"]) {
   const seen = new Map();
   for (const p of canonical) {
     if (seen.has(p[key])) problems.push(`${p.path}: ${key} совпадает с ${seen.get(p[key])}`);
     else seen.set(p[key], p.path);
+  }
+}
+
+// Уникальность текста: канонические страницы не должны быть почти дублями друг друга
+let maxSimilarity = 0;
+for (let i = 0; i < canonical.length; i++) {
+  for (let j = i + 1; j < canonical.length; j++) {
+    const [a, b] = [canonical[i], canonical[j]];
+    const sim = similarity(a.shingles, b.shingles);
+    maxSimilarity = Math.max(maxSimilarity, sim);
+    if (sim > RULES.textSimilarityMax)
+      problems.push(
+        `${a.path}: текст совпадает с ${b.path} на ${Math.round(sim * 100)}% (допустимо ${RULES.textSimilarityMax * 100}%)`,
+      );
   }
 }
 
@@ -125,5 +168,6 @@ if (problems.length) {
   process.exit(1);
 }
 console.log(
-  `SEO-проверка пройдена: ${pages.length} страниц, ${canonical.length} канонических в sitemap`,
+  `SEO-проверка пройдена: ${pages.length} страниц, ${canonical.length} канонических в sitemap, ` +
+    `наибольшее совпадение текста ${Math.round(maxSimilarity * 100)}%`,
 );

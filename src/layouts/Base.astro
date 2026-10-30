@@ -1,5 +1,10 @@
 ---
 import { ClientRouter } from "astro:transitions";
+import {
+  PUBLIC_BING_VERIFICATION,
+  PUBLIC_GOOGLE_VERIFICATION,
+  PUBLIC_YANDEX_VERIFICATION,
+} from "astro:env/client";
 import "../styles/global.css";
 import interCyrillic from "../assets/fonts/inter-cyrillic-wght-normal.woff2?url";
 
@@ -25,6 +30,15 @@ const {
 const site = Astro.site ?? new URL("https://velum.kz");
 const canonical = new URL(path, site).href;
 const ogImage = new URL("/og.jpg", site).href;
+// Поисковики проверяют код подтверждения на главной странице
+const verification =
+  path === "/"
+    ? [
+        ["yandex-verification", PUBLIC_YANDEX_VERIFICATION],
+        ["google-site-verification", PUBLIC_GOOGLE_VERIFICATION],
+        ["msvalidate.01", PUBLIC_BING_VERIFICATION],
+      ].filter(([, code]) => code)
+    : [];
 ---
 
 <!doctype html>
@@ -42,6 +56,9 @@ const ogImage = new URL("/og.jpg", site).href;
     {!noindex && <link rel="canonical" href={canonical} />}
     <meta name="theme-color" content="#ffffff" />
     <meta name="format-detection" content="telephone=no" />
+    {verification.map(([name, code]) => (
+      <meta name={name} content={code} />
+    ))}
 
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="ru_RU" />

@@ -46,6 +46,22 @@ export default defineConfig({
         access: "public",
         optional: true,
       }),
+      // Коды подтверждения прав в Яндекс Вебмастере, Google Search Console и Bing Webmaster
+      PUBLIC_YANDEX_VERIFICATION: envField.string({
+        context: "client",
+        access: "public",
+        optional: true,
+      }),
+      PUBLIC_GOOGLE_VERIFICATION: envField.string({
+        context: "client",
+        access: "public",
+        optional: true,
+      }),
+      PUBLIC_BING_VERIFICATION: envField.string({
+        context: "client",
+        access: "public",
+        optional: true,
+      }),
       TURNSTILE_SECRET_KEY: envField.string({
         context: "server",
         access: "secret",

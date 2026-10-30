@@ -16,22 +16,36 @@ import "../styles/style.css";
 // Фон первого экрана на компьютере (CSS background) — самый крупный элемент, грузим заранее
 import desktopHero from "../assets/img/def.webp";
 
+// WebSite — по нему Google и Яндекс показывают название сайта в выдаче
 const jsonLd = {
   "@context": "https://schema.org",
-  "@type": "HomeAndConstructionBusiness",
-  name: business.name,
-  url: business.url,
-  logo: new URL("/logo-x1.png", business.url).href,
-  image: new URL("/og.jpg", business.url).href,
-  description: business.description,
-  telephone: business.phoneE164,
-  priceRange: "₸₸",
-  address: {
-    "@type": "PostalAddress",
-    addressLocality: business.city,
-    addressCountry: "KZ",
-  },
-  areaServed: "KZ",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": `${business.url}#website`,
+      name: business.name,
+      url: business.url,
+      inLanguage: "ru",
+      publisher: { "@id": `${business.url}#business` },
+    },
+    {
+      "@type": "HomeAndConstructionBusiness",
+      "@id": `${business.url}#business`,
+      name: business.name,
+      url: business.url,
+      logo: new URL("/logo-x1.png", business.url).href,
+      image: new URL("/og.jpg", business.url).href,
+      description: business.description,
+      telephone: business.phoneE164,
+      priceRange: "₸₸",
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: business.city,
+        addressCountry: "KZ",
+      },
+      areaServed: { "@type": "City", name: business.city },
+    },
+  ],
 };
 ---
 
