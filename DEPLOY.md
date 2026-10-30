@@ -86,8 +86,8 @@
 
 ### Что уже сделано на сайте
 
-- **IndexNow** (Яндекс, Bing, Seznam, Naver): после каждого деплоя на продакшен GitHub Actions
-  (`.github/workflows/indexnow.yml`) отправляет адреса из sitemap. Ключ — файл
+- **IndexNow** (Яндекс, Bing, Seznam, Naver): после каждого обновления main GitHub Actions
+  (`.github/workflows/indexnow.yml`) ждёт публикации на Vercel и отправляет адреса из sitemap. Ключ — файл
   `public/<ключ>.txt`, он не секретный. Вручную: Actions → IndexNow → Run workflow.
 - **robots.txt**: `Clean-param` для Яндекса — адреса с `utm_*`, `yclid`, `gclid` не считаются отдельными страницами.
 - **Разметка schema.org**: компания, сайт, товары с ценами, хлебные крошки. Её читают все поисковики.

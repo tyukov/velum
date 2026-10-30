@@ -229,8 +229,74 @@ async function initZoom() {
   zoom.attach(".zoom");
 }
 
+// ---------- Калькулятор стоимости в карточке товара ----------
+// Площадь крыши × цена за м² с запасом на раскрой и нахлёсты. Площадь запоминаем на время визита,
+// чтобы при смене покрытия или цвета не вводить её заново. Заявка уходит менеджеру с площадью и суммой.
+const ROOF_RESERVE = 0.1;
+const SMALL_ORDER_M2 = 50;
+const AREA_KEY = "velum:roof-area";
+
+const tenge = (n: number) => `${new Intl.NumberFormat("ru-RU").format(n).replace(/\s/g, " ")} ₸`;
+
+const storage = {
+  get: () => {
+    try {
+      return sessionStorage.getItem(AREA_KEY) ?? "";
+    } catch {
+      return "";
+    }
+  },
+  set: (v: string) => {
+    try {
+      sessionStorage.setItem(AREA_KEY, v);
+    } catch {
+      // Приватный режим: просто не запоминаем
+    }
+  },
+};
+
+function initCalc() {
+  const calc = document.querySelector<HTMLElement>(".calc");
+  const input = calc?.querySelector<HTMLInputElement>(".calc__input");
+  if (!calc || !input) return;
+  const price = Number(calc.dataset.price);
+  const result = calc.querySelector<HTMLElement>(".calc__result")!;
+  const note = calc.querySelector<HTMLElement>(".calc__note")!;
+  const productField = document.querySelector<HTMLInputElement>('#ex1 input[name="product"]');
+  const baseProduct = productField?.value ?? "";
+  const orderText = document.querySelector<HTMLElement>(".product-view__order .btn__text");
+
+  const update = () => {
+    const area = Number(input.value.replace(",", "."));
+    const valid = area >= 1 && area <= 10000;
+    result.hidden = !valid;
+    note.hidden = true;
+    if (productField) productField.value = baseProduct;
+    if (orderText) orderText.textContent = "Узнать стоимость";
+    storage.set(valid ? input.value : "");
+    if (!valid) return;
+
+    // Округляем до сотых перед ceil: 100 × 1,1 в JS даёт 110,00000000000001
+    const sheets = Math.ceil(Math.round(area * (1 + ROOF_RESERVE) * 100) / 100);
+    const sum = sheets * price;
+    result.querySelector(".calc__sum")!.textContent = tenge(sum);
+    result.querySelector(".calc__detail")!.textContent =
+      `${sheets} м² металлочерепицы с запасом ${ROOF_RESERVE * 100}% на раскрой и нахлёсты, ` +
+      `по ${tenge(price)} за м². Без доборных элементов и доставки.`;
+    note.hidden = !("smallMarkup" in calc.dataset) || sheets >= SMALL_ORDER_M2;
+    if (productField)
+      productField.value = `${baseProduct}; крыша ${area} м², ${sheets} м² листа, примерно ${tenge(sum)}`;
+    if (orderText) orderText.textContent = "Получить точный расчёт";
+  };
+
+  input.value = storage.get();
+  input.addEventListener("input", update);
+  update();
+}
+
 // Первая загрузка и каждый переход между страницами
 document.addEventListener("astro:page-load", () => {
+  initCalc();
   initPhoneMasks();
   initFaq();
   initForms();

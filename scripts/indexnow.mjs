@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Сообщает Яндексу, Bing и другим поисковикам с IndexNow, что страницы сайта обновились.
-// Запускается в GitHub Actions после успешного деплоя на продакшен (.github/workflows/indexnow.yml).
+// Запускается в GitHub Actions после обновления main (.github/workflows/indexnow.yml).
 // Ключ лежит в public/<ключ>.txt — по нему поисковик проверяет, что запрос пришёл от владельца сайта.
 import { readdirSync } from "node:fs";
 
@@ -11,7 +11,18 @@ const keyFile = readdirSync("public").find((f) => /^[a-f0-9]{32}\.txt$/.test(f))
 if (!keyFile) throw new Error("Нет файла ключа IndexNow в public/");
 const key = keyFile.replace(".txt", "");
 
-const sitemap = await (await fetch(`${SITE}/sitemap-0.xml`)).text();
+// Поисковик проверяет ключ по адресу keyLocation, поэтому ждём, пока сайт его отдаёт (до 10 минут)
+async function waitFor(url) {
+  for (let i = 0; i < 20; i++) {
+    const res = await fetch(url).catch(() => null);
+    if (res?.ok) return res;
+    await new Promise((r) => setTimeout(r, 30_000));
+  }
+  throw new Error(`Сайт не отвечает: ${url}`);
+}
+
+await waitFor(`${SITE}/${keyFile}`);
+const sitemap = await (await waitFor(`${SITE}/sitemap-0.xml`)).text();
 const urlList = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
 if (!urlList.length) throw new Error("В sitemap нет адресов");
 

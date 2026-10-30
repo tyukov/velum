@@ -321,6 +321,39 @@ test.describe("каталог металлочерепицы", () => {
     expect(overflow).toBe(false);
   });
 
+  test("калькулятор: сумма по площади, наценка до 50 м², площадь уходит в заявку", async ({
+    page,
+  }) => {
+    await page.goto("/catalog/metallocherepitsa/tramontana/vikingmp-e-0-5-rr32");
+    const calc = page.locator(".calc");
+    const area = calc.getByLabel("Сколько нужно на вашу крышу?");
+    // 30 м² крыши + 10% запаса = 33 м² по 7 555 ₸
+    await area.fill("30");
+    await expect(calc.locator(".calc__sum")).toHaveText("249\u00a0315\u00a0₸");
+    await expect(calc.locator(".calc__note")).toBeVisible();
+    await area.fill("100");
+    await expect(calc.locator(".calc__sum")).toHaveText("831\u00a0050\u00a0₸");
+    await expect(calc.locator(".calc__note")).toBeHidden();
+
+    // Площадь сохраняется при смене цвета
+    await page
+      .getByRole("group", { name: "Цвет" })
+      .getByRole("link", { name: /RAL 3005/ })
+      .click();
+    await expect(page).toHaveURL(/vikingmp-e-0-5-ral-3005$/);
+    await expect(page.locator(".calc__input")).toHaveValue("100");
+
+    await page.getByRole("link", { name: "Получить точный расчёт" }).click();
+    const modal = page.locator(".blocker .modal");
+    const name = uniqueName();
+    await modal.getByLabel("Ваше имя").fill(name);
+    await modal.getByLabel("Ваш телефон").pressSequentially("7011234567");
+    await modal.getByRole("button", { name: "Отправить заявку" }).click();
+    await expect(modal.locator(".form-status")).toHaveText(/Спасибо/);
+    const sent = await sentMessage(name);
+    expect(sent.text).toContain("крыша 100 м², 110 м² листа, примерно 831");
+  });
+
   test("заявка с товара уходит с названием варианта", async ({ page }) => {
     await page.goto("/catalog/metallocherepitsa/tramontana/vikingmp-e-0-5-rr32");
     await page.getByRole("link", { name: "Узнать стоимость" }).click();
