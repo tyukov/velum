@@ -2,6 +2,47 @@
 // Astro собирает этот модуль и подключает его с type="module" (отложенная загрузка).
 import { formatPhone } from "../lib/phone";
 
+// ---------- Cloudflare Turnstile (если на сайте задан ключ) ----------
+// Скрипт Cloudflare загружается только при первом открытии формы, чтобы не замедлять страницу.
+type Turnstile = {
+  render: (el: HTMLElement, opts: { sitekey: string; language?: string }) => string;
+  reset: (id: string) => void;
+};
+declare global {
+  interface Window {
+    turnstile?: Turnstile;
+  }
+}
+
+let turnstileScript: Promise<Turnstile> | null = null;
+function loadTurnstile(): Promise<Turnstile> {
+  turnstileScript ??= new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+    script.async = true;
+    script.onload = () => (window.turnstile ? resolve(window.turnstile) : reject());
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+  return turnstileScript;
+}
+
+function renderTurnstile(form: HTMLElement) {
+  const box = form.querySelector<HTMLElement>(".turnstile[data-sitekey]");
+  if (!box || box.dataset.widgetId) return;
+  box.dataset.widgetId = "pending";
+  loadTurnstile()
+    .then((ts) => {
+      box.dataset.widgetId = ts.render(box, { sitekey: box.dataset.sitekey!, language: "ru" });
+    })
+    .catch(() => delete box.dataset.widgetId);
+}
+
+function resetTurnstile(form: HTMLElement) {
+  const id = form.querySelector<HTMLElement>(".turnstile")?.dataset.widgetId;
+  if (id && id !== "pending") window.turnstile?.reset(id);
+}
+
 // ---------- Модальные окна ----------
 // Разметка совместима со стилями: .blocker > .modal + a.close-modal
 let current: { modal: HTMLElement; blocker: HTMLElement } | null = null;
@@ -38,6 +79,7 @@ function openModal(modal: HTMLElement | null) {
   document.body.style.overflow = "hidden";
   modal.style.display = "inline-block";
   current = { modal, blocker };
+  renderTurnstile(modal);
 
   modal.querySelector<HTMLElement>("input:not([type=hidden]):not(.honeypot), button")?.focus();
 }
@@ -134,6 +176,7 @@ document.querySelectorAll<HTMLFormElement>('form[action="/api/send"]').forEach((
         (err instanceof Error && err.message) ||
         "Не удалось отправить заявку. Позвоните нам: 8 701 013 13 59";
     } finally {
+      resetTurnstile(form);
       if (button) button.disabled = false;
     }
   });

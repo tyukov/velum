@@ -1,9 +1,10 @@
 // Приём заявки с формы и отправка в Telegram (функция Vercel).
 // Токен и чат задаются переменными окружения TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID.
 import type { APIRoute } from "astro";
-import { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } from "astro:env/server";
+import { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, TURNSTILE_SECRET_KEY } from "astro:env/server";
 import { formatPhone, isCompletePhone } from "../../lib/phone";
 import { business } from "../../lib/business";
+import { verifyTurnstile } from "../../lib/turnstile";
 
 export const prerender = false;
 
@@ -31,7 +32,7 @@ function reply(
   return new Response(error, { status, headers: { "Content-Type": "text/plain; charset=utf-8" } });
 }
 
-export const POST: APIRoute = async ({ request, redirect }) => {
+export const POST: APIRoute = async ({ request, redirect, clientAddress }) => {
   let form: FormData;
   try {
     form = await request.formData();
@@ -41,6 +42,13 @@ export const POST: APIRoute = async ({ request, redirect }) => {
 
   // Ловушка для ботов: скрытое поле должно остаться пустым
   if (form.get("website")) return reply(request, redirect);
+
+  if (TURNSTILE_SECRET_KEY) {
+    const token = String(form.get("cf-turnstile-response") ?? "");
+    if (!(await verifyTurnstile(TURNSTILE_SECRET_KEY, token, clientAddress))) {
+      return reply(request, redirect, "Подтвердите, что вы не робот, и отправьте ещё раз", 400);
+    }
+  }
 
   const name = field(form, "user_name", 100);
   const phone = formatPhone(field(form, "user_phone", 30));
