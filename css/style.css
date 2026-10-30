@@ -32,12 +32,8 @@
     color: #333;
     -moz-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
-    text-size-adjust: 100% -webkit-animation-duration: 2s;
-    animation-duration: 2s;
-    -webkit-animation-fill-mode: both;
-    animation-fill-mode: both;
-    -webkit-animation-name: fadeIn;
-    animation-name: fadeIn;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
 }
 
 .wrap {
@@ -239,7 +235,7 @@ BUTTONS
     text-align: center;
     display: block;
     font-size: 12px;
-    color: #777;
+    color: #666;
     margin: 10px 0;
 }
 
@@ -317,7 +313,7 @@ PROMO-MESSAGE
 .promo-message .promo-header__subtitle {
     font-size: .875rem;
     margin: 0 0 .625rem;
-    color: #999;
+    color: #707070;
 }
 
 .promo-message .promo-header__title {
@@ -348,7 +344,7 @@ PROMO-MESSAGE
 }
 
 .promo-message .promo-header__text {
-    color: #777;
+    color: #666;
     font-size: .875rem;
     max-width: 440px;
     margin: 0 0 2rem;
@@ -458,7 +454,7 @@ PROMO-STEPS
 .promo-steps .promo-header__text {
     max-width: 30rem;
     margin: 0 0 1rem;
-    color: #777;
+    color: #666;
 }
 
 .steps-list {
@@ -493,7 +489,7 @@ PROMO-STEPS
 
 .steps-list__text {
     margin: 0;
-    color: #777;
+    color: #666;
 }
 
 /***
@@ -610,7 +606,7 @@ PROMO-FEATURES
 
 .features-list__text {
     margin: 0;
-    color: #777;
+    color: #666;
 }
 
 /***
@@ -1528,4 +1524,8 @@ textarea.modal__input {
         padding: 40px 45px;
      border-radius: 4px
     }
+}
+
+.promo-faq .promo-header__text a {
+    color: #ebb683;
 }
