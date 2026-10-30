@@ -222,10 +222,27 @@ test.describe("каталог металлочерепицы", () => {
     await expect(page).toHaveURL(/\/lamonterra-x\/polyester-0-45-ral-8017$/);
     await page.locator(".picker__chip", { hasText: "0,4 мм" }).click();
     await expect(page).toHaveURL(/polyester-0-4-ral-8017$/);
-    await page.getByRole("link", { name: "RAL 3005 Красное вино" }).click();
+    await page
+      .getByRole("group", { name: "Цвет" })
+      .getByRole("link", { name: "RAL 3005 Красное вино" })
+      .click();
     await expect(page).toHaveURL(/polyester-0-4-ral-3005$/);
     await expect(page.locator("h1")).toContainText("Ламонтерра-X");
     await expect(page.locator(".product-view__subtitle")).toContainText("0,4 мм");
+  });
+
+  test("таблица покрытий: цвета кружками ведут на варианты, на телефоне без прокрутки вбок", async ({
+    page,
+  }) => {
+    await page.goto("/catalog/metallocherepitsa/lamonterra-x");
+    const row = page.locator(".coatings-table tbody tr", { hasText: "PURMAN" });
+    await expect(row.locator(".coatings-table__swatch")).toHaveCount(2);
+    await row.locator(".coatings-table__swatch").first().click();
+    await expect(page).toHaveURL(/\/lamonterra-x\/purman-0-5-/);
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth,
+    );
+    expect(overflow).toBe(false);
   });
 
   test("заявка с товара уходит с названием варианта", async ({ page }) => {
@@ -251,7 +268,10 @@ test.describe("каталог металлочерепицы", () => {
       .click();
     await expect(page).toHaveURL(/\/monterrosa-s$/);
     await page.locator(".picker__chip", { hasText: "VikingMP E" }).click();
-    await page.getByRole("link", { name: "RAL 8004 Медно-коричневый" }).click();
+    await page
+      .getByRole("group", { name: "Цвет" })
+      .getByRole("link", { name: "RAL 8004 Медно-коричневый" })
+      .click();
     await expect(page).toHaveURL(/monterrosa-s\/vikingmp-e-0-5-ral-8004$/);
     await page.getByRole("group", { name: "Исполнение" }).getByRole("link", { name: "X" }).click();
     await expect(page).toHaveURL(/monterrosa-x\/vikingmp-e-0-5-ral-8004$/);

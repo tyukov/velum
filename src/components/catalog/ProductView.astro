@@ -336,47 +336,72 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
 
 <section class="coatings-table">
   <h2>Покрытия, цвета и цены {model.name}</h2>
-  <div class="coatings-table__scroll">
-    <table>
-      <thead>
-        <tr>
-          <th scope="col">Покрытие</th>
-          <th scope="col">Металл</th>
-          <th scope="col">Цена за м²</th>
-          <th scope="col">Наличие</th>
-          <th scope="col">Цвета</th>
-        </tr>
-      </thead>
-      <tbody>
-        {model.coatings.map((c) => {
-          const cPrice = priceOf(model, c);
-          const cWarranty = warrantyOf(model, c);
-          return (
-            <tr>
-              <th scope="row">
-                <a href={linkTo(c.name, c.thickness)}>{c.name}</a>
-                <span>
-                  {c.class}
-                  {cWarranty ? `, гарантия ${cWarranty} лет` : ""}
-                </span>
-              </th>
-              <td>{formatThickness(c.thickness)}</td>
-              <td>{cPrice ? formatPrice(cPrice) : "по запросу"}</td>
-              <td>{stockInfo[c.stock].label}</td>
-              <td>
-                {c.colors
-                  .map((code) => colors[code]!)
-                  .map((info) =>
-                    info.label === info.name ? info.name : `${info.label} ${info.name}`,
-                  )
-                  .join(", ")}
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
-  </div>
+  <!-- На телефоне строки таблицы показываются карточками (catalog.css) -->
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Покрытие</th>
+        <th scope="col">Металл</th>
+        <th scope="col">Цена за м²</th>
+        <th scope="col">Наличие</th>
+        <th scope="col">Цвета</th>
+      </tr>
+    </thead>
+    <tbody>
+      {model.coatings.map((c) => {
+        const cPrice = priceOf(model, c);
+        const cWarranty = warrantyOf(model, c);
+        const cVariants = all.filter(
+          (v) => v.coating.name === c.name && v.coating.thickness === c.thickness,
+        );
+        return (
+          <tr>
+            <th scope="row">
+              <a href={linkTo(c.name, c.thickness)}>{c.name}</a>
+              <span>
+                {c.class}
+                {cWarranty ? `, гарантия ${cWarranty} лет` : ""}
+              </span>
+            </th>
+            <td class="coatings-table__metal">{formatThickness(c.thickness)}</td>
+            <td class="coatings-table__price">
+              {cPrice ? (
+                <>
+                  {formatPrice(cPrice)}
+                  <span class="coatings-table__unit"> за м²</span>
+                </>
+              ) : (
+                "по запросу"
+              )}
+            </td>
+            <td class:list={["coatings-table__stock", `coatings-table__stock_${c.stock}`]}>
+              {stockInfo[c.stock].label}
+            </td>
+            <td>
+              <ul class="coatings-table__colors">
+                {cVariants.map((v) => {
+                  const info = colors[v.color]!;
+                  const text = info.label === info.name ? info.name : `${info.label} ${info.name}`;
+                  return (
+                    <li>
+                      <a
+                        href={`${base}/${v.slug}`}
+                        class="coatings-table__swatch"
+                        style={`--swatch: ${info.hex}`}
+                        title={text}
+                      >
+                        <span class="sr-only">{text}</span>
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
 </section>
 
 <section class="other-models">

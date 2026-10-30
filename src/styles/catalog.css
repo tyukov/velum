@@ -424,7 +424,7 @@
   border: 0;
 }
 
-/* Таблица покрытий модели */
+/* Таблица покрытий модели: на телефоне каждая строка — карточка, с 48rem — обычная таблица */
 .coatings-table {
   margin: 3rem 0 0;
 }
@@ -434,53 +434,163 @@
   margin: 0 0 1rem;
 }
 
-.coatings-table__scroll {
-  overflow-x: auto;
+.coatings-table table,
+.coatings-table tbody {
+  display: block;
 }
 
-.coatings-table table {
-  width: 100%;
-  min-width: 40rem;
-  border-collapse: collapse;
-  font-size: 0.9375rem;
+.coatings-table thead {
+  display: none;
+}
+
+.coatings-table tr {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid #eee;
 }
 
 .coatings-table th,
 .coatings-table td {
-  padding: 0.75rem 0.75rem 0.75rem 0;
-  border-bottom: 1px solid #eee;
+  display: block;
+  padding: 0;
   text-align: left;
-  vertical-align: top;
+  font-size: 0.9375rem;
 }
 
-.coatings-table thead th {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: #666;
+.coatings-table tbody th {
+  flex: 1 0 100%;
+  font-weight: 400;
 }
 
 .coatings-table tbody th a {
   color: #111;
   font-weight: 600;
+  font-size: 1rem;
 }
 
 .coatings-table tbody th span {
   display: block;
   font-size: 0.8125rem;
+  color: #666;
+}
+
+.coatings-table__metal {
+  color: #555;
+}
+
+.coatings-table__price {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.coatings-table__unit {
   font-weight: 400;
   color: #666;
 }
 
-.coatings-table td:last-child {
-  color: #555;
-  font-size: 0.875rem;
-}
-
-.coatings-table tbody th {
-  min-width: 11rem;
-}
-
-.coatings-table td:nth-child(2),
-.coatings-table td:nth-child(3) {
+.coatings-table .coatings-table__stock {
+  font-size: 0.8125rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 1rem;
   white-space: nowrap;
+}
+
+.coatings-table__stock_atyrau {
+  background: #eef7ee;
+  color: #24572a;
+}
+
+.coatings-table__stock_order {
+  background: #fdf3e3;
+  color: #7a4d10;
+}
+
+.coatings-table td:last-child {
+  flex: 1 0 100%;
+}
+
+.coatings-table__colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin: 0.25rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.coatings-table__swatch {
+  display: block;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: var(--swatch);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 12%);
+  transition: box-shadow 0.15s ease;
+}
+
+.coatings-table__swatch:hover {
+  box-shadow:
+    inset 0 0 0 1px rgb(0 0 0 / 12%),
+    0 0 0 2px #fff,
+    0 0 0 4px #ebb683;
+}
+
+@media (min-width: 48rem) {
+  .coatings-table table {
+    display: table;
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .coatings-table thead {
+    display: table-header-group;
+  }
+
+  .coatings-table tbody {
+    display: table-row-group;
+  }
+
+  .coatings-table tr {
+    display: table-row;
+  }
+
+  .coatings-table th,
+  .coatings-table td {
+    display: table-cell;
+    padding: 0.875rem 1rem 0.875rem 0;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+  }
+
+  .coatings-table thead th {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #666;
+  }
+
+  .coatings-table tbody th {
+    min-width: 11rem;
+  }
+
+  .coatings-table__metal {
+    white-space: nowrap;
+  }
+
+  .coatings-table .coatings-table__stock {
+    background: none;
+    padding: 0.875rem 1rem 0.875rem 0;
+    font-size: 0.875rem;
+  }
+
+  .coatings-table__colors {
+    margin: 0;
+  }
+
+  /* «за м²» уже есть в заголовке столбца */
+  .coatings-table__unit {
+    display: none;
+  }
 }
