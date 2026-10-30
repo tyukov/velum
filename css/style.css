@@ -1,3 +1,22 @@
+/* Inter (self-hosted, OFL) */
+@font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url(../fonts/inter-cyrillic-wght-normal.woff2) format("woff2");
+    unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url(../fonts/inter-latin-wght-normal.woff2) format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 *,
 *::before,
 *::after {
@@ -8,17 +27,13 @@
 
 .page {
     margin: 0;
-    font: 16px/1.5 "Gilroy", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font: 16px/1.5 "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
  background-color: #fff;
     color: #333;
     -moz-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
-    text-size-adjust: 100% -webkit-animation-duration: 2s;
-    animation-duration: 2s;
-    -webkit-animation-fill-mode: both;
-    animation-fill-mode: both;
-    -webkit-animation-name: fadeIn;
-    animation-name: fadeIn;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
 }
 
 .wrap {
@@ -174,7 +189,7 @@ BUTTONS
 
 .btn {
     display: inline-block;
-    font-family: "Gotham Pro", "Gilroy", sans-serif;
+    font-family: "Inter", sans-serif;
     margin: 0;
     padding: 0;
     text-align: center;
@@ -220,7 +235,7 @@ BUTTONS
     text-align: center;
     display: block;
     font-size: 12px;
-    color: #777;
+    color: #666;
     margin: 10px 0;
 }
 
@@ -233,7 +248,7 @@ BUTTONS
 }
 
 .btn_theme_soft-sky {
-    font-family: "Gilroy", sans-serif;
+    font-family: "Inter", sans-serif;
     font-weight: 400;
     color: #3f84ec;
     background-color: rgb(255 255 255 / 70%);
@@ -253,7 +268,7 @@ BUTTONS
 
 .header-list__btn {
     background-color: #ffcc99;
-    font-family: "Gilroy", Arial, sans-serif;
+    font-family: "Inter", Arial, sans-serif;
     font-size: .875rem;
     font-weight: 500;
     color: #333;
@@ -298,7 +313,7 @@ PROMO-MESSAGE
 .promo-message .promo-header__subtitle {
     font-size: .875rem;
     margin: 0 0 .625rem;
-    color: #999;
+    color: #707070;
 }
 
 .promo-message .promo-header__title {
@@ -329,7 +344,7 @@ PROMO-MESSAGE
 }
 
 .promo-message .promo-header__text {
-    color: #777;
+    color: #666;
     font-size: .875rem;
     max-width: 440px;
     margin: 0 0 2rem;
@@ -422,6 +437,7 @@ PROMO-STEPS
 .promo-illustration__img {
     max-width: 100%;
     width: 100%;
+    height: auto;
     border-radius: 1rem
 }
 
@@ -438,7 +454,7 @@ PROMO-STEPS
 .promo-steps .promo-header__text {
     max-width: 30rem;
     margin: 0 0 1rem;
-    color: #777;
+    color: #666;
 }
 
 .steps-list {
@@ -473,7 +489,7 @@ PROMO-STEPS
 
 .steps-list__text {
     margin: 0;
-    color: #777;
+    color: #666;
 }
 
 /***
@@ -526,18 +542,18 @@ PROMO-FEATURES
 }
 
 .features-list__item_pos_first .features-list__illustration {
-    background-image: url(../img/bg1.jpeg);
+    background-image: url(../img/bg1.webp);
 }
 
 .features-list__item_pos_second .features-list__illustration {
-    background-image: url(../img/bg2.jpeg);
+    background-image: url(../img/bg2.webp);
     display: block;
     margin-left: 59%;
     margin-top: -20px;
 }
 
 .features-list__copy_pos_third .features-list__illustration {
-    background-image: url(../img/bg3.jpeg);
+    background-image: url(../img/bg3.webp);
     display: block;
     margin-left: 4%;
     margin-top: -185px;
@@ -590,7 +606,7 @@ PROMO-FEATURES
 
 .features-list__text {
     margin: 0;
-    color: #777;
+    color: #666;
 }
 
 /***
@@ -1103,7 +1119,7 @@ figure {
     }
     .promo__illustration {
         min-height: 800px;
-        background-image: url(../img/def.jpeg);
+        background-image: url(../img/def.webp);
         background-position: 50% 50%;
         flex: 0 0 50%;
         max-width: 50%;
@@ -1255,7 +1271,7 @@ figure {
 }
 
 .modal__box-title {
-    font-family: "Gilroy", sans-serif;
+    font-family: "Inter", sans-serif;
     font-weight: bold;
     font-size: 1.75rem;
     line-height: 1.23;
@@ -1263,7 +1279,7 @@ figure {
 }
 
 .modal__box-text {
-    font-family: "Gilroy", sans-serif;
+    font-family: "Inter", sans-serif;
     font-size: 1rem;
     line-height: 1.55;
     font-weight: 300;
@@ -1292,7 +1308,7 @@ textarea.modal__input {
 }
 
 .modal__input {
-    font-family: "Gilroy", Arial, sans-serif;
+    font-family: "Inter", Arial, sans-serif;
     position: relative;
     display: block;
     margin: 0 0 1.5rem;
@@ -1329,6 +1345,26 @@ textarea.modal__input {
 }
 
 /*MODAL VUSIAL*/
+
+.form-status {
+    margin: 1rem 0 0;
+}
+
+.close-modal:focus-visible,
+.btn:focus-visible,
+.modal__input:focus-visible {
+    outline: 2px solid #ebb683;
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
 
 .blocker {
     position: fixed;
@@ -1488,4 +1524,8 @@ textarea.modal__input {
         padding: 40px 45px;
      border-radius: 4px
     }
+}
+
+.promo-faq .promo-header__text a {
+    color: #ebb683;
 }

@@ -1,3 +1,22 @@
+/* Inter (self-hosted, OFL) */
+@font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url(../fonts/inter-cyrillic-wght-normal.woff2) format("woff2");
+    unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url(../fonts/inter-latin-wght-normal.woff2) format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 *,*::before,*::after{
 	 -webkit-box-sizing:border-box;
 	 -moz-box-sizing:border-box;
@@ -12,7 +31,7 @@
  .page{
 	 text-align:center;
 	 margin:20px 0;
-	 font:16px/1.5 "Gotham Pro", "Gilroy", sans-serif;
+	 font:16px/1.5 "Inter", sans-serif;
 	 background-color:#faf7f5;
 	 color:#333;
 	 -moz-text-size-adjust:100%;
@@ -66,7 +85,7 @@
 }
 h1,
 .h1 {
- font-family: "Gilroy", sans-serif;
+ font-family: "Inter", sans-serif;
  font-size: 2em;
 }
 .h1 {
@@ -74,7 +93,7 @@ h1,
 }
  .btn{
 	 display:inline-block;
-	 font-family:"Gotham Pro", "Gilroy", sans-serif;
+	 font-family:"Inter", sans-serif;
 	 margin:0 0 1rem;
 	 padding:0;
 	 text-align:center;
@@ -161,7 +180,7 @@ h1,
 	 fill: #c2c2c2;
 }
  .product__name {
-  font-family: "Gilroy", sans-serif;
+  font-family: "Inter", sans-serif;
 	 font-size: .875rem;
 	 font-weight: 600;
 }
@@ -192,14 +211,14 @@ h1,
   border-radius: 1000px;
  }
  .modal__box-title {
- font-family: "Gilroy", sans-serif;
+ font-family: "Inter", sans-serif;
  font-weight: bold;
  font-size: 1.75rem;
  line-height: 1.23;
  margin: 0 0 1rem;
  } 
  .modal__box-text {
-  font-family: "Gilroy", sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 1rem;
   line-height: 1.55;
     font-weight: 300;
@@ -226,7 +245,7 @@ h1,
   resize: none
  }
  .modal__input {
-  font-family: "Gilroy", Arial, sans-serif;
+  font-family: "Inter", Arial, sans-serif;
   position: relative;
     display: block;
     margin: 0 0 1.5rem;

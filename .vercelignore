@@ -1,0 +1,11 @@
+# Черновики и исходники, которые не нужны на сайте
+*.psd
+README.md
+DEPLOY.md
+index2.html
+index-test.html
+js-m.html
+modal.html
+bt.html
+kfg.svg
+img/d

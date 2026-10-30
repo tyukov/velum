@@ -27,7 +27,8 @@
  <!-- Modal HTML embedded directly into document -->
 
 <div id="ex1" class="modal">
-<form action="telegram.php" method="post">
+<form action="/api/send" method="post">
+  <input type="text" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
  <div class="modal__header">
   <h3 class="modal__box-title">Узнайте о старте реализации первым!</h3>
   <p class="modal__box-text">Мы оповестим Вас за несколько дней до старта реализации с помощью SMS уведомления</p>
@@ -53,7 +54,8 @@
 </div>
 
 <div id="ex2" class="modal">
-<form action="telegram.php" method="post">
+<form action="/api/send" method="post">
+  <input type="text" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
  <div class="modal__header">
   <h3 class="modal__box-title">Узнайте о старте реализации вторым!</h3>
   <p class="modal__box-text">Мы оповестим Вас за несколько дней до старта реализации с помощью SMS уведомления</p>
