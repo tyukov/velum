@@ -64,5 +64,9 @@ const ogImage = new URL("/og.jpg", site).href;
   </head>
   <body class={bodyClass}>
     <slot />
+    <!-- Скрипт сайта на всех страницах: при переходах без перезагрузки он уже загружен -->
+    <script>
+      import "../scripts/main.ts";
+    </script>
   </body>
 </html>

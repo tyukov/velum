@@ -1,0 +1,32 @@
+---
+// Страницы каталога: общая шапка, подвал и окно заявки
+import Base from "./Base.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import LeadModal from "../components/LeadModal.astro";
+import "../styles/style.css";
+import "../styles/catalog.css";
+
+interface Props {
+  title: string;
+  description: string;
+  path: string;
+  canonicalPath?: string;
+  /** Товар для заявки «Узнать стоимость» */
+  product?: string;
+}
+
+const { title, description, path, canonicalPath, product } = Astro.props;
+---
+
+<Base title={title} description={description} path={canonicalPath ?? path}>
+  <Header />
+  <main class="main catalog">
+    <div class="wrap catalog__wrap">
+      <slot />
+    </div>
+  </main>
+  <Footer />
+  <LeadModal id="ex1" title="Узнать стоимость" submitText="Отправить заявку" product={product} />
+  <LeadModal id="ex2" title="Заказать звонок" submitText="Заказать звонок" />
+</Base>

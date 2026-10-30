@@ -1,0 +1,50 @@
+---
+// Условная картинка листа металлочерепицы в выбранном цвете (фото появятся позже)
+interface Props {
+  hex: string;
+  label: string;
+  size?: "large" | "small";
+}
+
+const { hex, label, size = "large" } = Astro.props;
+const id = `tile-${hex.slice(1)}-${size}`;
+---
+
+<svg
+  class={`tile-visual tile-visual_${size}`}
+  viewBox="0 0 240 160"
+  role="img"
+  aria-label={label}
+  preserveAspectRatio="xMidYMid slice"
+>
+  <defs>
+    <pattern id={`${id}-p`} width="40" height="32" patternUnits="userSpaceOnUse">
+      <rect width="40" height="32" fill={hex}></rect>
+      <path d="M0 0 Q20 30 40 0 L40 32 L0 32 Z" fill="#000" fill-opacity="0.18"></path>
+      <path
+        d="M0 2 Q20 30 40 2"
+        fill="none"
+        stroke="#fff"
+        stroke-opacity="0.22"
+        stroke-width="2"
+      ></path>
+      <rect y="30" width="40" height="2" fill="#000" fill-opacity="0.25"></rect>
+    </pattern>
+    <linearGradient id={`${id}-g`} x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.18"></stop>
+      <stop offset="1" stop-color="#000" stop-opacity="0.18"></stop>
+    </linearGradient>
+  </defs>
+  <rect width="240" height="160" fill={`url(#${id}-p)`}></rect>
+  <rect width="240" height="160" fill={`url(#${id}-g)`}></rect>
+</svg>
+
+<style>
+  .tile-visual {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 1rem;
+    aspect-ratio: 3 / 2;
+  }
+</style>

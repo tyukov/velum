@@ -1,0 +1,199 @@
+---
+// Страница модели/варианта металлочерепицы: выбор покрытия, толщины и цвета
+import TileVisual from "./TileVisual.astro";
+import Breadcrumbs from "./Breadcrumbs.astro";
+import { colors } from "../../data/catalog/colors";
+import {
+  formatThickness,
+  metalTileModels,
+  variantsOf,
+  type Variant,
+} from "../../data/catalog/metal-tile";
+import { business } from "../../lib/business";
+
+interface Props {
+  variant: Variant;
+}
+
+const { variant } = Astro.props;
+const { model, coating, color } = variant;
+const base = `/catalog/metallocherepitsa/${model.slug}`;
+const all = variantsOf(model);
+const colorInfo = colors[color]!;
+
+// Ссылка на вариант с нужным покрытием/толщиной: цвет сохраняем, если он есть
+const linkTo = (name: string, thickness?: number) => {
+  const sameName = all.filter((v) => v.coating.name === name);
+  const pool = thickness ? sameName.filter((v) => v.coating.thickness === thickness) : sameName;
+  const pick = pool.find((v) => v.color === color) ?? pool[0]!;
+  return `${base}/${pick.slug}`;
+};
+
+const coatingNames = [...new Set(model.coatings.map((c) => c.name))];
+const thicknesses = model.coatings.filter((c) => c.name === coating.name);
+const colorOptions = all.filter(
+  (v) => v.coating.name === coating.name && v.coating.thickness === coating.thickness,
+);
+const otherModels = metalTileModels.filter((m) => m.slug !== model.slug);
+---
+
+<Breadcrumbs
+  items={[
+    { name: "Главная", href: "/" },
+    { name: "Каталог", href: "/catalog" },
+    { name: "Металлочерепица", href: "/catalog/metallocherepitsa" },
+    { name: model.name, href: base },
+  ]}
+/>
+
+<article class="product-view">
+  <div class="product-view__visual">
+    <TileVisual hex={colorInfo.hex} label={`Цвет ${colorInfo.label} ${colorInfo.name}`} />
+    <p class="product-view__note">
+      Цвет на экране может отличаться от настоящего. Образцы покажем в офисе.
+    </p>
+  </div>
+
+  <div class="product-view__info">
+    <h1 class="product-view__title">
+      Металлочерепица {model.name}
+      <span class="product-view__subtitle">
+        {coating.name}, {formatThickness(coating.thickness)}, {colorInfo.label}
+        {colorInfo.label !== colorInfo.name && ` ${colorInfo.name}`}
+      </span>
+    </h1>
+
+    <ul class="product-view__facts">
+      <li>
+        <b>{coating.warranty} лет</b> гарантия
+      </li>
+      <li>
+        <b>{coating.class}</b> класс покрытия
+      </li>
+      <li>
+        <b>{model.width} мм</b> ширина листа
+      </li>
+    </ul>
+
+    <div class="picker" role="group" aria-label="Покрытие">
+      <p class="picker__label">Покрытие</p>
+      <div class="picker__options">
+        {coatingNames.map((name) => (
+          <a
+            href={linkTo(name)}
+            class:list={["picker__chip", { picker__chip_active: name === coating.name }]}
+            aria-current={name === coating.name ? "true" : undefined}
+          >
+            {name}
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="picker" role="group" aria-label="Толщина металла">
+      <p class="picker__label">Толщина металла</p>
+      <div class="picker__options">
+        {thicknesses.map((c) => (
+          <a
+            href={linkTo(c.name, c.thickness)}
+            class:list={[
+              "picker__chip",
+              { picker__chip_active: c.thickness === coating.thickness },
+            ]}
+            aria-current={c.thickness === coating.thickness ? "true" : undefined}
+          >
+            {formatThickness(c.thickness)}
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="picker" role="group" aria-label="Цвет">
+      <p class="picker__label">
+        Цвет:{" "}
+        <span>
+          {colorInfo.label}
+          {colorInfo.label !== colorInfo.name && `, ${colorInfo.name}`}
+        </span>
+      </p>
+      <div class="picker__options picker__options_colors">
+        {colorOptions.map((v) => {
+          const info = colors[v.color]!;
+          const active = v.color === color;
+          return (
+            <a
+              href={`${base}/${v.slug}`}
+              class:list={["picker__swatch", { picker__swatch_active: active }]}
+              style={`--swatch: ${info.hex}`}
+              title={`${info.label} ${info.name}`}
+              aria-label={`${info.label} ${info.name}`}
+              aria-current={active ? "true" : undefined}
+            />
+          );
+        })}
+      </div>
+    </div>
+
+    <div class="product-view__actions">
+      <a href="#ex1" rel="modal:open" class="btn btn_theme_grab btn_size_l product-view__btn">
+        <span class="btn__text">Узнать стоимость</span>
+      </a>
+      <a
+        href={`tel:${business.phoneE164}`}
+        class="btn btn_theme_outline-grab btn_size_l product-view__btn"
+      >
+        <span class="btn__text">Позвонить</span>
+      </a>
+    </div>
+  </div>
+</article>
+
+<section class="product-details">
+  <div class="product-details__text">
+    <h2>О модели</h2>
+    {model.description.map((p) => (
+      <p>{p}</p>
+    ))}
+    <p>
+      Покрытие {coating.name} относится к классу «{coating.class}»: толщина полимерного слоя{" "}
+      {coating.layer}, гарантия производителя {coating.warranty} лет.
+    </p>
+  </div>
+  <div class="product-details__specs">
+    <h2>Характеристики</h2>
+    <dl>
+      <dt>Производитель</dt>
+      <dd>Металл Профиль</dd>
+      <dt>Модель</dt>
+      <dd>{model.name}</dd>
+      <dt>Покрытие</dt>
+      <dd>{coating.name}</dd>
+      <dt>Класс покрытия</dt>
+      <dd>{coating.class}</dd>
+      <dt>Толщина полимерного слоя</dt>
+      <dd>{coating.layer}</dd>
+      <dt>Толщина металла</dt>
+      <dd>{formatThickness(coating.thickness)}</dd>
+      <dt>Цвет</dt>
+      <dd>
+        {colorInfo.label}
+        {colorInfo.label !== colorInfo.name && `, ${colorInfo.name}`}
+      </dd>
+      <dt>Полная ширина листа</dt>
+      <dd>{model.width} мм</dd>
+      <dt>Гарантия</dt>
+      <dd>{coating.warranty} лет</dd>
+    </dl>
+  </div>
+</section>
+
+<section class="other-models">
+  <h2>Другие модели металлочерепицы</h2>
+  <ul class="other-models__list">
+    {otherModels.map((m) => (
+      <li>
+        <a href={`/catalog/metallocherepitsa/${m.slug}`}>{m.name}</a>
+      </li>
+    ))}
+  </ul>
+</section>
