@@ -1,6 +1,7 @@
 // Модальные окна, маска телефона, FAQ и отправка заявок без перезагрузки.
 // Сайт переходит между страницами без перезагрузки (ClientRouter): модуль выполняется один раз,
 // а всё, что привязано к элементам страницы, подключается заново на событии astro:page-load.
+import type { TransitionBeforePreparationEvent } from "astro:transitions/client";
 import { formatPhone } from "../lib/phone";
 
 // ---------- Cloudflare Turnstile (если на сайте задан ключ) ----------
@@ -112,6 +113,26 @@ document.addEventListener("astro:before-swap", () => {
   current?.blocker.remove();
   current = null;
   document.body.style.overflow = "";
+});
+
+// ---------- Выбор характеристик товара без прыжка наверх ----------
+// Покрытие, толщина, цвет и исполнение — ссылки на страницы вариантов. Обычно после перехода
+// страница прокручивается наверх; при выборе в карточке товара оставляем прокрутку на месте.
+let keepScrollY: number | null = null;
+
+document.addEventListener("astro:before-preparation", (e: TransitionBeforePreparationEvent) => {
+  keepScrollY = e.sourceElement?.closest(".picker") ? window.scrollY : null;
+});
+
+const restoreScroll = () => {
+  if (keepScrollY !== null && window.scrollY !== keepScrollY)
+    window.scrollTo({ top: keepScrollY, behavior: "instant" });
+};
+document.addEventListener("astro:after-swap", restoreScroll);
+// Ещё раз после загрузки страницы: если стили подгрузились позже, высота страницы могла измениться
+document.addEventListener("astro:page-load", () => {
+  restoreScroll();
+  keepScrollY = null;
 });
 
 // ---------- Маска телефона: +7 (999) 999-99-99 ----------

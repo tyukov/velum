@@ -200,6 +200,64 @@ test("переходы между страницами без перезагру
   await expect(phone).toHaveValue("+7 (701) 123-45-67");
 });
 
+test("все переходы по сайту без перезагрузки", async ({ page }) => {
+  const sameDocument = () =>
+    page.evaluate(() => (window as unknown as { marker?: number }).marker === 1);
+  const steps: [string, () => Promise<void>, RegExp][] = [
+    [
+      "подвал → каталог",
+      () => page.locator("footer").getByRole("link", { name: "Каталог" }).click(),
+      /\/catalog$/,
+    ],
+    [
+      "каталог → раздел",
+      () => page.locator("main a[href='/catalog/metallocherepitsa']").first().click(),
+      /\/metallocherepitsa$/,
+    ],
+    [
+      "раздел → модель",
+      () =>
+        page
+          .getByRole("link", { name: /Монтекристо/ })
+          .first()
+          .click(),
+      /\/montecristo$/,
+    ],
+    [
+      "другие модели",
+      () => page.locator(".other-models").getByRole("link", { name: "Каскад" }).click(),
+      /\/kaskad$/,
+    ],
+    [
+      "таблица покрытий → вариант",
+      () => page.locator(".coatings-table__swatch").first().click(),
+      /\/kaskad\/.+/,
+    ],
+    [
+      "хлебные крошки",
+      () => page.locator(".breadcrumbs").getByRole("link", { name: "Металлочерепица" }).click(),
+      /\/metallocherepitsa$/,
+    ],
+    [
+      "подвал → политика",
+      () =>
+        page
+          .locator("footer")
+          .getByRole("link", { name: /Политика/ })
+          .click(),
+      /\/privacy$/,
+    ],
+    ["логотип → главная", () => page.locator("a.logo").first().click(), /\/$/],
+  ];
+  await page.goto("/");
+  await page.evaluate(() => ((window as unknown as { marker: number }).marker = 1));
+  for (const [name, go, url] of steps) {
+    await go();
+    await expect(page, name).toHaveURL(url);
+    expect(await sameDocument(), `${name}: страница перезагрузилась`).toBe(true);
+  }
+});
+
 test.describe("каталог металлочерепицы", () => {
   test("с главной в раздел и на страницу модели", async ({ page }) => {
     await page.goto("/");
@@ -229,6 +287,24 @@ test.describe("каталог металлочерепицы", () => {
     await expect(page).toHaveURL(/polyester-0-4-ral-3005$/);
     await expect(page.locator("h1")).toContainText("Ламонтерра-X");
     await expect(page.locator(".product-view__subtitle")).toContainText("0,4 мм");
+  });
+
+  test("выбор цвета и покрытия не прокручивает страницу наверх", async ({ page }) => {
+    await page.goto("/catalog/metallocherepitsa/lamonterra-x");
+    // Кликаем и проверяем, что прокрутка осталась той же, что была перед кликом
+    const pickAndKeepScroll = async (group: string, name: string | RegExp, url: RegExp) => {
+      const link = page.getByRole("group", { name: group }).getByRole("link", { name });
+      // По центру экрана, чтобы ссылку не закрывала липкая шапка
+      await link.evaluate((el) => el.scrollIntoView({ block: "center" }));
+      const before = await page.evaluate(() => window.scrollY);
+      expect(before).toBeGreaterThan(100);
+      // Нативный клик: Playwright перед своим кликом сам прокручивает страницу из-под липкой шапки
+      await link.evaluate((el: HTMLElement) => el.click());
+      await expect(page).toHaveURL(url);
+      await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(before);
+    };
+    await pickAndKeepScroll("Цвет", "RAL 3005 Красное вино", /normanmp-0-5-ral-3005$/);
+    await pickAndKeepScroll("Покрытие", /VikingMP E/, /vikingmp-e-0-5-ral-3005$/);
   });
 
   test("таблица покрытий: цвета кружками ведут на варианты, на телефоне без прокрутки вбок", async ({
