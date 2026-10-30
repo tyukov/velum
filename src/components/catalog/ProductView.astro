@@ -64,7 +64,6 @@ const productLd = {
   "@type": "Product",
   name: productName,
   description: model.summary,
-  brand: { "@type": "Brand", name: "Металл Профиль" },
   color: `${colorInfo.label} ${colorInfo.name}`,
   material: "Оцинкованная сталь с полимерным покрытием",
   url: new URL(Astro.url.pathname, site).href,
@@ -205,7 +204,7 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
           {formatPrice(price)} <span>за м²</span>
         </p>
         <p class="product-view__price-note">
-          Цена завода с НДС на {PRICE_DATE}. На заказы до 50 м² действует наценка.
+          Цена с НДС, актуальна на {PRICE_DATE}. На заказы до 50 м² действует наценка.
           {model.priceNote && ` ${model.priceNote}`} Точную сумму с доставкой рассчитает менеджер.
         </p>
       </div>
@@ -240,8 +239,6 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
   <div class="product-details__specs">
     <h2>Характеристики</h2>
     <dl>
-      <dt>Производитель</dt>
-      <dd>Металл Профиль</dd>
       <dt>Модель</dt>
       <dd>{model.name}</dd>
       <dt>Покрытие</dt>
