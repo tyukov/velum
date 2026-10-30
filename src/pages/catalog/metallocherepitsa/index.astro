@@ -6,6 +6,7 @@ import { colors } from "../../../data/catalog/colors";
 import {
   catalogEntries,
   formatPrice,
+  maxWarranty,
   minPrice,
   variantsOf,
 } from "../../../data/catalog/metal-tile";
@@ -35,9 +36,9 @@ const cardColor = (index: number) => {
   <header class="catalog-head">
     <h1>Металлочерепица</h1>
     <p>
-      Металлочерепица: четыре модели (Монтерроса — в четырёх исполнениях), десять видов покрытия и
-      больше тридцати цветов. Выберите модель, а на её странице — покрытие, толщину и цвет. Цены за
-      м² указаны с НДС, точную сумму с доставкой под ваш объём рассчитает менеджер.
+      Металлочерепица: {entries.length} моделей, больше десяти видов покрытия и больше тридцати
+      цветов. Выберите модель, а на её странице — покрытие, толщину и цвет. Цены за м² указаны с
+      НДС, точную сумму с доставкой под ваш объём рассчитает менеджер.
     </p>
   </header>
 
@@ -65,7 +66,7 @@ const cardColor = (index: number) => {
             <p class="model-card__meta">
               {entry.models.length > 1 && `${entry.models.length} исполнения · `}
               {new Set(coatings.map((c) => c.name)).size} покрытий · {colorCount} цветов · гарантия
-              до {Math.max(...coatings.map((c) => c.warranty))} лет
+              до {maxWarranty(entry.models)} лет
             </p>
           </a>
         </li>

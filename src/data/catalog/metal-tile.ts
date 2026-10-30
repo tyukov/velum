@@ -1,10 +1,12 @@
-// Металлочерепица: ассортимент по прайс-листу поставщика от 21.09.2026
-// (основной прайс и перечень цветов). Цены — за м² в тенге с НДС.
-// Название поставщика на сайте не показываем.
-
-export const PRICE_DATE = "21.09.2026";
+// Металлочерепица по прайсам двух поставщиков: П1 (прайс от 21.09.2026, основной прайс
+// и перечень цветов) и П2 (прайс от 12.10.2026). Цены — за м² в тенге с НДС.
+// Названия поставщиков на сайте не показываем; расшифровка П1/П2 — у менеджера.
 
 import { colorSlug } from "./colors";
+import { resolvePrice } from "../../lib/pricing";
+
+/** Даты прайсов поставщиков */
+export const PRICE_DATES = { p1: "21.09.2026", p2: "12.10.2026" } as const;
 
 export type CoatingClass = "Премиум" | "Премьер" | "Стандарт" | "Эконом";
 
@@ -162,6 +164,27 @@ const coatings = {
     colors: ["1014", "1015", "2004", "3005", "5005", "6005", "7004", "7024", "8017", "9003"],
     stock: "atyrau",
   },
+  // П2: матовое = VikingMP, глянцевое = полиэстер 0,45; цвета по прайсу П2
+  p2Matte: {
+    id: "vikingmp",
+    name: "VikingMP",
+    class: "Стандарт",
+    layer: "30 мкм",
+    thickness: 0.45,
+    warranty: 10,
+    colors: ["7024", "8017"],
+    stock: "atyrau",
+  },
+  p2Glossy: {
+    id: "polyester",
+    name: "Полиэстер",
+    class: "Стандарт",
+    layer: "25 мкм",
+    thickness: 0.45,
+    warranty: 5,
+    colors: ["1015", "3005", "5005", "5021", "6005", "7004", "7024", "8017", "9003"],
+    stock: "atyrau",
+  },
 } satisfies Record<string, Coating>;
 
 export interface Family {
@@ -178,20 +201,60 @@ export interface Model {
   name: string;
   /** Исполнения одной металлочерепицы (Монтерроса A/S/M/X) объединяются в одну модель */
   family?: Family;
-  /** Полная ширина листа, мм */
-  width: number;
+  /** Полная ширина листа, мм (если известна) */
+  width?: number;
   /** Короткое описание для карточки */
   summary: string;
   description: string[];
   coatings: Coating[];
-  /** Цена за м², ₸ с НДС: ключ — priceKey(покрытие) */
+  /** Цены П1 за м², ₸ с НДС: ключ — priceKey(покрытие) */
   prices: Record<string, number>;
+  /** Цены П2 за тот же товар (если он есть и у второго поставщика) */
+  prices2?: Record<string, number>;
   /** Примечание к цене из прайса */
   priceNote?: string;
 }
 
 export const priceKey = (coating: Coating) => `${coating.id}@${coating.thickness}`;
-export const priceOf = (model: Model, coating: Coating) => model.prices[priceKey(coating)];
+/** Цены обоих поставщиков за вариант (для менеджера) */
+export const supplierPrices = (model: Model, coating: Coating) => ({
+  p1: model.prices[priceKey(coating)],
+  p2: model.prices2?.[priceKey(coating)],
+});
+
+/** Цена на сайте по правилу двух поставщиков */
+export const priceOf = (model: Model, coating: Coating) => {
+  const { p1, p2 } = supplierPrices(model, coating);
+  return resolvePrice(p1, p2);
+};
+
+/**
+ * Гарантия на сайте: если вариант есть у обоих поставщиков, гарантию не показываем
+ * (неизвестно, у кого возьмём); если только у одного — показываем.
+ */
+export const warrantyOf = (model: Model, coating: Coating): number | undefined => {
+  const { p1, p2 } = supplierPrices(model, coating);
+  return p1 !== undefined && p2 !== undefined ? undefined : coating.warranty;
+};
+
+/** Наибольшая показываемая гарантия среди покрытий моделей */
+export const maxWarranty = (models: Model[]) =>
+  Math.max(0, ...models.flatMap((m) => m.coatings.map((c) => warrantyOf(m, c) ?? 0)));
+
+/** Для менеджера в заявке: цены поставщиков, «П1: 3 280 ₸, П2: 3 300 ₸» */
+export const supplyNote = (model: Model, coating: Coating) => {
+  const { p1, p2 } = supplierPrices(model, coating);
+  return [
+    p1 !== undefined && `П1: ${formatPrice(p1)}`,
+    p2 !== undefined && `П2: ${formatPrice(p2)}`,
+  ]
+    .filter(Boolean)
+    .join(", ");
+};
+
+/** Дата цены: прайс поставщика, чья цена учтена (если оба — более свежий) */
+export const priceDateOf = (model: Model, coating: Coating) =>
+  supplierPrices(model, coating).p2 !== undefined ? PRICE_DATES.p2 : PRICE_DATES.p1;
 
 const c = coatings;
 
@@ -228,6 +291,11 @@ export const metalTileModels: Model[] = [
       "vikingmp@0.45": 3280,
       "polyester@0.45": 3115,
       "polyester@0.4": 2405,
+    },
+    // П2 продаёт этот же профиль как «СуперМонтерей»
+    prices2: {
+      "vikingmp@0.45": 3300,
+      "polyester@0.45": 3075,
     },
   },
   {
@@ -360,6 +428,48 @@ export const metalTileModels: Model[] = [
     },
     priceNote: "Для высоты ступеньки 30 и 35 мм цена выше на 55 и 85 ₸/м² соответственно.",
   },
+  {
+    slug: "kaskad",
+    name: "Каскад",
+    summary: "Металлочерепица в наличии в Атырау: матовое и глянцевое покрытие.",
+    description: [
+      "Каскад — металлочерепица, которая есть на складе в Атырау. Выпускается с матовым покрытием VikingMP и глянцевым полиэстером, толщина металла 0,45 мм.",
+    ],
+    coatings: [c.p2Matte, c.p2Glossy],
+    prices: {},
+    prices2: {
+      "vikingmp@0.45": 3300,
+      "polyester@0.45": 3075,
+    },
+  },
+  {
+    slug: "stella",
+    name: "Stella",
+    summary: "Модульная металлочерепица в наличии в Атырау.",
+    description: [
+      "Stella — модульная металлочерепица: листы короткие, их удобно привезти и поднять на крышу. Есть на складе в Атырау с матовым покрытием VikingMP и глянцевым полиэстером, толщина металла 0,45 мм.",
+    ],
+    coatings: [c.p2Matte, c.p2Glossy],
+    prices: {},
+    prices2: {
+      "vikingmp@0.45": 3300,
+      "polyester@0.45": 3075,
+    },
+  },
+  {
+    slug: "como",
+    name: "Como",
+    summary: "Модульная металлочерепица в наличии в Атырау.",
+    description: [
+      "Como — модульная металлочерепица: листы короткие, их удобно привезти и поднять на крышу. Есть на складе в Атырау с матовым покрытием VikingMP и глянцевым полиэстером, толщина металла 0,45 мм.",
+    ],
+    coatings: [c.p2Matte, c.p2Glossy],
+    prices: {},
+    prices2: {
+      "vikingmp@0.45": 3300,
+      "polyester@0.45": 3075,
+    },
+  },
 ];
 
 export interface Variant {
@@ -425,6 +535,6 @@ export const formatPrice = (value: number) =>
 
 /** Минимальная цена за м² среди всех покрытий моделей */
 export const minPrice = (models: Model[]) =>
-  Math.min(...models.flatMap((m) => Object.values(m.prices)));
+  Math.min(...models.flatMap((m) => m.coatings.map((c) => priceOf(m, c) ?? Infinity)));
 
 export const formatThickness = (t: number) => `${String(t).replace(".", ",")} мм`;

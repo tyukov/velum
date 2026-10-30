@@ -14,9 +14,11 @@ interface Props {
   canonicalPath?: string;
   /** Товар для заявки «Узнать стоимость» */
   product?: string;
+  /** Цены поставщиков для менеджера */
+  supply?: string;
 }
 
-const { title, description, path, canonicalPath, product } = Astro.props;
+const { title, description, path, canonicalPath, product, supply } = Astro.props;
 ---
 
 <Base title={title} description={description} path={canonicalPath ?? path}>
@@ -27,6 +29,12 @@ const { title, description, path, canonicalPath, product } = Astro.props;
     </div>
   </main>
   <Footer />
-  <LeadModal id="ex1" title="Узнать стоимость" submitText="Отправить заявку" product={product} />
+  <LeadModal
+    id="ex1"
+    title="Узнать стоимость"
+    submitText="Отправить заявку"
+    product={product}
+    supply={supply}
+  />
   <LeadModal id="ex2" title="Заказать звонок" submitText="Заказать звонок" />
 </Base>

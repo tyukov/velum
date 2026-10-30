@@ -8,9 +8,11 @@ interface Props {
   withMessage?: boolean;
   /** Товар, о котором спрашивают: уходит в заявку скрытым полем */
   product?: string;
+  /** Для менеджера: цены поставщиков по этому товару (П1/П2), в заявку скрытым полем */
+  supply?: string;
 }
 
-const { id, title, submitText, withMessage = false, product } = Astro.props;
+const { id, title, submitText, withMessage = false, product, supply } = Astro.props;
 ---
 
 <div id={id} class="modal">
@@ -24,6 +26,7 @@ const { id, title, submitText, withMessage = false, product } = Astro.props;
       aria-hidden="true"
     />
     {product && <input type="hidden" name="product" value={product} />}
+    {supply && <input type="hidden" name="supply" value={supply} />}
     <div class="modal__header">
       <h2 class="modal__box-title">{title}</h2>
       <p class="modal__box-text">

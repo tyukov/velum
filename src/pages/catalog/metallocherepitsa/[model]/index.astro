@@ -5,7 +5,9 @@ import {
   defaultVariant,
   formatPrice,
   metalTileModels,
+  maxWarranty,
   minPrice,
+  supplyNote,
   type Model,
 } from "../../../../data/catalog/metal-tile";
 
@@ -15,14 +17,15 @@ export function getStaticPaths() {
 
 const { model } = Astro.props as { model: Model };
 const variant = defaultVariant(model);
-const warranties = model.coatings.map((c) => c.warranty);
+const warranty = maxWarranty([model]);
 ---
 
 <CatalogLayout
   title={`Металлочерепица ${model.name} в Атырау — цвета и покрытия | Velum`}
-  description={`Металлочерепица ${model.name}: от ${formatPrice(minPrice([model]))} за м², ${model.coatings.length} вариантов покрытия, гарантия от ${Math.min(...warranties)} до ${Math.max(...warranties)} лет. Подбор цвета и расчёт стоимости в Velum, Атырау.`}
+  description={`Металлочерепица ${model.name}: от ${formatPrice(minPrice([model]))} за м², ${model.coatings.length} вариантов покрытия, гарантия до ${warranty} лет. Подбор цвета и расчёт стоимости в Velum, Атырау.`}
   path={`/catalog/metallocherepitsa/${model.slug}`}
   product={`Металлочерепица ${model.name}`}
+  supply={supplyNote(model, variant.coating)}
 >
   <ProductView variant={variant} />
 </CatalogLayout>

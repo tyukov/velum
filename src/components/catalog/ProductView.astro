@@ -9,8 +9,10 @@ import {
   familyOf,
   formatPrice,
   formatThickness,
-  PRICE_DATE,
+  priceDateOf,
   priceOf,
+  supplierPrices,
+  warrantyOf,
   stockInfo,
   variantsOf,
   type Model,
@@ -58,6 +60,7 @@ const versionLink = (m: Model) => {
   return `/catalog/metallocherepitsa/${m.slug}/${pick.slug}`;
 };
 const price = priceOf(model, coating);
+const warranty = warrantyOf(model, coating);
 const stock = stockInfo[coating.stock];
 // Покрытия, которые есть в Атырау (хотя бы в одной толщине)
 const inStockNames = new Set(model.coatings.filter((c) => c.stock === "atyrau").map((c) => c.name));
@@ -119,15 +122,19 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
     </p>
 
     <ul class="product-view__facts">
-      <li>
-        <b>{coating.warranty} лет</b> гарантия
-      </li>
+      {warranty && (
+        <li>
+          <b>{warranty} лет</b> гарантия
+        </li>
+      )}
       <li>
         <b>{coating.class}</b> класс покрытия
       </li>
-      <li>
-        <b>{model.width} мм</b> ширина листа
-      </li>
+      {model.width && (
+        <li>
+          <b>{model.width} мм</b> ширина листа
+        </li>
+      )}
     </ul>
 
     {model.family && (
@@ -225,8 +232,10 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
           {formatPrice(price)} <span>за м²</span>
         </p>
         <p class="product-view__price-note">
-          Цена с НДС, актуальна на {PRICE_DATE}. На заказы до 50 м² действует наценка.
-          {model.priceNote && ` ${model.priceNote}`} Точную сумму с доставкой рассчитает менеджер.
+          Цена с НДС, актуальна на {priceDateOf(model, coating)}.
+          {supplierPrices(model, coating).p1 !== undefined &&
+            ` На заказы до 50 м² действует наценка.${model.priceNote ? ` ${model.priceNote}` : ""}`}{" "}
+          Точную сумму с доставкой рассчитает менеджер.
         </p>
       </div>
     )}
@@ -254,7 +263,8 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
     ))}
     <p>
       Покрытие {coating.name} относится к классу «{coating.class}»: толщина полимерного слоя{" "}
-      {coating.layer}, гарантия производителя {coating.warranty} лет.
+      {coating.layer}
+      {warranty ? `, гарантия ${warranty} лет` : ""}.
     </p>
   </div>
   <div class="product-details__specs">
@@ -275,10 +285,18 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
         {colorInfo.label}
         {colorInfo.label !== colorInfo.name && `, ${colorInfo.name}`}
       </dd>
-      <dt>Полная ширина листа</dt>
-      <dd>{model.width} мм</dd>
-      <dt>Гарантия</dt>
-      <dd>{coating.warranty} лет</dd>
+      {model.width && (
+        <>
+          <dt>Полная ширина листа</dt>
+          <dd>{model.width} мм</dd>
+        </>
+      )}
+      {warranty && (
+        <>
+          <dt>Гарантия</dt>
+          <dd>{warranty} лет</dd>
+        </>
+      )}
       {price && (
         <>
           <dt>Цена за м²</dt>

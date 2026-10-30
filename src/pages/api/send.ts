@@ -54,6 +54,7 @@ export const POST: APIRoute = async ({ request, redirect, clientAddress }) => {
   const phone = formatPhone(field(form, "user_phone", 30));
   const message = field(form, "user_message");
   const product = field(form, "product", 300);
+  const supply = field(form, "supply", 200);
   const page = field(form, "page", 300);
 
   if (!name) return reply(request, redirect, "Укажите имя", 400);
@@ -66,6 +67,7 @@ export const POST: APIRoute = async ({ request, redirect, clientAddress }) => {
     `<b>Имя:</b> ${name}`,
     `<b>Телефон:</b> ${phone}`,
     product && `<b>Товар:</b> ${product}`,
+    supply && `<b>Цены поставщиков:</b> ${supply}`,
     message && `<b>Сообщение:</b> ${message}`,
     page && `<b>Страница:</b> ${page}`,
   ]
