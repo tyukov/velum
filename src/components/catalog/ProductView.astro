@@ -22,9 +22,11 @@ import { business } from "../../lib/business";
 
 interface Props {
   variant: Variant;
+  /** Страница модели (а не варианта): разметка ProductGroup со всеми вариантами */
+  isModelPage?: boolean;
 }
 
-const { variant } = Astro.props;
+const { variant, isModelPage = false } = Astro.props;
 const { model, coating, color } = variant;
 const base = `/catalog/metallocherepitsa/${model.slug}`;
 const all = variantsOf(model);
@@ -66,26 +68,50 @@ const stock = stockInfo[coating.stock];
 const inStockNames = new Set(model.coatings.filter((c) => c.stock === "atyrau").map((c) => c.name));
 const site = Astro.site ?? new URL("https://velum.kz");
 const productName = `Металлочерепица ${model.name} ${coating.name} ${formatThickness(coating.thickness)}, ${colorInfo.label}`;
-const productLd = {
-  "@context": "https://schema.org",
-  "@type": "Product",
-  name: productName,
-  description: model.summary,
-  color: `${colorInfo.label} ${colorInfo.name}`,
-  material: "Оцинкованная сталь с полимерным покрытием",
-  url: new URL(Astro.url.pathname, site).href,
-  ...(price && {
-    offers: {
-      "@type": "Offer",
-      price,
-      priceCurrency: "KZT",
-      availability:
-        coating.stock === "atyrau" ? "https://schema.org/InStock" : "https://schema.org/BackOrder",
-      unitText: "м²",
-      seller: { "@type": "Organization", name: business.name },
-    },
-  }),
+const modelUrl = new URL(base, site).href;
+// Вариант для разметки: название, цвет, цена и наличие
+const variantLd = (v: Variant) => {
+  const info = colors[v.color]!;
+  const vPrice = priceOf(model, v.coating);
+  return {
+    "@type": "Product",
+    name: `Металлочерепица ${model.name} ${v.coating.name} ${formatThickness(v.coating.thickness)}, ${info.label}`,
+    url: new URL(`${base}/${v.slug}`, site).href,
+    color: `${info.label} ${info.name}`,
+    material: `Оцинкованная сталь ${formatThickness(v.coating.thickness)}, покрытие ${v.coating.name}`,
+    ...(vPrice && {
+      offers: {
+        "@type": "Offer",
+        price: vPrice,
+        priceCurrency: "KZT",
+        availability:
+          v.coating.stock === "atyrau"
+            ? "https://schema.org/InStock"
+            : "https://schema.org/BackOrder",
+        seller: { "@type": "Organization", name: business.name },
+      },
+    }),
+  };
 };
+// Страница модели — ProductGroup со всеми вариантами; страница варианта — Product этой группы
+const productLd = isModelPage
+  ? {
+      "@context": "https://schema.org",
+      "@type": "ProductGroup",
+      "@id": modelUrl,
+      name: `Металлочерепица ${model.name}`,
+      description: model.summary,
+      url: modelUrl,
+      productGroupID: model.slug,
+      variesBy: ["https://schema.org/color", "https://schema.org/material"],
+      hasVariant: all.map(variantLd),
+    }
+  : {
+      "@context": "https://schema.org",
+      ...variantLd(variant),
+      description: model.summary,
+      isVariantOf: { "@type": "ProductGroup", "@id": modelUrl },
+    };
 
 const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug === model.slug));
 ---
@@ -304,6 +330,51 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
         </>
       )}
     </dl>
+  </div>
+</section>
+
+<section class="coatings-table">
+  <h2>Покрытия, цвета и цены {model.name}</h2>
+  <div class="coatings-table__scroll">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Покрытие</th>
+          <th scope="col">Металл</th>
+          <th scope="col">Цена за м²</th>
+          <th scope="col">Наличие</th>
+          <th scope="col">Цвета</th>
+        </tr>
+      </thead>
+      <tbody>
+        {model.coatings.map((c) => {
+          const cPrice = priceOf(model, c);
+          const cWarranty = warrantyOf(model, c);
+          return (
+            <tr>
+              <th scope="row">
+                <a href={linkTo(c.name, c.thickness)}>{c.name}</a>
+                <span>
+                  {c.class}
+                  {cWarranty ? `, гарантия ${cWarranty} лет` : ""}
+                </span>
+              </th>
+              <td>{formatThickness(c.thickness)}</td>
+              <td>{cPrice ? formatPrice(cPrice) : "по запросу"}</td>
+              <td>{stockInfo[c.stock].label}</td>
+              <td>
+                {c.colors
+                  .map((code) => colors[code]!)
+                  .map((info) =>
+                    info.label === info.name ? info.name : `${info.label} ${info.name}`,
+                  )
+                  .join(", ")}
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
   </div>
 </section>
 
