@@ -257,3 +257,26 @@ test("цены по прайсу: вариант и раздел", async ({ page
   await expect(page.locator(".model-card", { hasText: "Ламонтерра-X" })).toContainText("от 2 405");
   await expect(page.locator(".model-card", { hasText: "Монтерроса" })).toContainText("от 3 090");
 });
+
+test("наличие: полиэстер и VikingMP в Атырау, остальное под заказ", async ({ page }) => {
+  await page.goto("/catalog/metallocherepitsa/lamonterra-x/polyester-0-45-ral-3005");
+  await expect(page.locator(".stock")).toContainText("В наличии в Атырау");
+  await page.locator(".picker__chip", { hasText: "PURMAN" }).click();
+  await expect(page.locator(".stock")).toContainText("Под заказ");
+  await expect(page.locator(".stock")).toContainText("из Караганды");
+  await expect(page.locator(".picker__chip", { hasText: "VikingMP" }).last()).toContainText(
+    "в наличии в Атырау",
+  );
+  const ld = await page
+    .locator('script[type="application/ld+json"]')
+    .evaluateAll((els) => els.map((e) => JSON.parse(e.textContent ?? "{}")));
+  expect(ld.find((d) => d["@type"] === "Product").offers.availability).toBe(
+    "https://schema.org/BackOrder",
+  );
+
+  await page.goto("/catalog/metallocherepitsa");
+  await expect(page.locator(".model-card", { hasText: "Трамонтана" })).toContainText("Под заказ");
+  await expect(page.locator(".model-card", { hasText: "Ламонтерра-X" })).toContainText(
+    "В наличии в Атырау: VikingMP, Полиэстер",
+  );
+});

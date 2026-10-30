@@ -21,7 +21,22 @@ export interface Coating {
   warranty: number;
   /** Коды цветов из приложения №1 */
   colors: string[];
+  /** atyrau — есть на складе в Атырау; order — под заказ (Караганда, иначе Россия) */
+  stock: Stock;
 }
+
+export type Stock = "atyrau" | "order";
+
+export const stockInfo: Record<Stock, { label: string; text: string }> = {
+  atyrau: {
+    label: "В наличии в Атырау",
+    text: "Есть на складе в Атырау.",
+  },
+  order: {
+    label: "Под заказ",
+    text: "Везём под заказ из Караганды, если там нет — из России. Срок поставки назовёт менеджер.",
+  },
+};
 
 // Покрытия и цвета (приложение №1, колонки толщин металла)
 const coatings = {
@@ -33,6 +48,7 @@ const coatings = {
     thickness: 0.5,
     warranty: 25,
     colors: ["copper"],
+    stock: "order",
   },
   purman: {
     id: "purman",
@@ -42,6 +58,7 @@ const coatings = {
     thickness: 0.5,
     warranty: 50,
     colors: ["8017", "9005"],
+    stock: "order",
   },
   vikingE: {
     id: "vikingmp-e",
@@ -51,6 +68,7 @@ const coatings = {
     thickness: 0.5,
     warranty: 40,
     colors: ["3005", "6005", "6007", "7024", "8004", "8017", "8019", "9005", "RR32"],
+    stock: "order",
   },
   cloudy: {
     id: "cloudy",
@@ -60,6 +78,7 @@ const coatings = {
     thickness: 0.5,
     warranty: 30,
     colors: ["antique"],
+    stock: "order",
   },
   puretan: {
     id: "puretan",
@@ -69,6 +88,7 @@ const coatings = {
     thickness: 0.5,
     warranty: 30,
     colors: ["RR11", "RR32"],
+    stock: "order",
   },
   valori: {
     id: "valori",
@@ -78,6 +98,7 @@ const coatings = {
     thickness: 0.5,
     warranty: 30,
     colors: ["wine", "dark-slate", "grey-slate", "dark-brownie", "bright-brownie"],
+    stock: "order",
   },
   norman: {
     id: "normanmp",
@@ -87,6 +108,7 @@ const coatings = {
     thickness: 0.5,
     warranty: 20,
     colors: ["1014", "3005", "3011", "5005", "5015", "6005", "7024", "8017", "9003", "9006"],
+    stock: "order",
   },
   viking: {
     id: "vikingmp",
@@ -96,6 +118,7 @@ const coatings = {
     thickness: 0.45,
     warranty: 10,
     colors: ["3005", "6007", "7021", "7024", "8004", "8017", "8019"],
+    stock: "atyrau",
   },
   polyester045: {
     id: "polyester",
@@ -127,6 +150,7 @@ const coatings = {
       "9003",
       "9006",
     ],
+    stock: "atyrau",
   },
   polyester04: {
     id: "polyester",
@@ -136,6 +160,7 @@ const coatings = {
     thickness: 0.4,
     warranty: 5,
     colors: ["1014", "1015", "2004", "3005", "5005", "6005", "7004", "7024", "8017", "9003"],
+    stock: "atyrau",
   },
 } satisfies Record<string, Coating>;
 

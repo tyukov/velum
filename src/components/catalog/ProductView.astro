@@ -11,6 +11,7 @@ import {
   formatThickness,
   PRICE_DATE,
   priceOf,
+  stockInfo,
   variantsOf,
   type Model,
   type Variant,
@@ -57,6 +58,9 @@ const versionLink = (m: Model) => {
   return `/catalog/metallocherepitsa/${m.slug}/${pick.slug}`;
 };
 const price = priceOf(model, coating);
+const stock = stockInfo[coating.stock];
+// Покрытия, которые есть в Атырау (хотя бы в одной толщине)
+const inStockNames = new Set(model.coatings.filter((c) => c.stock === "atyrau").map((c) => c.name));
 const site = Astro.site ?? new URL("https://velum.kz");
 const productName = `Металлочерепица ${model.name} ${coating.name} ${formatThickness(coating.thickness)}, ${colorInfo.label}`;
 const productLd = {
@@ -72,7 +76,8 @@ const productLd = {
       "@type": "Offer",
       price,
       priceCurrency: "KZT",
-      availability: "https://schema.org/InStock",
+      availability:
+        coating.stock === "atyrau" ? "https://schema.org/InStock" : "https://schema.org/BackOrder",
       unitText: "м²",
       seller: { "@type": "Organization", name: business.name },
     },
@@ -107,6 +112,11 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
         {colorInfo.label !== colorInfo.name && ` ${colorInfo.name}`}
       </span>
     </h1>
+
+    <p class:list={["stock", `stock_${coating.stock}`]}>
+      <b>{stock.label}</b>
+      <span>{stock.text}</span>
+    </p>
 
     <ul class="product-view__facts">
       <li>
@@ -149,9 +159,20 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
             aria-current={name === coating.name ? "true" : undefined}
           >
             {name}
+            {inStockNames.has(name) && (
+              <span class="picker__stock" title="В наличии в Атырау">
+                <span class="sr-only">, в наличии в Атырау</span>
+              </span>
+            )}
           </a>
         ))}
       </div>
+      {inStockNames.size > 0 && (
+        <p class="picker__hint">
+          <span class="picker__stock" aria-hidden="true" /> есть на складе в Атырау, остальные — под
+          заказ
+        </p>
+      )}
     </div>
 
     <div class="picker" role="group" aria-label="Толщина металла">

@@ -54,6 +54,14 @@ const cardColor = (index: number) => {
             <h2 class="model-card__title">{entry.name}</h2>
             <p class="model-card__text">{entry.summary}</p>
             <p class="model-card__price">от {formatPrice(minPrice(entry.models))} за м²</p>
+            <p class="model-card__stock">
+              {(() => {
+                const names = [
+                  ...new Set(coatings.filter((c) => c.stock === "atyrau").map((c) => c.name)),
+                ];
+                return names.length ? `В наличии в Атырау: ${names.join(", ")}` : "Под заказ";
+              })()}
+            </p>
             <p class="model-card__meta">
               {entry.models.length > 1 && `${entry.models.length} исполнения · `}
               {new Set(coatings.map((c) => c.name)).size} покрытий · {colorCount} цветов · гарантия
