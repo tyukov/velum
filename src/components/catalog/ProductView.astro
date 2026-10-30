@@ -9,8 +9,9 @@ import {
   familyOf,
   formatPrice,
   formatThickness,
-  PRICE_DATE,
+  priceDateOf,
   priceOf,
+  supplierPrices,
   stockInfo,
   variantsOf,
   type Model,
@@ -125,9 +126,11 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
       <li>
         <b>{coating.class}</b> класс покрытия
       </li>
-      <li>
-        <b>{model.width} мм</b> ширина листа
-      </li>
+      {model.width && (
+        <li>
+          <b>{model.width} мм</b> ширина листа
+        </li>
+      )}
     </ul>
 
     {model.family && (
@@ -225,8 +228,10 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
           {formatPrice(price)} <span>за м²</span>
         </p>
         <p class="product-view__price-note">
-          Цена с НДС, актуальна на {PRICE_DATE}. На заказы до 50 м² действует наценка.
-          {model.priceNote && ` ${model.priceNote}`} Точную сумму с доставкой рассчитает менеджер.
+          Цена с НДС, актуальна на {priceDateOf(model, coating)}.
+          {supplierPrices(model, coating).p1 !== undefined &&
+            ` На заказы до 50 м² действует наценка.${model.priceNote ? ` ${model.priceNote}` : ""}`}{" "}
+          Точную сумму с доставкой рассчитает менеджер.
         </p>
       </div>
     )}
@@ -275,8 +280,12 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
         {colorInfo.label}
         {colorInfo.label !== colorInfo.name && `, ${colorInfo.name}`}
       </dd>
-      <dt>Полная ширина листа</dt>
-      <dd>{model.width} мм</dd>
+      {model.width && (
+        <>
+          <dt>Полная ширина листа</dt>
+          <dd>{model.width} мм</dd>
+        </>
+      )}
       <dt>Гарантия</dt>
       <dd>{coating.warranty} лет</dd>
       {price && (

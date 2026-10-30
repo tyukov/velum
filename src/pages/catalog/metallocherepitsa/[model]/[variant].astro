@@ -7,6 +7,7 @@ import {
   formatPrice,
   formatThickness,
   priceOf,
+  supplyNote,
   metalTileModels,
   variantsOf,
   type Variant,
@@ -38,6 +39,7 @@ const isDefault = defaultVariant(model).slug === variant.slug;
   path={`${modelPath}/${variant.slug}`}
   canonicalPath={isDefault ? modelPath : undefined}
   product={name}
+  supply={supplyNote(model, coating)}
 >
   <ProductView variant={variant} />
 </CatalogLayout>

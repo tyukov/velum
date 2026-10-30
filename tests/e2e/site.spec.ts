@@ -179,7 +179,7 @@ test.describe("каталог металлочерепицы", () => {
     await page.goto("/");
     await page.locator(".promo-header__title-link").click();
     await expect(page).toHaveURL(/\/catalog\/metallocherepitsa$/);
-    await expect(page.locator(".model-card")).toHaveCount(4);
+    await expect(page.locator(".model-card")).toHaveCount(7);
     await page
       .getByRole("link", { name: /Трамонтана/ })
       .first()
@@ -279,4 +279,37 @@ test("наличие: полиэстер и VikingMP в Атырау, остал
   await expect(page.locator(".model-card", { hasText: "Ламонтерра-X" })).toContainText(
     "В наличии в Атырау: VikingMP, Полиэстер",
   );
+});
+
+test.describe("второй поставщик", () => {
+  test("Ламонтерра-X: цена по правилу двух поставщиков", async ({ page }) => {
+    // Полиэстер 0,45: 3 115 и 3 075 — разница 40, берём меньшую
+    await page.goto("/catalog/metallocherepitsa/lamonterra-x/polyester-0-45-ral-3005");
+    await expect(page.locator(".product-view__price-value")).toContainText("3 075");
+    // VikingMP: 3 280 и 3 300 — разница 20, берём меньшую
+    await page.goto("/catalog/metallocherepitsa/lamonterra-x/vikingmp-0-45-ral-8017");
+    await expect(page.locator(".product-view__price-value")).toContainText("3 280");
+    await expect(page.locator(".product-view__price-note")).toContainText("12.10.2026");
+  });
+
+  test("Stella: модель второго поставщика, в наличии, заявка с ценами поставщиков", async ({
+    page,
+  }) => {
+    fs.rmSync(TELEGRAM_MOCK_LOG, { force: true });
+    await page.goto("/catalog/metallocherepitsa/stella/polyester-0-45-ral-5021");
+    await expect(page.locator("h1")).toContainText("Stella");
+    await expect(page.locator(".stock")).toContainText("В наличии в Атырау");
+    await expect(page.locator(".product-view__price-value")).toContainText("3 075");
+    await expect(page.locator(".product-view__price-note")).not.toContainText("наценка");
+    await expect(page.locator(".product-view__facts")).not.toContainText("ширина листа");
+
+    await page.getByRole("link", { name: "Узнать стоимость" }).click();
+    const modal = page.locator(".blocker .modal");
+    await modal.getByLabel("Ваше имя").fill("Тест");
+    await modal.getByLabel("Ваш телефон").pressSequentially("7011234567");
+    await modal.getByRole("button", { name: "Отправить заявку" }).click();
+    await expect(modal.locator(".form-status")).toHaveText(/Спасибо/);
+    const sent = JSON.parse(fs.readFileSync(TELEGRAM_MOCK_LOG, "utf8").trim().split("\n").pop()!);
+    expect(sent.text).toMatch(/<b>Цены поставщиков:<\/b> П2: 3\s075\s₸/);
+  });
 });

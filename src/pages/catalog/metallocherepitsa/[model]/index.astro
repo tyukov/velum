@@ -6,6 +6,7 @@ import {
   formatPrice,
   metalTileModels,
   minPrice,
+  supplyNote,
   type Model,
 } from "../../../../data/catalog/metal-tile";
 
@@ -23,6 +24,7 @@ const warranties = model.coatings.map((c) => c.warranty);
   description={`Металлочерепица ${model.name}: от ${formatPrice(minPrice([model]))} за м², ${model.coatings.length} вариантов покрытия, гарантия от ${Math.min(...warranties)} до ${Math.max(...warranties)} лет. Подбор цвета и расчёт стоимости в Velum, Атырау.`}
   path={`/catalog/metallocherepitsa/${model.slug}`}
   product={`Металлочерепица ${model.name}`}
+  supply={supplyNote(model, variant.coating)}
 >
   <ProductView variant={variant} />
 </CatalogLayout>
