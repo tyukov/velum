@@ -78,7 +78,7 @@ const variantLd = (v: Variant) => {
     "@type": "Product",
     name: `Металлочерепица ${model.name} ${v.coating.name} ${formatThickness(v.coating.thickness)}, ${info.label}`,
     url: new URL(`${base}/${v.slug}`, site).href,
-    color: `${info.label} ${info.name}`,
+    color: info.label === info.name ? info.name : `${info.label} ${info.name}`,
     material: `Оцинкованная сталь ${formatThickness(v.coating.thickness)}, покрытие ${v.coating.name}`,
     ...(vPrice && {
       offers: {
