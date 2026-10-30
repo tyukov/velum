@@ -1,2 +1,3 @@
-config.php
-.dev.vars
+.env*
+.vercel
+node_modules

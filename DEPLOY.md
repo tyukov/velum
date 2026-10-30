@@ -1,29 +1,50 @@
-# Публикация сайта и заявки в Telegram
+# Публикация на Vercel и заявки в Telegram
 
-Формы на сайте отправляются на `/api/send`. Этот адрес работает на двух видах хостинга:
-
-- **Cloudflare Pages** — обрабатывает `functions/api/send.js`;
-- **PHP-хостинг (Apache)** — `.htaccess` перенаправляет его на `telegram.php`.
+Сайт статический: HTML, CSS и немного JS без зависимостей. Заявки с форм уходят
+на `/api/send` — это функция Vercel (`api/send.js`), которая пересылает их в Telegram.
 
 ## 1. Telegram-бот
 
-1. В @BotFather: `/mybots` → бот → *API Token* → **Revoke** (старый токен был в открытом коде, его нужно заменить). Сохраните новый токен.
-2. Создайте группу для заявок, добавьте туда бота.
+1. В @BotFather: `/mybots` → бот → *API Token* → **Revoke**. Старый токен был в открытом
+   коде и остаётся в истории git, его обязательно нужно заменить. Сохраните новый.
+2. Создайте группу для заявок и добавьте туда бота.
 3. Напишите в группе любое сообщение и откройте
-   `https://api.telegram.org/bot<ТОКЕН>/getUpdates` — в ответе найдите `"chat":{"id":-100...}`. Это `TELEGRAM_CHAT_ID`.
+   `https://api.telegram.org/bot<ТОКЕН>/getUpdates`. В ответе найдите `"chat":{"id":-100...}` —
+   это `TELEGRAM_CHAT_ID`.
 
-## 2а. Cloudflare Pages (рекомендуется)
+## 2. Vercel
 
-1. dash.cloudflare.com → *Workers & Pages* → *Create* → *Pages* → *Connect to Git* → репозиторий `velum`.
-2. Framework preset: **None**, Build command: пусто, Output directory: `/`.
-3. *Settings → Variables and Secrets*: добавьте `TELEGRAM_BOT_TOKEN` (тип Secret) и `TELEGRAM_CHAT_ID`. Сделайте *Retry deployment*.
-4. Сайт откроется на `velum.pages.dev`. Отправьте тестовую заявку.
-5. Домен: *Custom domains* → *Set up a custom domain* → введите домен и добавьте у регистратора DNS-запись, которую покажет Cloudflare (CNAME на `velum.pages.dev`). HTTPS выпускается автоматически.
+1. vercel.com → **Add New… → Project** → импортируйте репозиторий `tyukov/velum`.
+2. Framework Preset: **Other**. Build Command и Output Directory оставьте пустыми.
+3. **Environment Variables**: `TELEGRAM_BOT_TOKEN` и `TELEGRAM_CHAT_ID`, затем **Deploy**.
+4. Откройте выданный адрес `*.vercel.app` и отправьте тестовую заявку.
 
-## 2б. PHP-хостинг (ps.kz, hoster.kz и т. п.)
+Каждый push в `main` публикует сайт, а каждый pull request получает свой адрес для предпросмотра.
 
-1. Загрузите файлы сайта в корень (`public_html`) по FTP или через git.
-2. Скопируйте `config.example.php` в `config.php` и впишите токен и chat id.
-3. Домен: в панели хостинга добавьте домен, у регистратора укажите NS-серверы хостинга.
+## 3. Домен velum.kz
 
-> Для доменов **.kz** уточните у регистратора требование о размещении сервера в Казахстане.
+1. Project → **Settings → Domains** → добавьте `velum.kz` и `www.velum.kz`
+   (`www` Vercel предложит перенаправлять на основной домен).
+2. У регистратора домена создайте DNS-записи, которые покажет Vercel. Обычно это:
+   - `A` для `@` → `76.76.21.21`
+   - `CNAME` для `www` → `cname.vercel-dns.com`
+3. HTTPS-сертификат выпускается автоматически в течение нескольких минут.
+
+> Для доменов **.kz** уточните у регистратора, требуют ли правила размещать сервер в Казахстане.
+
+## 4. После запуска
+
+- Google Search Console и Яндекс Вебмастер: подтвердите сайт и отправьте `https://velum.kz/sitemap.xml`.
+- Проверьте скорость в PageSpeed Insights: https://pagespeed.web.dev/
+
+## Что где лежит
+
+| Путь | Назначение |
+|---|---|
+| `index.html`, `taplink.html`, `thanks.html` | Страницы сайта |
+| `css/`, `fonts/`, `img/` | Стили, шрифт Inter, изображения (WebP) |
+| `js/main.js` | Модальные окна, маска телефона, FAQ, отправка форм |
+| `api/send.js` | Функция Vercel: заявка → Telegram |
+| `vercel.json` | Чистые адреса, кэширование, заголовки безопасности |
+| `robots.txt`, `sitemap.xml` | Для поисковиков |
+| `.vercelignore` | Черновики, которые не публикуются |
