@@ -21,10 +21,13 @@ export default defineConfig({
   site: "https://velum.kz",
   trailingSlash: "never",
   build: {
-    // CSS небольшой — встраиваем в HTML, чтобы не блокировать первую отрисовку
-    inlineStylesheets: "always",
+    // CSS отдельными файлами: при переходах без перезагрузки CSP первой страницы
+    // разрешает их через 'self', а повторные переходы берут стили из кэша
+    inlineStylesheets: "never",
   },
   adapter: vercel(),
+  // Переходы без перезагрузки: страницы подгружаются заранее при наведении/касании ссылки
+  prefetch: { prefetchAll: true, defaultStrategy: "hover" },
   // Панель разработчика мешает браузерным тестам (добавляет свои элементы на страницу)
   devToolbar: { enabled: process.env.E2E !== "1" },
   integrations: [

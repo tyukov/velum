@@ -157,3 +157,19 @@ test("нет ошибок в консоли", async ({ page }) => {
   for (const path of ["/", "/taplink", "/privacy"]) await page.goto(path);
   expect(errors).toEqual([]);
 });
+
+test("переходы между страницами без перезагрузки", async ({ page }) => {
+  await page.goto("/privacy");
+  await page.evaluate(() => ((window as unknown as { marker: number }).marker = 1));
+  await page.locator("a.logo").first().click();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.locator("h1")).toContainText("Металлочерепица");
+  // Тот же документ: страница не перезагружалась
+  expect(await page.evaluate(() => (window as unknown as { marker?: number }).marker)).toBe(1);
+
+  // Скрипты страницы работают после перехода
+  await page.locator('.promo-message a[href="#ex1"]').click();
+  const phone = page.locator(".blocker").getByLabel("Ваш телефон");
+  await phone.pressSequentially("7011234567");
+  await expect(phone).toHaveValue("+7 (701) 123-45-67");
+});

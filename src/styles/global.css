@@ -27,3 +27,24 @@
   height: 1px;
   overflow: hidden;
 }
+
+/* Ровные строки без одиноких слов: заголовки балансируются, абзацы без «висячих» слов */
+h1,
+h2,
+h3,
+.product__name,
+.features-list__title,
+.steps-list__title {
+  text-wrap: balance;
+}
+
+p,
+li {
+  text-wrap: pretty;
+}
+
+/* Декоративные элементы не должны давать горизонтальную прокрутку */
+main,
+.page__wrap {
+  overflow-x: clip;
+}
