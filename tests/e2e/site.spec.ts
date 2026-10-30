@@ -55,6 +55,15 @@ test.describe("главная", () => {
     await expect(page.locator(".blocker")).toHaveCount(0);
   });
 
+  test("крестик окна не закрыт шапкой на маленьком экране", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 568 });
+    await page.locator('.promo-message a[href="#ex1"]').click();
+    await page.locator(".blocker").evaluate((el) => (el.scrollTop = 0));
+    const close = page.locator(".close-modal");
+    await close.click();
+    await expect(page.locator(".blocker")).toHaveCount(0);
+  });
+
   test("неполный телефон не отправляется", async ({ page }) => {
     // На телефоне кнопка «Перезвоните мне» на баннере, на компьютере — «Заказать звонок» в шапке
     const hero = page.locator('.promo-message a[href="#ex2"]');
