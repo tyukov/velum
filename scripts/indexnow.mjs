@@ -18,11 +18,18 @@ async function waitFor(url) {
     if (res?.ok) return res;
     await new Promise((r) => setTimeout(r, 30_000));
   }
-  throw new Error(`Сайт не отвечает: ${url}`);
+  return null;
 }
 
-await waitFor(`${SITE}/${keyFile}`);
-const sitemap = await (await waitFor(`${SITE}/sitemap-0.xml`)).text();
+// Домен ещё не подключён к Vercel или сайт недоступен: поисковики не смогут проверить ключ.
+// Не роняем workflow на каждом обновлении — оставляем предупреждение в GitHub Actions.
+if (!(await waitFor(`${SITE}/${keyFile}`))) {
+  console.log(
+    `::warning::${SITE}/${keyFile} не отвечает — IndexNow пропущен. Подключён ли домен к Vercel?`,
+  );
+  process.exit(0);
+}
+const sitemap = await (await fetch(`${SITE}/sitemap-0.xml`)).text();
 const urlList = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
 if (!urlList.length) throw new Error("В sitemap нет адресов");
 
