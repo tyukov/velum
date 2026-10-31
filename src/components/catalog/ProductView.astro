@@ -19,6 +19,7 @@ import {
   type Model,
   type Variant,
 } from "../../data/catalog/metal-tile";
+import { ROOF_TYPES, SLOPES } from "../../lib/roof";
 import { business } from "../../lib/business";
 
 interface Props {
@@ -63,6 +64,20 @@ const versionLink = (m: Model) => {
   return `/catalog/metallocherepitsa/${m.slug}/${pick.slug}`;
 };
 const price = priceOf(model, coating);
+// Покрытия модели для сравнения в калькуляторе: сумма на ту же площадь
+const calcOptions = model.coatings.flatMap((c) => {
+  const p = priceOf(model, c);
+  if (!p) return [];
+  return [
+    {
+      name: `${c.name} ${formatThickness(c.thickness)}`,
+      price: p,
+      inStock: c.stock === "atyrau",
+      href: linkTo(c.name, c.thickness),
+      current: c === coating,
+    },
+  ];
+});
 const warranty = warrantyOf(model, coating);
 const stock = stockInfo[coating.stock];
 // Покрытия, которые есть в Атырау (хотя бы в одной толщине)
@@ -270,33 +285,127 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
     {price && (
       <div
         class="calc"
+        data-nosnippet
         data-price={price}
         data-small-markup={supplierPrices(model, coating).p1 !== undefined ? "" : undefined}
+        data-options={JSON.stringify(calcOptions)}
+        data-whatsapp={business.phoneE164.replace("+", "")}
       >
-        <label class="calc__label" for="calc-area">
-          Сколько нужно на вашу крышу?
-        </label>
-        <div class="calc__field">
-          <input
-            id="calc-area"
-            class="calc__input"
-            type="number"
-            inputmode="decimal"
-            min="1"
-            max="10000"
-            step="any"
-            placeholder="Площадь крыши"
-            autocomplete="off"
-          />
-          <span class="calc__unit">м²</span>
+        <p class="calc__title">Сколько нужно на вашу крышу?</p>
+        <div class="calc__chips" role="radiogroup" aria-label="Как считать">
+          <label class="calc__chip">
+            <input type="radio" name="calc-mode" value="area" checked />
+            <span>Знаю площадь</span>
+          </label>
+          <label class="calc__chip">
+            <input type="radio" name="calc-mode" value="house" />
+            <span>По размерам дома</span>
+          </label>
         </div>
-        <p class="calc__result" aria-live="polite" hidden>
-          Примерно <b class="calc__sum"></b>
-          <span class="calc__detail"></span>
-        </p>
-        <p class="calc__note" hidden>
-          Для заказа до 50 м² цена будет выше: на небольшие заказы действует наценка.
-        </p>
+
+        <div class="calc__mode" data-mode="area">
+          <label class="calc__label" for="calc-area">
+            Площадь крыши
+          </label>
+          <div class="calc__field">
+            <input
+              id="calc-area"
+              class="calc__input"
+              type="number"
+              inputmode="decimal"
+              min="1"
+              max="100000"
+              step="any"
+              autocomplete="off"
+            />
+            <span class="calc__unit">м²</span>
+          </div>
+        </div>
+
+        <div class="calc__mode" data-mode="house" hidden>
+          <div class="calc__fields">
+            <div>
+              <label class="calc__label" for="calc-length">
+                Длина дома
+              </label>
+              <div class="calc__field">
+                <input
+                  id="calc-length"
+                  class="calc__input"
+                  type="number"
+                  inputmode="decimal"
+                  min="1"
+                  max="500"
+                  step="any"
+                  autocomplete="off"
+                />
+                <span class="calc__unit">м</span>
+              </div>
+            </div>
+            <div>
+              <label class="calc__label" for="calc-width">
+                Ширина дома
+              </label>
+              <div class="calc__field">
+                <input
+                  id="calc-width"
+                  class="calc__input"
+                  type="number"
+                  inputmode="decimal"
+                  min="1"
+                  max="500"
+                  step="any"
+                  autocomplete="off"
+                />
+                <span class="calc__unit">м</span>
+              </div>
+            </div>
+          </div>
+          <p class="calc__label">Наклон крыши</p>
+          <div class="calc__chips" role="radiogroup" aria-label="Наклон крыши">
+            {Object.entries(SLOPES).map(([value, s]) => (
+              <label class="calc__chip">
+                <input type="radio" name="calc-slope" value={value} checked={value === "mid"} />
+                <span>
+                  {s.label}, ~{s.degrees}°
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <p class="calc__label">Тип крыши</p>
+        <div class="calc__chips" role="radiogroup" aria-label="Тип крыши">
+          {Object.entries(ROOF_TYPES).map(([value, t]) => (
+            <label class="calc__chip">
+              <input type="radio" name="calc-roof" value={value} checked={value === "gable"} />
+              <span>{t.label}</span>
+            </label>
+          ))}
+        </div>
+
+        <p class="calc__error" role="alert" hidden></p>
+        <div class="calc__result" aria-live="polite" hidden>
+          <p class="calc__total">
+            Примерно <b class="calc__sum"></b>
+          </p>
+          <p class="calc__detail"></p>
+          <p class="calc__note" hidden>
+            Для заказа до 50 м² цена будет выше: на небольшие заказы действует наценка.
+          </p>
+          <div class="calc__trims" hidden>
+            <p class="calc__subtitle">Ещё понадобится</p>
+            <ul class="calc__trims-list"></ul>
+            <p class="calc__detail">Цену доборных элементов рассчитает менеджер.</p>
+          </div>
+          <div class="calc__compare">
+            <p class="calc__subtitle">С другим покрытием на эту площадь</p>
+            <ul class="calc__compare-list"></ul>
+          </div>
+          <a class="calc__whatsapp" href="#" target="_blank" rel="noopener">
+            Отправить расчёт в WhatsApp
+          </a>
+        </div>
       </div>
     )}
 

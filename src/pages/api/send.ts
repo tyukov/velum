@@ -53,7 +53,7 @@ export const POST: APIRoute = async ({ request, redirect, clientAddress }) => {
   const name = field(form, "user_name", 100);
   const phone = formatPhone(field(form, "user_phone", 30));
   const message = field(form, "user_message");
-  const product = field(form, "product", 300);
+  const product = field(form, "product", 600);
   const supply = field(form, "supply", 200);
   const page = field(form, "page", 300);
 

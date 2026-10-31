@@ -326,12 +326,17 @@ test.describe("каталог металлочерепицы", () => {
   }) => {
     await page.goto("/catalog/metallocherepitsa/tramontana/vikingmp-e-0-5-rr32");
     const calc = page.locator(".calc");
-    const area = calc.getByLabel("Сколько нужно на вашу крышу?");
+    const area = calc.getByLabel("Площадь крыши");
     // 30 м² крыши + 10% запаса = 33 м² по 7 555 ₸
     await area.fill("30");
     await expect(calc.locator(".calc__sum")).toHaveText("249\u00a0315\u00a0₸");
     await expect(calc.locator(".calc__note")).toBeVisible();
+    // Слишком большое число: подсказка вместо пустоты
+    await area.fill("1234567");
+    await expect(calc.locator(".calc__error")).toContainText("рассчитаем индивидуально");
+    await expect(calc.locator(".calc__result")).toBeHidden();
     await area.fill("100");
+    await expect(calc.locator(".calc__error")).toBeHidden();
     await expect(calc.locator(".calc__sum")).toHaveText("831\u00a0050\u00a0₸");
     await expect(calc.locator(".calc__note")).toBeHidden();
 
@@ -341,7 +346,7 @@ test.describe("каталог металлочерепицы", () => {
       .getByRole("link", { name: /RAL 3005/ })
       .click();
     await expect(page).toHaveURL(/vikingmp-e-0-5-ral-3005$/);
-    await expect(page.locator(".calc__input")).toHaveValue("100");
+    await expect(page.locator("#calc-area")).toHaveValue("100");
 
     await page.getByRole("link", { name: "Получить точный расчёт" }).click();
     const modal = page.locator(".blocker .modal");
@@ -351,7 +356,62 @@ test.describe("каталог металлочерепицы", () => {
     await modal.getByRole("button", { name: "Отправить заявку" }).click();
     await expect(modal.locator(".form-status")).toHaveText(/Спасибо/);
     const sent = await sentMessage(name);
-    expect(sent.text).toContain("крыша 100 м², 110 м² листа, примерно 831");
+    expect(sent.text).toContain("крыша 100 м², двускатная; 110 м² листа, примерно 831");
+  });
+
+  test("калькулятор по размерам дома: доборные элементы, сравнение покрытий, WhatsApp", async ({
+    page,
+  }) => {
+    await page.goto("/catalog/metallocherepitsa/lamonterra-x");
+    const calc = page.locator(".calc");
+    await calc.getByText("По размерам дома").click();
+    await calc.getByLabel("Длина дома").fill("10");
+    await calc.getByLabel("Ширина дома").fill("8");
+    // Дом 10 × 8 со свесами 11 × 9, наклон 30°: скаты 114,3 м², +10% → 126 м² по 3 875 ₸
+    await expect(calc.locator(".calc__sum")).toHaveText("488\u00a0250\u00a0₸");
+    await expect(calc.locator(".calc__trims")).toContainText("конёк — 11 м");
+    await expect(calc.locator(".calc__trims")).toContainText("саморезы — ~1\u00a0050 шт");
+    // Сравнение: все покрытия модели, текущее отмечено, дешёвое сверху
+    const options = calc.locator(".calc__option");
+    await expect(options).toHaveCount(10);
+    await expect(options.first()).toContainText("Полиэстер 0,4 мм");
+    await expect(calc.locator('.calc__option[aria-current="true"]')).toContainText("NormanMP");
+    const wa = await calc
+      .getByRole("link", { name: "Отправить расчёт в WhatsApp" })
+      .getAttribute("href");
+    expect(wa).toContain("https://wa.me/77010131359?text=");
+    expect(decodeURIComponent(wa!)).toContain("дом 10 × 8 м");
+
+    // Вальмовая: запас 20%, доборные считает менеджер
+    await calc.getByText("Вальмовая").click();
+    await expect(calc.locator(".calc__sum")).toHaveText("534\u00a0750\u00a0₸");
+    await expect(calc.locator(".calc__trims")).toBeHidden();
+
+    // Переход на другое покрытие из сравнения: расчёт сохраняется
+    await options.filter({ hasText: "Полиэстер 0,45 мм" }).click();
+    await expect(page).toHaveURL(/polyester-0-45/);
+    await expect(page.locator("#calc-length")).toHaveValue("10");
+    await expect(page.locator(".calc__option[aria-current]")).toContainText("Полиэстер 0,45 мм");
+  });
+
+  test("двойное нажатие «Отправить» — одна заявка", async ({ page }) => {
+    await page.goto("/catalog/metallocherepitsa/kaskad");
+    await page.getByRole("link", { name: "Узнать стоимость" }).click();
+    const modal = page.locator(".blocker .modal");
+    const name = uniqueName();
+    await modal.getByLabel("Ваше имя").fill(name);
+    await modal.getByLabel("Ваш телефон").pressSequentially("7011234567");
+    const submit = modal.getByRole("button", { name: "Отправить заявку" });
+    await submit.dblclick();
+    await expect(modal.locator(".form-status")).toHaveText(/Спасибо/);
+    await expect(submit).toBeDisabled();
+    await sentMessage(name);
+    await page.waitForTimeout(1000);
+    const count = fs
+      .readFileSync(TELEGRAM_MOCK_LOG, "utf8")
+      .split("\n")
+      .filter((l) => l.includes(name)).length;
+    expect(count).toBe(1);
   });
 
   test("заявка с товара уходит с названием варианта", async ({ page }) => {
