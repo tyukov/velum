@@ -1,7 +1,10 @@
 // Модальные окна, маска телефона, FAQ и отправка заявок без перезагрузки.
 // Сайт переходит между страницами без перезагрузки (ClientRouter): модуль выполняется один раз,
 // а всё, что привязано к элементам страницы, подключается заново на событии astro:page-load.
-import type { TransitionBeforePreparationEvent } from "astro:transitions/client";
+import type {
+  TransitionBeforePreparationEvent,
+  TransitionBeforeSwapEvent,
+} from "astro:transitions/client";
 import { formatPhone } from "../lib/phone";
 import { initCalc } from "./calc";
 
@@ -114,6 +117,17 @@ document.addEventListener("astro:before-swap", () => {
   current?.blocker.remove();
   current = null;
   document.body.style.overflow = "";
+});
+
+// ---------- Новая версия сайта ----------
+// Если сайт обновили, пока вкладка открыта, страница из нового деплоя принесёт новый скрипт,
+// а старый останется работать: обработчики подключились бы дважды и заявка ушла бы два раза.
+// Поэтому на страницу другой сборки переходим с полной перезагрузкой.
+document.addEventListener("astro:before-swap", (e: TransitionBeforeSwapEvent) => {
+  const build = e.newDocument.querySelector<HTMLMetaElement>('meta[name="velum-build"]')?.content;
+  if (build && build !== import.meta.env.BUILD_ID) {
+    e.swap = () => location.assign(e.to.href);
+  }
 });
 
 // ---------- Выбор характеристик товара без прыжка наверх ----------

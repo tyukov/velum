@@ -17,8 +17,13 @@ function mediumZoomStyleHash() {
   return `sha256-${createHash("sha256").update(css).digest("base64")}`;
 }
 
+// Версия сборки: при переходе без перезагрузки на страницу из нового деплоя сайт
+// перезагружается полностью, иначе старый и новый скрипты работали бы одновременно
+const BUILD_ID = Date.now().toString(36);
+
 export default defineConfig({
   site: "https://velum.kz",
+  vite: { define: { "import.meta.env.BUILD_ID": JSON.stringify(BUILD_ID) } },
   trailingSlash: "never",
   build: {
     // CSS отдельными файлами: при переходах без перезагрузки CSP первой страницы
