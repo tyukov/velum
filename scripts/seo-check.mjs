@@ -42,8 +42,31 @@ const decode = (s) =>
     .replace(/&#39;/g, "'");
 
 /** Фразы по 5 слов из основного текста страницы — для поиска почти одинаковых страниц */
+/**
+ * Убирает блоки с data-nosnippet: это интерфейс (калькулятор), одинаковый на всех страницах,
+ * как меню. Google не берёт его в сниппеты, и в сравнении текстов он не участвует.
+ */
+function withoutNosnippet(html) {
+  let out = html;
+  for (let start; (start = out.search(/<div\b[^>]*\bdata-nosnippet\b/)) !== -1;) {
+    const tags = /<div\b|<\/div>/g;
+    tags.lastIndex = start;
+    let depth = 0;
+    let end = out.length;
+    for (let m; (m = tags.exec(out));) {
+      depth += m[0] === "</div>" ? -1 : 1;
+      if (depth === 0) {
+        end = tags.lastIndex;
+        break;
+      }
+    }
+    out = out.slice(0, start) + out.slice(end);
+  }
+  return out;
+}
+
 function shingles(html) {
-  const main = html.match(/<main[\s\S]*<\/main>/)?.[0] ?? html;
+  const main = withoutNosnippet(html.match(/<main[\s\S]*<\/main>/)?.[0] ?? html);
   const words =
     main
       .replace(/<(script|style)[\s\S]*?<\/\1>/g, " ")

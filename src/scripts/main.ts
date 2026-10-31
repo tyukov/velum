@@ -1,8 +1,12 @@
 // Модальные окна, маска телефона, FAQ и отправка заявок без перезагрузки.
 // Сайт переходит между страницами без перезагрузки (ClientRouter): модуль выполняется один раз,
 // а всё, что привязано к элементам страницы, подключается заново на событии astro:page-load.
-import type { TransitionBeforePreparationEvent } from "astro:transitions/client";
+import type {
+  TransitionBeforePreparationEvent,
+  TransitionBeforeSwapEvent,
+} from "astro:transitions/client";
 import { formatPhone } from "../lib/phone";
+import { initCalc } from "./calc";
 
 // ---------- Cloudflare Turnstile (если на сайте задан ключ) ----------
 // Скрипт Cloudflare загружается только при первом открытии формы, чтобы не замедлять страницу.
@@ -115,13 +119,24 @@ document.addEventListener("astro:before-swap", () => {
   document.body.style.overflow = "";
 });
 
+// ---------- Новая версия сайта ----------
+// Если сайт обновили, пока вкладка открыта, страница из нового деплоя принесёт новый скрипт,
+// а старый останется работать: обработчики подключились бы дважды и заявка ушла бы два раза.
+// Поэтому на страницу другой сборки переходим с полной перезагрузкой.
+document.addEventListener("astro:before-swap", (e: TransitionBeforeSwapEvent) => {
+  const build = e.newDocument.querySelector<HTMLMetaElement>('meta[name="velum-build"]')?.content;
+  if (build && build !== import.meta.env.BUILD_ID) {
+    e.swap = () => location.assign(e.to.href);
+  }
+});
+
 // ---------- Выбор характеристик товара без прыжка наверх ----------
 // Покрытие, толщина, цвет и исполнение — ссылки на страницы вариантов. Обычно после перехода
-// страница прокручивается наверх; при выборе в карточке товара оставляем прокрутку на месте.
+// страница прокручивается наверх; при выборе в карточке товара и в калькуляторе оставляем прокрутку.
 let keepScrollY: number | null = null;
 
 document.addEventListener("astro:before-preparation", (e: TransitionBeforePreparationEvent) => {
-  keepScrollY = e.sourceElement?.closest(".picker") ? window.scrollY : null;
+  keepScrollY = e.sourceElement?.closest(".picker, .calc") ? window.scrollY : null;
 });
 
 const restoreScroll = () => {
@@ -136,22 +151,34 @@ document.addEventListener("astro:page-load", () => {
 });
 
 // ---------- Маска телефона: +7 (999) 999-99-99 ----------
+// Обработчики на документе, а не на каждом поле: работают сразу после перехода,
+// не дожидаясь astro:page-load (оно приходит после анимации смены страницы)
+const telInput = (target: EventTarget | null) =>
+  target instanceof HTMLInputElement && target.type === "tel" ? target : null;
+
+document.addEventListener("focusin", (e) => {
+  const input = telInput(e.target);
+  if (!input) return;
+  if (!input.value) input.value = "+7 (";
+  requestAnimationFrame(() => input.setSelectionRange(input.value.length, input.value.length));
+});
+
+document.addEventListener("input", (e) => {
+  const input = telInput(e.target);
+  if (input) input.value = formatPhone(input.value);
+});
+
+document.addEventListener("focusout", (e) => {
+  const input = telInput(e.target);
+  if (input && input.value.replace(/\D/g, "").length <= 1) input.value = "";
+});
+
 function initPhoneMasks() {
   document.querySelectorAll<HTMLInputElement>('input[type="tel"]').forEach((input) => {
     input.inputMode = "tel";
     input.autocomplete = "tel";
     input.pattern = "\\+7 \\(\\d{3}\\) \\d{3}-\\d{2}-\\d{2}";
     input.title = "Номер в формате +7 (701) 000-00-00";
-    input.addEventListener("focus", () => {
-      if (!input.value) input.value = "+7 (";
-      requestAnimationFrame(() => input.setSelectionRange(input.value.length, input.value.length));
-    });
-    input.addEventListener("input", () => {
-      input.value = formatPhone(input.value);
-    });
-    input.addEventListener("blur", () => {
-      if (input.value.replace(/\D/g, "").length <= 1) input.value = "";
-    });
   });
 }
 
@@ -176,15 +203,27 @@ function initFaq() {
 // ---------- Отправка заявок ----------
 function initForms() {
   document.querySelectorAll<HTMLFormElement>('form[action="/api/send"]').forEach((form) => {
+    // Подключаем один раз: иначе одна заявка ушла бы несколько раз
+    if (form.dataset.bound) return;
+    form.dataset.bound = "";
+
     const page = document.createElement("input");
     page.type = "hidden";
     page.name = "page";
     page.value = location.pathname + location.search;
     form.appendChild(page);
 
+    const button = form.querySelector<HTMLButtonElement>('[type="submit"]');
+    let sending = false;
+    // После успешной отправки кнопка неактивна, пока данные не изменят: двойное нажатие не создаст дубль
+    form.addEventListener("input", () => {
+      if (!sending && button) button.disabled = false;
+    });
+
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const button = form.querySelector<HTMLButtonElement>('[type="submit"]');
+      if (sending) return;
+      sending = true;
       let status = form.querySelector<HTMLElement>(".form-status");
       if (!status) {
         status = document.createElement("p");
@@ -195,6 +234,7 @@ function initForms() {
       status.textContent = "Отправляем…";
       if (button) button.disabled = true;
 
+      let sent = false;
       try {
         const res = await fetch(form.action, {
           method: "POST",
@@ -203,6 +243,7 @@ function initForms() {
         });
         const data: { ok?: boolean; error?: string } = await res.json().catch(() => ({}));
         if (!res.ok || !data.ok) throw new Error(data.error);
+        sent = true;
         form.reset();
         status.textContent = "Спасибо! Заявка отправлена, менеджер скоро перезвонит.";
       } catch (err) {
@@ -211,7 +252,8 @@ function initForms() {
           "Не удалось отправить заявку. Позвоните нам: 8 701 013 13 59";
       } finally {
         resetTurnstile(form);
-        if (button) button.disabled = false;
+        sending = false;
+        if (button) button.disabled = sent;
       }
     });
   });
@@ -227,71 +269,6 @@ async function initZoom() {
     zoom = mediumZoom({ margin: 50 });
   }
   zoom.attach(".zoom");
-}
-
-// ---------- Калькулятор стоимости в карточке товара ----------
-// Площадь крыши × цена за м² с запасом на раскрой и нахлёсты. Площадь запоминаем на время визита,
-// чтобы при смене покрытия или цвета не вводить её заново. Заявка уходит менеджеру с площадью и суммой.
-const ROOF_RESERVE = 0.1;
-const SMALL_ORDER_M2 = 50;
-const AREA_KEY = "velum:roof-area";
-
-const tenge = (n: number) => `${new Intl.NumberFormat("ru-RU").format(n).replace(/\s/g, " ")} ₸`;
-
-const storage = {
-  get: () => {
-    try {
-      return sessionStorage.getItem(AREA_KEY) ?? "";
-    } catch {
-      return "";
-    }
-  },
-  set: (v: string) => {
-    try {
-      sessionStorage.setItem(AREA_KEY, v);
-    } catch {
-      // Приватный режим: просто не запоминаем
-    }
-  },
-};
-
-function initCalc() {
-  const calc = document.querySelector<HTMLElement>(".calc");
-  const input = calc?.querySelector<HTMLInputElement>(".calc__input");
-  if (!calc || !input) return;
-  const price = Number(calc.dataset.price);
-  const result = calc.querySelector<HTMLElement>(".calc__result")!;
-  const note = calc.querySelector<HTMLElement>(".calc__note")!;
-  const productField = document.querySelector<HTMLInputElement>('#ex1 input[name="product"]');
-  const baseProduct = productField?.value ?? "";
-  const orderText = document.querySelector<HTMLElement>(".product-view__order .btn__text");
-
-  const update = () => {
-    const area = Number(input.value.replace(",", "."));
-    const valid = area >= 1 && area <= 10000;
-    result.hidden = !valid;
-    note.hidden = true;
-    if (productField) productField.value = baseProduct;
-    if (orderText) orderText.textContent = "Узнать стоимость";
-    storage.set(valid ? input.value : "");
-    if (!valid) return;
-
-    // Округляем до сотых перед ceil: 100 × 1,1 в JS даёт 110,00000000000001
-    const sheets = Math.ceil(Math.round(area * (1 + ROOF_RESERVE) * 100) / 100);
-    const sum = sheets * price;
-    result.querySelector(".calc__sum")!.textContent = tenge(sum);
-    result.querySelector(".calc__detail")!.textContent =
-      `${sheets} м² металлочерепицы с запасом ${ROOF_RESERVE * 100}% на раскрой и нахлёсты, ` +
-      `по ${tenge(price)} за м². Без доборных элементов и доставки.`;
-    note.hidden = !("smallMarkup" in calc.dataset) || sheets >= SMALL_ORDER_M2;
-    if (productField)
-      productField.value = `${baseProduct}; крыша ${area} м², ${sheets} м² листа, примерно ${tenge(sum)}`;
-    if (orderText) orderText.textContent = "Получить точный расчёт";
-  };
-
-  input.value = storage.get();
-  input.addEventListener("input", update);
-  update();
 }
 
 // Первая загрузка и каждый переход между страницами

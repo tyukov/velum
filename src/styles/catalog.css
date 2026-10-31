@@ -361,17 +361,71 @@
 /* Калькулятор стоимости */
 .calc {
   margin: 0.75rem 0 0;
-  padding: 1rem 1.25rem;
+  padding: 1rem 1.25rem 1.25rem;
   border: 1px solid #eee;
   border-radius: 1rem;
 }
 
-.calc__label {
-  display: block;
-  margin: 0 0 0.5rem;
-  font-size: 0.9375rem;
+.calc__title {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #111;
+}
+
+.calc__label {
+  display: block;
+  margin: 0.875rem 0 0.375rem;
+  font-size: 0.8125rem;
+  color: #666;
+}
+
+.calc__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.calc__chip {
+  position: relative;
+  cursor: pointer;
+}
+
+.calc__chip input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.calc__chip span {
+  display: block;
+  padding: 0.5rem 0.875rem;
+  border: 1px solid #e3e3e3;
+  border-radius: 2rem;
+  font-size: 0.875rem;
+  color: #333;
+  background: #fff;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.calc__chip input:checked + span {
+  border-color: #ebb683;
+  background: #fdf3e8;
+  color: #111;
+  font-weight: 600;
+}
+
+.calc__chip input:focus-visible + span {
+  outline: 2px solid #ebb683;
+  outline-offset: 2px;
+}
+
+.calc__fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 0.75rem;
 }
 
 .calc__field {
@@ -382,7 +436,7 @@
 .calc__input {
   width: 100%;
   height: 3rem;
-  padding: 0 3rem 0 1rem;
+  padding: 0 2.75rem 0 1rem;
   border: 1px solid #ddd;
   border-radius: 0.75rem;
   font: inherit;
@@ -413,23 +467,35 @@
   pointer-events: none;
 }
 
-.calc__result {
+.calc__error {
   margin: 0.75rem 0 0;
+  font-size: 0.8125rem;
+  color: #a03a1c;
+}
+
+.calc__result {
+  margin: 1rem 0 0;
+  padding: 1rem 0 0;
+  border-top: 1px solid #eee;
+}
+
+.calc__total {
+  margin: 0;
   font-size: 0.9375rem;
   color: #333;
 }
 
 .calc__sum {
-  font-size: 1.375rem;
+  font-size: 1.5rem;
   font-weight: 600;
   color: #111;
   white-space: nowrap;
 }
 
 .calc__detail {
-  display: block;
-  margin: 0.125rem 0 0;
+  margin: 0.25rem 0 0;
   font-size: 0.8125rem;
+  line-height: 1.5;
   color: #666;
 }
 
@@ -437,6 +503,81 @@
   margin: 0.5rem 0 0;
   font-size: 0.8125rem;
   color: #7a4d10;
+}
+
+.calc__subtitle {
+  margin: 1rem 0 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111;
+}
+
+.calc__trims-list {
+  margin: 0;
+  padding: 0 0 0 1.125rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #333;
+}
+
+.calc__compare-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.calc__option {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f1f1f1;
+  font-size: 0.875rem;
+  color: #333;
+  text-decoration: none;
+}
+
+.calc__option:hover .calc__option-name {
+  text-decoration: underline;
+}
+
+.calc__option[aria-current] {
+  font-weight: 600;
+  color: #111;
+}
+
+.calc__option-stock {
+  margin: 0 0 0 0.5rem;
+  padding: 0.0625rem 0.4375rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #24572a;
+  background: #eef7ee;
+  white-space: nowrap;
+}
+
+.calc__option-sum {
+  white-space: nowrap;
+}
+
+.calc__whatsapp {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1rem 0 0;
+  height: 3rem;
+  border-radius: 0.875rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #fff;
+  background: #157a3f;
+  text-decoration: none;
+}
+
+.calc__whatsapp:hover {
+  background: #11663a;
 }
 
 /* Наличие */
