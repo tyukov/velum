@@ -151,22 +151,34 @@ document.addEventListener("astro:page-load", () => {
 });
 
 // ---------- Маска телефона: +7 (999) 999-99-99 ----------
+// Обработчики на документе, а не на каждом поле: работают сразу после перехода,
+// не дожидаясь astro:page-load (оно приходит после анимации смены страницы)
+const telInput = (target: EventTarget | null) =>
+  target instanceof HTMLInputElement && target.type === "tel" ? target : null;
+
+document.addEventListener("focusin", (e) => {
+  const input = telInput(e.target);
+  if (!input) return;
+  if (!input.value) input.value = "+7 (";
+  requestAnimationFrame(() => input.setSelectionRange(input.value.length, input.value.length));
+});
+
+document.addEventListener("input", (e) => {
+  const input = telInput(e.target);
+  if (input) input.value = formatPhone(input.value);
+});
+
+document.addEventListener("focusout", (e) => {
+  const input = telInput(e.target);
+  if (input && input.value.replace(/\D/g, "").length <= 1) input.value = "";
+});
+
 function initPhoneMasks() {
   document.querySelectorAll<HTMLInputElement>('input[type="tel"]').forEach((input) => {
     input.inputMode = "tel";
     input.autocomplete = "tel";
     input.pattern = "\\+7 \\(\\d{3}\\) \\d{3}-\\d{2}-\\d{2}";
     input.title = "Номер в формате +7 (701) 000-00-00";
-    input.addEventListener("focus", () => {
-      if (!input.value) input.value = "+7 (";
-      requestAnimationFrame(() => input.setSelectionRange(input.value.length, input.value.length));
-    });
-    input.addEventListener("input", () => {
-      input.value = formatPhone(input.value);
-    });
-    input.addEventListener("blur", () => {
-      if (input.value.replace(/\D/g, "").length <= 1) input.value = "";
-    });
   });
 }
 
