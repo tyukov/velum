@@ -34,12 +34,36 @@ test.describe("главная", () => {
       "content",
       "https://velum.kz/og.jpg",
     );
-    const ld = JSON.parse(
-      (await page.locator('script[type="application/ld+json"]').textContent()) ?? "{}",
-    );
-    const types = ld["@graph"].map((item: { "@type": string }) => item["@type"]);
+    const ld = await page
+      .locator('script[type="application/ld+json"]')
+      .evaluateAll((els) => els.map((e) => JSON.parse(e.textContent ?? "{}")));
+    const graph = ld.find((d) => d["@graph"]);
+    const types = graph["@graph"].map((item: { "@type": string }) => item["@type"]);
     expect(types).toEqual(["WebSite", "HomeAndConstructionBusiness"]);
+    expect(graph["@graph"][1].sameAs).toContain("https://www.instagram.com/velum.kz");
     await expect(page.locator("h1")).toHaveCount(1);
+  });
+
+  test("FAQ в разметке FAQPage, визитка для Instagram не индексируется", async ({ page }) => {
+    const ld = await page
+      .locator('script[type="application/ld+json"]')
+      .evaluateAll((els) => els.map((e) => JSON.parse(e.textContent ?? "{}")));
+    const faq = ld.find((d) => d["@type"] === "FAQPage");
+    expect(faq.mainEntity.length).toBe(await page.locator(".faq-list__item").count());
+    await page.goto("/taplink");
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex");
+  });
+
+  test("кнопка WhatsApp: на всех страницах с текстом про страницу, кроме визитки", async ({
+    page,
+  }) => {
+    const wa = page.getByRole("link", { name: "Написать в WhatsApp" });
+    await expect(wa).toHaveAttribute("href", /^https:\/\/wa\.me\/77010131359\?text=/);
+    await page.goto("/catalog/metallocherepitsa/kaskad");
+    const href = decodeURIComponent((await wa.getAttribute("href")) ?? "");
+    expect(href).toContain("Металлочерепица Каскад");
+    await page.goto("/taplink");
+    await expect(page.locator(".whatsapp-float")).toHaveCount(0);
   });
 
   test("robots.txt и ключ IndexNow доступны поисковикам", async ({ request }) => {
@@ -445,6 +469,19 @@ test.describe("каталог металлочерепицы", () => {
     await page.getByRole("group", { name: "Исполнение" }).getByRole("link", { name: "X" }).click();
     await expect(page).toHaveURL(/monterrosa-x\/vikingmp-e-0-5-ral-8004$/);
     await expect(page.locator("h1")).toContainText("Монтерроса X");
+  });
+
+  test("картинка товара: в разметке и превью ссылки, файл отдаётся", async ({ page, request }) => {
+    await page.goto("/catalog/metallocherepitsa/lamonterra-x/normanmp-0-5-ral-3005");
+    const og = await page.locator('meta[property="og:image"]').getAttribute("content");
+    expect(og).toBe("https://velum.kz/images/tile/ral-3005.jpg");
+    const res = await request.get("/images/tile/ral-3005.jpg");
+    expect(res.status()).toBe(200);
+    expect(res.headers()["content-type"]).toContain("image/jpeg");
+    const ld = await page
+      .locator('script[type="application/ld+json"]')
+      .evaluateAll((els) => els.map((e) => JSON.parse(e.textContent ?? "{}")));
+    expect(ld.find((d) => d["@type"] === "Product").image).toBe(og);
   });
 
   test("вариант: свой заголовок, canonical на модель; модель — ProductGroup", async ({ page }) => {

@@ -2,7 +2,7 @@
 // Страница модели/варианта металлочерепицы: выбор покрытия, толщины и цвета
 import TileVisual from "./TileVisual.astro";
 import Breadcrumbs from "./Breadcrumbs.astro";
-import { colors } from "../../data/catalog/colors";
+import { colors, colorSlug } from "../../data/catalog/colors";
 import {
   catalogEntries,
   defaultVariant,
@@ -20,6 +20,7 @@ import {
   type Variant,
 } from "../../data/catalog/metal-tile";
 import { ROOF_TYPES, SLOPES } from "../../lib/roof";
+import { tileImagePath } from "../../lib/tile-svg";
 import { business } from "../../lib/business";
 
 interface Props {
@@ -93,6 +94,7 @@ const variantLd = (v: Variant) => {
     "@type": "Product",
     name: `Металлочерепица ${model.name} ${v.coating.name} ${formatThickness(v.coating.thickness)}, ${info.label}`,
     url: new URL(`${base}/${v.slug}`, site).href,
+    image: new URL(tileImagePath(colorSlug(v.color)), site).href,
     color: info.label === info.name ? info.name : `${info.label} ${info.name}`,
     material: `Оцинкованная сталь ${formatThickness(v.coating.thickness)}, покрытие ${v.coating.name}`,
     ...(vPrice && {
@@ -118,6 +120,7 @@ const productLd = isModelPage
       name: `Металлочерепица ${model.name}`,
       description: model.summary,
       url: modelUrl,
+      image: new URL(tileImagePath(colorSlug(color)), site).href,
       productGroupID: model.slug,
       variesBy: ["https://schema.org/color", "https://schema.org/material"],
       hasVariant: all.map(variantLd),
@@ -145,7 +148,7 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
   <div class="product-view__visual">
     <TileVisual hex={colorInfo.hex} label={`Цвет ${colorInfo.label} ${colorInfo.name}`} />
     <p class="product-view__note">
-      Цвет на экране может отличаться от настоящего. Образцы покажем в офисе.
+      Цвет на экране может отличаться от настоящего. Образцы цвета покажем по запросу.
     </p>
   </div>
 

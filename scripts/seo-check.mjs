@@ -142,6 +142,9 @@ const pages = htmlFiles(ROOT).map((file) => {
     for (const prop of ["og:title", "og:description", "og:image"]) {
       if (!html.includes(`property="${prop}"`)) fail(`нет ${prop}`);
     }
+    const ogImage = attr(html, /<meta property="og:image" content="([^"]*)"/);
+    if (ogImage?.startsWith(SITE) && !existsSync(join(ROOT, ogImage.slice(SITE.length))))
+      fail(`og:image не найден в сборке: ${ogImage}`);
   }
   return page;
 });

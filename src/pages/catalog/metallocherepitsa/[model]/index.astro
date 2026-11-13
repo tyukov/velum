@@ -1,4 +1,6 @@
 ---
+import { colorSlug } from "../../../../data/catalog/colors";
+import { tileImagePath } from "../../../../lib/tile-svg";
 import CatalogLayout from "../../../../layouts/CatalogLayout.astro";
 import ProductView from "../../../../components/catalog/ProductView.astro";
 import {
@@ -26,6 +28,7 @@ const colorCount = new Set(variantsOf(model).map((v) => v.color)).size;
 <CatalogLayout
   title={`Металлочерепица ${model.name} в Атырау: цены, цвета | Velum`}
   description={`Металлочерепица ${model.name} от ${formatPrice(minPrice([model]))} за м²: ${coatingCount} покрытий, ${colorCount} цветов${warranty ? `, гарантия до ${warranty} лет` : ""}. Расчёт и доставка по Атырау.`}
+  ogImage={tileImagePath(colorSlug(variant.color))}
   path={`/catalog/metallocherepitsa/${model.slug}`}
   product={`Металлочерепица ${model.name}`}
   supply={supplyNote(model, variant.coating)}

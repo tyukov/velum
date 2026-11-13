@@ -6,6 +6,7 @@ import {
   PUBLIC_YANDEX_VERIFICATION,
 } from "astro:env/client";
 import "../styles/global.css";
+import WhatsAppButton from "../components/WhatsAppButton.astro";
 import interCyrillic from "../assets/fonts/inter-cyrillic-wght-normal.woff2?url";
 
 interface Props {
@@ -14,8 +15,12 @@ interface Props {
   /** Путь страницы без завершающего слэша, например "/taplink" */
   path?: string;
   ogTitle?: string;
+  /** Картинка превью ссылки, путь от корня сайта; по умолчанию общая /og.jpg */
+  ogImage?: string;
   noindex?: boolean;
   bodyClass?: string;
+  /** Плавающая кнопка WhatsApp; на визитке для Instagram своя кнопка */
+  whatsapp?: boolean;
 }
 
 const {
@@ -23,13 +28,15 @@ const {
   description,
   path = "/",
   ogTitle = title,
+  ogImage: ogImagePath = "/og.jpg",
   noindex = false,
   bodyClass = "page",
+  whatsapp = true,
 } = Astro.props;
 
 const site = Astro.site ?? new URL("https://velum.kz");
 const canonical = new URL(path, site).href;
-const ogImage = new URL("/og.jpg", site).href;
+const ogImage = new URL(ogImagePath, site).href;
 // Поисковики проверяют код подтверждения на главной странице
 const verification =
   path === "/"
@@ -82,6 +89,7 @@ const verification =
   </head>
   <body class={bodyClass}>
     <slot />
+    {whatsapp && <WhatsAppButton topic={ogTitle.replace(/ \| Velum$/, "")} />}
     <!-- Скрипт сайта на всех страницах: при переходах без перезагрузки он уже загружен -->
     <script>
       import "../scripts/main.ts";
