@@ -34,11 +34,13 @@ test.describe("главная", () => {
       "content",
       "https://velum.kz/og.jpg",
     );
-    const ld = JSON.parse(
-      (await page.locator('script[type="application/ld+json"]').textContent()) ?? "{}",
-    );
-    const types = ld["@graph"].map((item: { "@type": string }) => item["@type"]);
+    const ld = await page
+      .locator('script[type="application/ld+json"]')
+      .evaluateAll((els) => els.map((e) => JSON.parse(e.textContent ?? "{}")));
+    const graph = ld.find((d) => d["@graph"]);
+    const types = graph["@graph"].map((item: { "@type": string }) => item["@type"]);
     expect(types).toEqual(["WebSite", "HomeAndConstructionBusiness"]);
+    expect(graph["@graph"][1].sameAs).toContain("https://www.instagram.com/velum.kz");
     await expect(page.locator("h1")).toHaveCount(1);
   });
 
