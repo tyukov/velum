@@ -199,7 +199,8 @@ h1,
 
 .modal__label-placeholder {
   padding: 5px;
-  color: rgb(0 0 0 / 50%);
+  /* 60% чёрного на белом — контраст 5,7:1 (нужно 4,5:1) */
+  color: rgb(0 0 0 / 60%);
   border-radius: 1000px;
 }
 .modal__box-title {
