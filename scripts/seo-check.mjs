@@ -110,6 +110,9 @@ const pages = htmlFiles(ROOT).map((file) => {
   const fail = (msg) => problems.push(`${path}: ${msg}`);
 
   if (!/<html lang="ru"/.test(html)) fail('нет <html lang="ru">');
+  // Незаполненные заглушки вида «[БИН/ИИН]» не должны попасть на сайт
+  const placeholder = html.match(/\[(?:юридическ|БИН|ИИН|адрес|e-mail)[^\]]*\]/i);
+  if (placeholder) fail(`незаполненная заглушка ${placeholder[0]}`);
   if (!page.title) fail("нет <title>");
   if (!page.description) fail("нет meta description");
   const h1 = (html.match(/<h1[\s>]/g) ?? []).length;
