@@ -54,6 +54,18 @@ test.describe("главная", () => {
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex");
   });
 
+  test("кнопка WhatsApp: на всех страницах с текстом про страницу, кроме визитки", async ({
+    page,
+  }) => {
+    const wa = page.getByRole("link", { name: "Написать в WhatsApp" });
+    await expect(wa).toHaveAttribute("href", /^https:\/\/wa\.me\/77010131359\?text=/);
+    await page.goto("/catalog/metallocherepitsa/kaskad");
+    const href = decodeURIComponent((await wa.getAttribute("href")) ?? "");
+    expect(href).toContain("Металлочерепица Каскад");
+    await page.goto("/taplink");
+    await expect(page.locator(".whatsapp-float")).toHaveCount(0);
+  });
+
   test("robots.txt и ключ IndexNow доступны поисковикам", async ({ request }) => {
     const robots = await (await request.get("/robots.txt")).text();
     expect(robots).toContain("Clean-param: utm_source");

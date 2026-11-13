@@ -6,6 +6,7 @@ import {
   PUBLIC_YANDEX_VERIFICATION,
 } from "astro:env/client";
 import "../styles/global.css";
+import WhatsAppButton from "../components/WhatsAppButton.astro";
 import interCyrillic from "../assets/fonts/inter-cyrillic-wght-normal.woff2?url";
 
 interface Props {
@@ -18,6 +19,8 @@ interface Props {
   ogImage?: string;
   noindex?: boolean;
   bodyClass?: string;
+  /** Плавающая кнопка WhatsApp; на визитке для Instagram своя кнопка */
+  whatsapp?: boolean;
 }
 
 const {
@@ -28,6 +31,7 @@ const {
   ogImage: ogImagePath = "/og.jpg",
   noindex = false,
   bodyClass = "page",
+  whatsapp = true,
 } = Astro.props;
 
 const site = Astro.site ?? new URL("https://velum.kz");
@@ -85,6 +89,7 @@ const verification =
   </head>
   <body class={bodyClass}>
     <slot />
+    {whatsapp && <WhatsAppButton topic={ogTitle.replace(/ \| Velum$/, "")} />}
     <!-- Скрипт сайта на всех страницах: при переходах без перезагрузки он уже загружен -->
     <script>
       import "../scripts/main.ts";
