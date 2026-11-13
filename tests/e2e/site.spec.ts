@@ -418,6 +418,27 @@ test.describe("каталог металлочерепицы", () => {
     await expect(page.locator(".calc__option[aria-current]")).toContainText("Полиэстер 0,45 мм");
   });
 
+  test("ловушка по времени: мгновенная отправка отклоняется, повторная проходит", async ({
+    page,
+  }) => {
+    await page.goto("/catalog/metallocherepitsa/kaskad");
+    await page.getByRole("link", { name: "Узнать стоимость" }).click();
+    const modal = page.locator(".blocker .modal");
+    const name = uniqueName();
+    // Как бот: поля и отправка сразу после открытия окна
+    await modal.evaluate((el, n) => {
+      el.dataset.openedAt = String(Date.now());
+      (el.querySelector('input[name="user_name"]') as HTMLInputElement).value = n;
+      (el.querySelector('input[type="tel"]') as HTMLInputElement).value = "+7 (701) 123-45-67";
+      el.querySelector("form")!.requestSubmit();
+    }, name);
+    await expect(modal.locator(".form-status")).toHaveText(/отправьте заявку ещё раз/);
+    await page.waitForTimeout(600);
+    await modal.getByRole("button", { name: "Отправить заявку" }).click();
+    await expect(modal.locator(".form-status")).toHaveText(/Спасибо/);
+    await sentMessage(name);
+  });
+
   test("двойное нажатие «Отправить» — одна заявка", async ({ page }) => {
     await page.goto("/catalog/metallocherepitsa/kaskad");
     await page.getByRole("link", { name: "Узнать стоимость" }).click();

@@ -8,6 +8,9 @@ import { verifyTurnstile } from "../../lib/turnstile";
 
 export const prerender = false;
 
+/** Быстрее этого форму заполняют только боты, мс */
+const MIN_FILL_MS = 500;
+
 const FALLBACK = `Не удалось отправить заявку, позвоните нам: ${business.phoneDisplay}`;
 
 const field = (form: FormData, name: string, max = 1000) =>
@@ -42,6 +45,14 @@ export const POST: APIRoute = async ({ request, redirect, clientAddress }) => {
 
   // Ловушка для ботов: скрытое поле должно остаться пустым
   if (form.get("website")) return reply(request, redirect);
+
+  // Ловушка по времени: от открытия окна до отправки прошло меньше полсекунды — так
+  // заполняют только скрипты. Человеку просто показываем ошибку: повторная отправка пройдёт.
+  // Без JavaScript поля fill_ms нет — такие заявки не трогаем
+  const fillMs = Number(form.get("fill_ms"));
+  if (form.has("fill_ms") && Number.isFinite(fillMs) && fillMs < MIN_FILL_MS) {
+    return reply(request, redirect, "Проверьте данные и отправьте заявку ещё раз", 400);
+  }
 
   if (TURNSTILE_SECRET_KEY) {
     const token = String(form.get("cf-turnstile-response") ?? "");
