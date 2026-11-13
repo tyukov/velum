@@ -310,7 +310,12 @@ PROMO-MESSAGE
 }
 
 .promo-message .promo-header__subtitle {
+  display: block;
   font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: normal;
+  text-wrap: wrap;
   margin: 0 0 0.625rem;
   color: #707070;
 }

@@ -42,6 +42,16 @@ test.describe("главная", () => {
     await expect(page.locator("h1")).toHaveCount(1);
   });
 
+  test("FAQ в разметке FAQPage, визитка для Instagram не индексируется", async ({ page }) => {
+    const ld = await page
+      .locator('script[type="application/ld+json"]')
+      .evaluateAll((els) => els.map((e) => JSON.parse(e.textContent ?? "{}")));
+    const faq = ld.find((d) => d["@type"] === "FAQPage");
+    expect(faq.mainEntity.length).toBe(await page.locator(".faq-list__item").count());
+    await page.goto("/taplink");
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex");
+  });
+
   test("robots.txt и ключ IndexNow доступны поисковикам", async ({ request }) => {
     const robots = await (await request.get("/robots.txt")).text();
     expect(robots).toContain("Clean-param: utm_source");
@@ -445,6 +455,19 @@ test.describe("каталог металлочерепицы", () => {
     await page.getByRole("group", { name: "Исполнение" }).getByRole("link", { name: "X" }).click();
     await expect(page).toHaveURL(/monterrosa-x\/vikingmp-e-0-5-ral-8004$/);
     await expect(page.locator("h1")).toContainText("Монтерроса X");
+  });
+
+  test("картинка товара: в разметке и превью ссылки, файл отдаётся", async ({ page, request }) => {
+    await page.goto("/catalog/metallocherepitsa/lamonterra-x/normanmp-0-5-ral-3005");
+    const og = await page.locator('meta[property="og:image"]').getAttribute("content");
+    expect(og).toBe("https://velum.kz/images/tile/ral-3005.jpg");
+    const res = await request.get("/images/tile/ral-3005.jpg");
+    expect(res.status()).toBe(200);
+    expect(res.headers()["content-type"]).toContain("image/jpeg");
+    const ld = await page
+      .locator('script[type="application/ld+json"]')
+      .evaluateAll((els) => els.map((e) => JSON.parse(e.textContent ?? "{}")));
+    expect(ld.find((d) => d["@type"] === "Product").image).toBe(og);
   });
 
   test("вариант: свой заголовок, canonical на модель; модель — ProductGroup", async ({ page }) => {

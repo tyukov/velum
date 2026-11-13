@@ -3,12 +3,14 @@ import Base from "../layouts/Base.astro";
 import Logo from "../components/Logo.astro";
 import LeadModal from "../components/LeadModal.astro";
 import "../styles/taplink.css";
+// Страница-визитка для ссылки в Instagram: дублирует контакты сайта, в поиск не нужна
 ---
 
 <Base
   title="Velum — контакты, товары и услуги"
   description="Velum: кровельные и фасадные материалы в Атырау. Каталог товаров и услуг, контакты, заявка на звонок."
   path="/taplink"
+  noindex
 >
   <div class="page__wrap">
     <div class="page-min">

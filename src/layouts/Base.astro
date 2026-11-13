@@ -14,6 +14,8 @@ interface Props {
   /** Путь страницы без завершающего слэша, например "/taplink" */
   path?: string;
   ogTitle?: string;
+  /** Картинка превью ссылки, путь от корня сайта; по умолчанию общая /og.jpg */
+  ogImage?: string;
   noindex?: boolean;
   bodyClass?: string;
 }
@@ -23,13 +25,14 @@ const {
   description,
   path = "/",
   ogTitle = title,
+  ogImage: ogImagePath = "/og.jpg",
   noindex = false,
   bodyClass = "page",
 } = Astro.props;
 
 const site = Astro.site ?? new URL("https://velum.kz");
 const canonical = new URL(path, site).href;
-const ogImage = new URL("/og.jpg", site).href;
+const ogImage = new URL(ogImagePath, site).href;
 // Поисковики проверяют код подтверждения на главной странице
 const verification =
   path === "/"

@@ -86,7 +86,7 @@
 .model-card__meta {
   margin: 0 0.5rem;
   font-size: 0.8125rem;
-  color: #777;
+  color: #666;
 }
 
 /* Страница товара */
@@ -110,7 +110,7 @@
 .product-view__note {
   margin: 0.5rem 0 0;
   font-size: 0.8125rem;
-  color: #777;
+  color: #666;
 }
 
 .product-view__title {

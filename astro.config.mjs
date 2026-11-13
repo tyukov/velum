@@ -38,7 +38,11 @@ export default defineConfig({
   integrations: [
     sitemap({
       // Только канонические страницы: варианты товаров ссылаются canonical на страницу модели
-      filter: (page) => !page.includes("/thanks") && !/\/catalog\/[^/]+\/[^/]+\/[^/]+$/.test(page),
+      // Не в карте сайта: служебные страницы, визитка для Instagram и варианты товаров (canonical на модель)
+      filter: (page) =>
+        !page.includes("/thanks") &&
+        !page.endsWith("/taplink") &&
+        !/\/catalog\/[^/]+\/[^/]+\/[^/]+$/.test(page),
     }),
   ],
   env: {

@@ -1,4 +1,6 @@
 ---
+import { colorSlug } from "../../../../data/catalog/colors";
+import { tileImagePath } from "../../../../lib/tile-svg";
 import CatalogLayout from "../../../../layouts/CatalogLayout.astro";
 import ProductView from "../../../../components/catalog/ProductView.astro";
 import { colors } from "../../../../data/catalog/colors";
@@ -47,6 +49,7 @@ const shortName = [
 <CatalogLayout
   title={`${shortName} | Velum`}
   description={`${name}${price ? `: ${formatPrice(price)} за м²` : ""}${warranty ? `, гарантия ${warranty} лет` : ""}. ${stockInfo[coating.stock].label}. Расчёт и доставка по Атырау.`}
+  ogImage={tileImagePath(colorSlug(variant.color))}
   path={`${modelPath}/${variant.slug}`}
   canonicalPath={modelPath}
   product={name}

@@ -12,16 +12,18 @@ interface Props {
   description: string;
   path: string;
   canonicalPath?: string;
+  /** Картинка превью ссылки */
+  ogImage?: string;
   /** Товар для заявки «Узнать стоимость» */
   product?: string;
   /** Цены поставщиков для менеджера */
   supply?: string;
 }
 
-const { title, description, path, canonicalPath, product, supply } = Astro.props;
+const { title, description, path, canonicalPath, ogImage, product, supply } = Astro.props;
 ---
 
-<Base title={title} description={description} path={canonicalPath ?? path}>
+<Base title={title} description={description} path={canonicalPath ?? path} ogImage={ogImage}>
   <Header />
   <main class="main catalog">
     <div class="wrap catalog__wrap">
