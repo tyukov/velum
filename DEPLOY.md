@@ -96,10 +96,12 @@
 
 ## 7. После запуска
 
-- **Vercel Speed Insights** (реальная скорость сайта у посетителей, бесплатно на Hobby):
-  проект в Vercel → вкладка **Speed Insights** → **Enable**. Код уже подключён (`src/scripts/main.ts`),
-  данные появятся после первых посещений velum.kz. Страницы моделей и вариантов в отчёте
-  сгруппированы: `/catalog/metallocherepitsa/[model]` и `/[model]/[variant]`.
+- **Vercel Web Analytics** (посещаемость: страницы, источники, устройства, страны — без cookie)
+  и **Speed Insights** (реальная скорость сайта у посетителей). Оба бесплатны на Hobby с лимитами.
+  Включаются в проекте Vercel: вкладка **Analytics** → **Enable** и вкладка **Speed Insights** →
+  **Enable**. Код уже подключён (`src/scripts/main.ts`), данные появятся после первых посещений
+  velum.kz. Страницы моделей и вариантов в отчётах сгруппированы:
+  `/catalog/metallocherepitsa/[model]` и `/[model]/[variant]`.
 
 - Проверьте скорость в PageSpeed Insights: https://pagespeed.web.dev/
 
