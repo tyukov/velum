@@ -11,6 +11,10 @@ export default defineConfig({
   reporter: process.env.CI ? [["github"], ["list"]] : "list",
   // Dev-сервер собирает страницу при первом заходе; под нагрузкой параллельных тестов это дольше 5 с
   expect: { timeout: 10_000 },
+  // Эталоны скриншотов без суффикса платформы: их снимает и сравнивает одна среда — CI.
+  // В CI отсутствующий эталон — ошибка, а не повод молча его создать
+  snapshotPathTemplate: "{testDir}/__screenshots__/{testFilePath}/{arg}-{projectName}{ext}",
+  updateSnapshots: process.env.CI ? "none" : "missing",
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: "retain-on-failure",

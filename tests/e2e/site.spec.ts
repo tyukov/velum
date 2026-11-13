@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Locator } from "@playwright/test";
 import fs from "node:fs";
 import { TELEGRAM_MOCK_LOG } from "../../playwright.config";
 
@@ -17,6 +17,14 @@ const sentMessage = async (name: string): Promise<{ text: string }> => {
     })
     .toBe(true);
   return found!;
+};
+
+// Сервер отклоняет заявки, отправленные быстрее 0,5 с после открытия окна (ловушка для ботов).
+// Playwright заполняет форму быстрее человека, поэтому перед отправкой ждём, как человек
+const humanPause = async (modal: Locator) => {
+  const openedAt = Number(await modal.getAttribute("data-opened-at"));
+  const wait = openedAt + 600 - (await modal.page().evaluate(() => Date.now()));
+  if (wait > 0) await modal.page().waitForTimeout(wait);
 };
 
 test.describe("главная", () => {
@@ -93,6 +101,7 @@ test.describe("главная", () => {
     await phone.pressSequentially("87011234567");
     await expect(phone).toHaveValue("+7 (701) 123-45-67");
     await modal.getByLabel("Ваш вопрос:").fill("Нужна черепица <b>");
+    await humanPause(modal);
     await modal.getByRole("button", { name: "Отправить заявку" }).click();
 
     await expect(modal.locator(".form-status")).toHaveText(/Спасибо/);
@@ -121,6 +130,7 @@ test.describe("главная", () => {
     const modal = page.locator(".blocker .modal");
     await modal.getByLabel("Ваше имя").fill("Тест");
     await modal.getByLabel("Ваш телефон").pressSequentially("701");
+    await humanPause(modal);
     await modal.getByRole("button", { name: "Заказать звонок" }).click();
     // Браузер не даёт отправить форму, пока номер не совпадает с шаблоном
     expect(
@@ -377,6 +387,7 @@ test.describe("каталог металлочерепицы", () => {
     const name = uniqueName();
     await modal.getByLabel("Ваше имя").fill(name);
     await modal.getByLabel("Ваш телефон").pressSequentially("7011234567");
+    await humanPause(modal);
     await modal.getByRole("button", { name: "Отправить заявку" }).click();
     await expect(modal.locator(".form-status")).toHaveText(/Спасибо/);
     const sent = await sentMessage(name);
@@ -418,6 +429,27 @@ test.describe("каталог металлочерепицы", () => {
     await expect(page.locator(".calc__option[aria-current]")).toContainText("Полиэстер 0,45 мм");
   });
 
+  test("ловушка по времени: мгновенная отправка отклоняется, повторная проходит", async ({
+    page,
+  }) => {
+    await page.goto("/catalog/metallocherepitsa/kaskad");
+    await page.getByRole("link", { name: "Узнать стоимость" }).click();
+    const modal = page.locator(".blocker .modal");
+    const name = uniqueName();
+    // Как бот: поля и отправка сразу после открытия окна
+    await modal.evaluate((el, n) => {
+      el.dataset.openedAt = String(Date.now());
+      (el.querySelector('input[name="user_name"]') as HTMLInputElement).value = n;
+      (el.querySelector('input[type="tel"]') as HTMLInputElement).value = "+7 (701) 123-45-67";
+      el.querySelector("form")!.requestSubmit();
+    }, name);
+    await expect(modal.locator(".form-status")).toHaveText(/отправьте заявку ещё раз/);
+    await page.waitForTimeout(600);
+    await modal.getByRole("button", { name: "Отправить заявку" }).click();
+    await expect(modal.locator(".form-status")).toHaveText(/Спасибо/);
+    await sentMessage(name);
+  });
+
   test("двойное нажатие «Отправить» — одна заявка", async ({ page }) => {
     await page.goto("/catalog/metallocherepitsa/kaskad");
     await page.getByRole("link", { name: "Узнать стоимость" }).click();
@@ -426,6 +458,7 @@ test.describe("каталог металлочерепицы", () => {
     await modal.getByLabel("Ваше имя").fill(name);
     await modal.getByLabel("Ваш телефон").pressSequentially("7011234567");
     const submit = modal.getByRole("button", { name: "Отправить заявку" });
+    await humanPause(modal);
     await submit.dblclick();
     await expect(modal.locator(".form-status")).toHaveText(/Спасибо/);
     await expect(submit).toBeDisabled();
@@ -445,6 +478,7 @@ test.describe("каталог металлочерепицы", () => {
     const name = uniqueName();
     await modal.getByLabel("Ваше имя").fill(name);
     await modal.getByLabel("Ваш телефон").pressSequentially("7011234567");
+    await humanPause(modal);
     await modal.getByRole("button", { name: "Отправить заявку" }).click();
     await expect(modal.locator(".form-status")).toHaveText(/Спасибо/);
     const sent = await sentMessage(name);
@@ -575,6 +609,7 @@ test.describe("второй поставщик", () => {
     const name = uniqueName();
     await modal.getByLabel("Ваше имя").fill(name);
     await modal.getByLabel("Ваш телефон").pressSequentially("7011234567");
+    await humanPause(modal);
     await modal.getByRole("button", { name: "Отправить заявку" }).click();
     await expect(modal.locator(".form-status")).toHaveText(/Спасибо/);
     const sent = await sentMessage(name);

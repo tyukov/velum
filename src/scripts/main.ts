@@ -60,6 +60,8 @@ function openModal(modal: HTMLElement | null) {
   if (!modal) return;
   if (current) closeModal();
   lastFocus = document.activeElement as HTMLElement | null;
+  // Время открытия окна: заявку, отправленную почти мгновенно, сервер считает ботом
+  modal.dataset.openedAt = String(Date.now());
 
   const blocker = document.createElement("div");
   blocker.className = "jquery-modal blocker current";
@@ -238,9 +240,12 @@ function initForms() {
 
       let sent = false;
       try {
+        const body = new FormData(form);
+        const openedAt = Number(form.closest<HTMLElement>(".modal")?.dataset.openedAt);
+        if (openedAt) body.set("fill_ms", String(Date.now() - openedAt));
         const res = await fetch(form.action, {
           method: "POST",
-          body: new FormData(form),
+          body,
           headers: { Accept: "application/json" },
         });
         const data: { ok?: boolean; error?: string } = await res.json().catch(() => ({}));
