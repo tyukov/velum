@@ -7,6 +7,7 @@ import type {
 } from "astro:transitions/client";
 import { formatPhone } from "../lib/phone";
 import { initCalc } from "./calc";
+import { injectSpeedInsights } from "@vercel/speed-insights";
 
 // ---------- Cloudflare Turnstile (если на сайте задан ключ) ----------
 // Скрипт Cloudflare загружается только при первом открытии формы, чтобы не замедлять страницу.
@@ -271,8 +272,27 @@ async function initZoom() {
   zoom.attach(".zoom");
 }
 
+// ---------- Vercel Speed Insights: реальная скорость сайта у посетителей ----------
+// Подключаем один раз здесь, а не компонентом в шаблоне: при переходах без перезагрузки
+// компонент вставлял бы скрипт заново на каждой странице. Только в продакшене:
+// в разработке пакет грузит отладочный скрипт со стороннего домена.
+// Страницы моделей и вариантов группируем по шаблону, чтобы в панели Vercel
+// не было сотен отдельных адресов.
+const routeOf = (path: string) =>
+  path
+    .replace(
+      /^\/catalog\/metallocherepitsa\/[^/]+\/[^/]+$/,
+      "/catalog/metallocherepitsa/[model]/[variant]",
+    )
+    .replace(/^\/catalog\/metallocherepitsa\/[^/]+$/, "/catalog/metallocherepitsa/[model]");
+
+const speedInsights = import.meta.env.PROD
+  ? injectSpeedInsights({ framework: "astro", route: routeOf(location.pathname) })
+  : null;
+
 // Первая загрузка и каждый переход между страницами
 document.addEventListener("astro:page-load", () => {
+  speedInsights?.setRoute(routeOf(location.pathname));
   initCalc();
   initPhoneMasks();
   initFaq();
