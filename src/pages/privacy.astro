@@ -5,7 +5,7 @@ import { business } from "../lib/business";
 import "../styles/taplink.css";
 
 const { legal } = business;
-const updated = "30 октября 2026 г.";
+const updated = "13 ноября 2026 г.";
 ---
 
 <Base
@@ -27,8 +27,8 @@ const updated = "30 октября 2026 г.";
           Казахстан от 21 мая 2013 года № 94-V «О персональных данных и их защите».
         </p>
         <p>
-          Собственник и оператор базы, содержащей персональные данные: {legal.name}, БИН/ИИН{" "}
-          {legal.bin}, адрес: {legal.address} (далее — Оператор).
+          Собственник и оператор базы, содержащей персональные данные: {legal.name}, ИИН {legal.iin}
+          , место нахождения: {legal.location} (далее — Оператор).
         </p>
 
         <h2>2. Какие данные мы собираем</h2>
@@ -86,7 +86,8 @@ const updated = "30 октября 2026 г.";
           <li>отозвать согласие на обработку.</li>
         </ul>
         <p>
-          Для этого напишите на {legal.email} или позвоните по телефону
+          Для этого напишите на <a href={`mailto:${legal.email}`}>{legal.email}</a> или позвоните по
+          телефону
           <a href={`tel:${business.phoneE164}`}>{business.phoneDisplay}</a>.
         </p>
 
