@@ -607,7 +607,8 @@ test.describe("каталог металлочерепицы", () => {
     const sent = await sentMessage(name);
     expect(sent.text).toContain(
       "<b>Товар:</b> Металлочерепица Трамонтана VikingMP E 0,5 мм, RR 32",
-    );
+    ); // Площадь по умолчанию (100 м²) посетитель не трогал — в заявку она не попадает
+    expect(sent.text).not.toContain("крыша 100 м²");
   });
 
   test("Монтерроса: исполнения одной модели, цвет и покрытие сохраняются", async ({ page }) => {
