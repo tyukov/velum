@@ -181,8 +181,16 @@ test.describe("главная", () => {
   });
 });
 
-test("Taplink: форма открывается", async ({ page }) => {
+test("Taplink: главные кнопки, товары, 2ГИС, форма открывается", async ({ page }) => {
   await page.goto("/taplink");
+  await expect(page.locator("h1")).toHaveText("Кровля и фасад в Атырау");
+  const actions = page.getByRole("navigation", { name: "Связаться с нами" });
+  await expect(actions.getByRole("link")).toHaveCount(5);
+  await expect(actions.getByRole("link", { name: "Как добраться (2ГИС)" })).toHaveAttribute(
+    "href",
+    "https://go.2gis.com/v1o8m",
+  );
+  await expect(page.locator(".tl__goods li")).toHaveCount(16);
   await page.locator('a[href="#ex1"]').click();
   await expect(page.locator(".blocker .modal")).toBeVisible();
 });
