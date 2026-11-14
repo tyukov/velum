@@ -104,7 +104,7 @@ test.describe("главная", () => {
     const phone = modal.getByLabel("Ваш телефон");
     await phone.pressSequentially("87011234567");
     await expect(phone).toHaveValue("+7 (701) 123-45-67");
-    await modal.getByLabel("Ваш вопрос:").fill("Нужна черепица <b>");
+    await modal.getByLabel("Ваш вопрос").fill("Нужна черепица <b>");
     await humanPause(modal);
     await modal.getByRole("button", { name: "Отправить заявку" }).click();
 
@@ -186,6 +186,21 @@ test("политика конфиденциальности", async ({ page }) =
   await page.goto("/privacy");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Политика конфиденциальности");
   await expect(page.getByText("№ 94-V")).toBeVisible();
+});
+
+test("инструкции: шаги и разметка HowTo, ссылка в шапке", async ({ page, isMobile }) => {
+  await page.goto("/");
+  if (isMobile) await page.locator(".s-menu > summary").click();
+  await page
+    .locator(isMobile ? ".s-menu__panel" : ".s-nav")
+    .getByRole("link", { name: "Инструкции" })
+    .click();
+  await expect(page).toHaveURL(/\/instructions$/);
+  await expect(page.getByRole("heading", { level: 2, name: "Как измерить крышу" })).toBeVisible();
+  const ld = await page
+    .locator('script[type="application/ld+json"]')
+    .evaluateAll((els) => els.flatMap((e) => JSON.parse(e.textContent ?? "[]")));
+  expect(ld.filter((d) => d["@type"] === "HowTo")).toHaveLength(4);
 });
 
 test("несуществующая страница — 404", async ({ page }) => {

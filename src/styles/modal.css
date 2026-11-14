@@ -1,0 +1,236 @@
+/* Окно заявки в стиле макета «эскиз»: слева эскиз дома и доводы, справа форма.
+   Само открытие/закрытие — src/scripts/main.ts (разметка .blocker > .modal + a.close-modal). */
+.blocker {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  overflow: auto;
+  box-sizing: border-box;
+  padding: 20px;
+  background-color: rgb(20 18 16 / 55%);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  text-align: center;
+}
+.blocker::before {
+  content: "";
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+  margin-right: -0.05em;
+}
+.modal.lead {
+  position: relative;
+  display: none;
+  vertical-align: middle;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 480px;
+  padding: 0;
+  border-radius: 28px;
+  background: #ffffff;
+  text-align: left;
+  font-family: Inter, system-ui, sans-serif;
+  overflow: hidden;
+  box-shadow: 0 30px 80px rgb(0 0 0 / 25%);
+}
+.blocker .modal.lead {
+  display: inline-block;
+}
+.modal.lead_wide {
+  max-width: 880px;
+}
+.lead_wide .lead__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.lead__aside {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 24px;
+  background: var(--paper-2, #faf7f3);
+}
+.lead__aside img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: auto 0 12px;
+}
+.lead__aside-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ink, #141414);
+}
+.lead__aside ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 15px;
+  line-height: 1.45;
+  color: #555555;
+}
+.lead__aside li {
+  position: relative;
+  padding: 4px 0 4px 22px;
+}
+.lead__aside li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 10px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent, #e8a96f);
+}
+
+.lead__form {
+  padding: 40px 40px 32px;
+}
+.lead__title {
+  margin: 0 48px 12px 0;
+  font-size: clamp(26px, 3vw, 32px);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  color: var(--ink, #141414);
+}
+.lead__text {
+  margin: 0 0 20px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #555555;
+}
+.lead__field {
+  margin-bottom: 14px;
+}
+.lead__field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333333;
+}
+.lead__field label span {
+  font-weight: 400;
+  color: #6d665e;
+}
+.lead__field input,
+.lead__field textarea {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 52px;
+  padding: 13px 16px;
+  border: 1px solid #e3ddd3;
+  border-radius: 14px;
+  background: #ffffff;
+  font: inherit;
+  font-size: 16px;
+  color: var(--ink, #141414);
+  transition: border-color 0.15s;
+}
+.lead__field textarea {
+  height: 92px;
+  resize: none;
+}
+.lead__field input::placeholder,
+.lead__field textarea::placeholder {
+  color: #8a8279;
+}
+.lead__field input:focus,
+.lead__field textarea:focus {
+  outline: none;
+  border-color: var(--ink, #141414);
+}
+.lead__field input:focus-visible,
+.lead__field textarea:focus-visible {
+  outline: 2px solid var(--accent, #e8a96f);
+  outline-offset: 2px;
+}
+.lead__submit {
+  width: 100%;
+  margin-top: 6px;
+}
+.lead__legal {
+  margin: 14px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #6d665e;
+}
+.lead__legal a {
+  color: inherit;
+}
+.lead__wa {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 8px;
+  color: var(--wa, #157a3f);
+  font-size: 15px;
+  font-weight: 600;
+}
+.lead .form-status {
+  margin: 12px 0 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink, #141414);
+}
+
+/* Крестик */
+.modal.lead a.close-modal {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 1;
+  display: block;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #f3f1ee;
+  text-indent: -9999px;
+  overflow: hidden;
+  cursor: pointer;
+}
+.modal.lead a.close-modal::before,
+.modal.lead a.close-modal::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  top: 21px;
+  width: 16px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--ink, #141414);
+  transform: rotate(45deg);
+}
+.modal.lead a.close-modal::after {
+  transform: rotate(-45deg);
+}
+.modal.lead a.close-modal:focus-visible {
+  outline: 2px solid var(--accent, #e8a96f);
+  outline-offset: 2px;
+}
+
+/* Телефон и планшет: только форма, эскиз сверху маленький */
+@media (max-width: 760px) {
+  .blocker {
+    padding: 12px;
+  }
+  .lead_wide .lead__grid {
+    display: block;
+  }
+  .lead__aside {
+    display: none;
+  }
+  .lead__form {
+    padding: 28px 20px 20px;
+  }
+  .modal.lead {
+    border-radius: 24px;
+  }
+}

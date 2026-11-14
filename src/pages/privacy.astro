@@ -1,21 +1,25 @@
 ---
-import Base from "../layouts/Base.astro";
-import Logo from "../components/Logo.astro";
+import PageLayout from "../layouts/PageLayout.astro";
+import Breadcrumbs from "../components/catalog/Breadcrumbs.astro";
 import { business } from "../lib/business";
-import "../styles/taplink.css";
 
 const { legal } = business;
 const updated = "13 ноября 2026 г.";
 ---
 
-<Base
+<PageLayout
   title="Политика конфиденциальности | Velum"
   description="Как Velum собирает, использует и защищает персональные данные посетителей сайта velum.kz."
   path="/privacy"
 >
-  <div class="page__wrap">
-    <div class="page-min">
-      <Logo />
+  <div class="s-wrap s-policy">
+    <Breadcrumbs
+      items={[
+        { name: "Главная", href: "/" },
+        { name: "Политика конфиденциальности", href: "/privacy" },
+      ]}
+    />
+    <div class="s-policy__in">
       <article class="policy">
         <h1>Политика конфиденциальности</h1>
         <p class="policy__updated">Редакция от {updated}</p>
@@ -97,41 +101,48 @@ const updated = "13 ноября 2026 г.";
           странице.
         </p>
       </article>
-      <a href="/" class="btn btn_theme_grab btn_size_m btn_size_l">
-        <span class="btn__text">Вернуться на главную</span>
+      <a href="/" class="s-btn s-btn--dark">
+        Вернуться на главную
       </a>
     </div>
   </div>
-</Base>
+</PageLayout>
 
 <style>
+  .s-policy {
+    padding-top: 24px;
+    padding-bottom: clamp(48px, 6vw, 88px);
+  }
+  .s-policy__in {
+    max-width: 760px;
+  }
   .policy {
-    margin: 2rem 0;
     text-align: left;
   }
   .policy h1 {
-    font-size: clamp(1.5rem, 7vw, 2rem);
-    line-height: 1.2;
-    text-align: center;
+    margin: 0 0 8px;
+    font-size: clamp(30px, 4vw, 44px);
+    line-height: 1.15;
+    letter-spacing: -0.015em;
     overflow-wrap: anywhere;
   }
   .policy h2 {
     margin: 2rem 0 0.75rem;
-    font-size: 1.25rem;
+    font-size: 20px;
   }
   .policy p,
   .policy li {
-    font-size: 1rem;
-    line-height: 1.6;
-    color: #333;
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--text);
   }
   .policy ul {
     padding-left: 1.25rem;
   }
   .policy .policy__updated {
-    font-size: 0.875rem;
-    text-align: center;
-    color: #666;
+    margin: 0 0 24px;
+    font-size: 14px;
+    color: var(--muted);
   }
   .policy a {
     color: inherit;

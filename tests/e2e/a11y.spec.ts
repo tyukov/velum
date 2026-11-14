@@ -20,6 +20,8 @@ for (const path of [
   "/catalog/metallocherepitsa/lamonterra-x",
   "/catalog/metallocherepitsa/monterrosa-s/vikingmp-0-45-ral-7021",
   "/privacy",
+  "/instructions",
+  "/thanks",
   "/taplink",
 ]) {
   test(`доступность: ${path}`, async ({ page }) => {

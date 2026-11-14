@@ -1,0 +1,280 @@
+---
+// Инструкции: замер, разгрузка и хранение, монтаж, уход. Разметка HowTo для поисковиков.
+import PageLayout from "../../layouts/PageLayout.astro";
+import Breadcrumbs from "../../components/catalog/Breadcrumbs.astro";
+import { business } from "../../lib/business";
+
+const guides = [
+  {
+    id: "zamer",
+    title: "Как измерить крышу",
+    art: ["tile", "classic", "#45322E"],
+    steps: [
+      "Измерьте каждый скат: длину от конька до края карниза и ширину по карнизу.",
+      "К длине листа добавьте свес за карниз — обычно 4–5 см, чтобы вода уходила в желоб.",
+      "Площадь ската = длина × ширина. Сложите все скаты и добавьте 10% на подрезку и нахлёсты.",
+      "Пришлите размеры или фото чертежа — посчитаем листы, доборные элементы и саморезы бесплатно.",
+    ],
+  },
+  {
+    id: "hranenie",
+    title: "Разгрузка и хранение",
+    art: ["profnastil", "c20", "#55443a"],
+    steps: [
+      "Снимайте листы вдвоём, за длинные края, не тяните лист по пачке — так не останется царапин.",
+      "Храните на ровном настиле под навесом, с подкладками через 50 см.",
+      "Защитную плёнку снимите сразу после монтажа: на солнце она прикипает к покрытию.",
+    ],
+  },
+  {
+    id: "montazh",
+    title: "Монтаж металлочерепицы",
+    art: ["ridge", "", "#474A51"],
+    steps: [
+      "Уложите гидроизоляционную плёнку и прибейте контробрешётку — под листом должна проветриваться крыша.",
+      "Сделайте обрешётку с шагом, равным шагу ряда вашей модели — его подскажет менеджер.",
+      "Сначала закрепите карнизную планку, затем укладывайте листы снизу вверх с нахлёстом на одну волну.",
+      "Крепите кровельными саморезами с уплотнительной шайбой в прогиб волны под ступенькой — примерно 6–8 штук на м².",
+      "Режьте ножницами по металлу или электроножницами. Болгаркой резать нельзя: она прожигает покрытие, и край начнёт ржаветь.",
+      "В конце поставьте конёк, торцевые планки и снегозадержатели.",
+    ],
+  },
+  {
+    id: "uhod",
+    title: "Уход за крышей",
+    art: ["gutter", "", "#45322E"],
+    steps: [
+      "Раз в год осматривайте крышу и подтягивайте ослабшие саморезы.",
+      "Весной и осенью чистите желоба и воронки от листьев.",
+      "Мойте водой с мягкой щёткой, без абразивов и растворителей.",
+      "Царапины закрашивайте ремонтной эмалью в цвет покрытия — она продаётся под каждый RAL.",
+    ],
+  },
+];
+
+const site = Astro.site ?? new URL("https://velum.kz");
+const jsonLd = guides.map((g) => ({
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  name: g.title,
+  url: new URL(`/instructions#${g.id}`, site).href,
+  step: g.steps.map((text, i) => ({ "@type": "HowToStep", position: i + 1, text })),
+}));
+---
+
+<PageLayout
+  title="Инструкции: замер, монтаж и уход за крышей | Velum"
+  description="Как измерить крышу, принять и хранить листы металлочерепицы, смонтировать кровлю и ухаживать за ней. Короткие инструкции по шагам от Velum, Атырау."
+  path="/instructions"
+  lead
+>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  <div class="s-wrap guides">
+    <Breadcrumbs
+      items={[
+        { name: "Главная", href: "/" },
+        { name: "Инструкции", href: "/instructions" },
+      ]}
+    />
+    <header class="guides__head">
+      <h1>Инструкции: от замера до ухода за крышей</h1>
+      <p>
+        Коротко и по шагам: как посчитать материал, принять и хранить листы, смонтировать крышу и
+        ухаживать за ней.
+      </p>
+      <nav class="guides__toc" aria-label="Разделы инструкций">
+        {guides.map((g) => (
+          <a href={`#${g.id}`}>{g.title}</a>
+        ))}
+      </nav>
+    </header>
+
+    {guides.map((g, i) => (
+      <section id={g.id} class:list={["guide", { guide_flip: i % 2 === 1 }]}>
+        <div class="guide__text">
+          <p class="guide__step">
+            Шаг {i + 1} из {guides.length}
+          </p>
+          <h2>{g.title}</h2>
+          <ol>
+            {g.steps.map((s) => (
+              <li>{s}</li>
+            ))}
+          </ol>
+        </div>
+        <div class="guide__art">
+          <canvas
+            data-art
+            data-kind={g.art[0]}
+            data-model={g.art[1]}
+            data-color={g.art[2]}
+            aria-hidden="true"
+          />
+        </div>
+      </section>
+    ))}
+
+    <aside class="guides__note">
+      <div>
+        <h2>Это общие рекомендации</h2>
+        <p>
+          Перед монтажом сверьтесь с инструкцией производителя для вашей модели. Если сомневаетесь —
+          позвоните, подскажем.
+        </p>
+      </div>
+      <a class="s-btn s-btn--accent" href={`tel:${business.phoneE164}`}>
+        {business.phoneDisplay}
+      </a>
+    </aside>
+  </div>
+</PageLayout>
+
+<style>
+  .guides {
+    padding-top: 24px;
+    padding-bottom: clamp(48px, 6vw, 88px);
+    font-family: Inter, system-ui, sans-serif;
+  }
+  .guides__head {
+    padding: clamp(22px, 4vw, 48px);
+    border-radius: 28px;
+    background: var(--paper);
+  }
+  .guides__head h1 {
+    margin: 0 0 12px;
+    font-size: clamp(28px, 3.6vw, 44px);
+    line-height: 1.15;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+  .guides__head p {
+    max-width: 38rem;
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--text);
+  }
+  .guides__toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 20px;
+  }
+  .guides__toc a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 16px;
+    border-radius: 20px;
+    background: #ffffff;
+    border: 1px solid #e3ddd3;
+    color: var(--ink);
+    font-size: 14px;
+    text-decoration: none;
+  }
+  .guides__toc a:hover {
+    border-color: var(--ink);
+  }
+  .guide {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(24px, 4vw, 56px);
+    padding-block: clamp(32px, 4vw, 48px);
+    border-bottom: 1px solid var(--line);
+    scroll-margin-top: calc(var(--header-h) + 12px);
+  }
+  .guide_flip .guide__art {
+    order: -1;
+  }
+  .guide__step {
+    margin: 0 0 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-ink);
+  }
+  .guide h2 {
+    margin: 0 0 16px;
+    font-size: clamp(24px, 2.6vw, 32px);
+    font-weight: 600;
+  }
+  .guide ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: g;
+  }
+  .guide li {
+    position: relative;
+    padding: 6px 0 6px 40px;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--text);
+    counter-increment: g;
+  }
+  .guide li::before {
+    content: counter(g);
+    position: absolute;
+    left: 0;
+    top: 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid #e3ddd3;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .guide__art {
+    border-radius: 24px;
+    background: var(--paper);
+    overflow: hidden;
+  }
+  .guide__art canvas {
+    display: block;
+    width: 100%;
+    height: 300px;
+  }
+  .guides__note {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px 32px;
+    margin-top: clamp(32px, 4vw, 48px);
+    padding: clamp(22px, 3vw, 36px);
+    border-radius: 24px;
+    background: var(--ink);
+    color: #d6d0c8;
+  }
+  .guides__note h2 {
+    margin: 0 0 6px;
+    font-size: 22px;
+    font-weight: 600;
+    color: #ffffff;
+  }
+  .guides__note p {
+    max-width: 36rem;
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  @media (max-width: 760px) {
+    .guide {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
+    }
+    .guide__art,
+    .guide_flip .guide__art {
+      order: -1;
+    }
+    .guide__art canvas {
+      height: 180px;
+    }
+    .guides__note .s-btn {
+      width: 100%;
+    }
+  }
+</style>
