@@ -18,6 +18,13 @@ const items = [
     text: "Привезём до объекта, при необходимости — монтаж с проверенными бригадами.",
   },
 ];
+// Значки доводов: дом/склад, расчёт, гарантия, доставка
+const ICONS = [
+  "M3 11 12 4l9 7M5 10v10h14V10M10 20v-6h4v6",
+  "M7 3h7l4 4v14H7zM14 3v4h4M10 12h5M10 16h5",
+  "M12 3 5 6v6c0 4.5 3 7.6 7 9 4-1.4 7-4.5 7-9V6zM9 12l2 2 4-4",
+  "M3 6h11v10H3zM14 10h4l3 3v3h-7M7 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4M17 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4",
+];
 ---
 
 <section class="s-section s-wrap" aria-labelledby="why-title">
@@ -29,11 +36,24 @@ const items = [
   <ul class="why">
     {items.map((it, i) => (
       <li class="why__item s-card">
-        <span class="why__num" aria-hidden="true">
-          {String(i + 1).padStart(2, "0")}
+        <span class="why__icon" aria-hidden="true">
+          <svg
+            width="26"
+            height="26"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d={ICONS[i]}></path>
+          </svg>
         </span>
-        <h3>{it.title}</h3>
-        <p>{it.text}</p>
+        <div>
+          <h3>{it.title}</h3>
+          <p>{it.text}</p>
+        </div>
       </li>
     ))}
   </ul>
@@ -51,11 +71,15 @@ const items = [
   .why__item {
     padding: 24px;
   }
-  .why__num {
-    display: block;
-    margin-bottom: 18px;
-    font-size: 14px;
-    font-weight: 600;
+  .why__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    margin-bottom: 16px;
+    border-radius: 16px;
+    background: #fbefe2;
     color: var(--accent-ink);
   }
   .why__item h3 {
@@ -76,8 +100,18 @@ const items = [
     .why__item {
       padding: 18px;
     }
-    .why__num {
-      margin-bottom: 8px;
+    /* Телефон: компактный список, иконка слева */
+    .why__item {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .why__icon {
+      flex: none;
+      width: 44px;
+      height: 44px;
+      margin: 0;
+      border-radius: 14px;
     }
   }
 </style>

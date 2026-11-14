@@ -91,7 +91,7 @@ test.describe("главная", () => {
   });
 
   test("заявка: маска телефона, отправка, закрытие окна", async ({ page }) => {
-    await page.locator('.hero a[href="#ex1"]').click();
+    await page.locator('.hcalc a[href="#ex1"]').click();
     const modal = page.locator(".blocker .modal");
     await expect(modal).toBeVisible();
     await expect(modal.getByRole("link", { name: "политикой конфиденциальности" })).toHaveAttribute(
@@ -120,7 +120,7 @@ test.describe("главная", () => {
 
   test("крестик окна не закрыт шапкой на маленьком экране", async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 568 });
-    await page.locator('.hero a[href="#ex1"]').click();
+    await page.locator('.hcalc a[href="#ex1"]').click();
     await page.locator(".blocker").evaluate((el) => (el.scrollTop = 0));
     const close = page.locator(".close-modal");
     await close.click();
@@ -345,7 +345,7 @@ test("переходы между страницами без перезагру
   expect(await page.evaluate(() => (window as unknown as { marker?: number }).marker)).toBe(1);
 
   // Скрипты страницы работают после перехода
-  await page.locator('.hero a[href="#ex1"]').click();
+  await page.locator('.hcalc a[href="#ex1"]').click();
   const phone = page.locator(".blocker").getByLabel("Ваш телефон");
   await phone.pressSequentially("7011234567");
   await expect(phone).toHaveValue("+7 (701) 123-45-67");
@@ -773,4 +773,26 @@ test.describe("второй поставщик", () => {
     const sent = await sentMessage(name);
     expect(sent.text).toMatch(/<b>Цены поставщиков:<\/b> П2: 3\s075\s₸/);
   });
+});
+
+test("меню на телефоне: разделы, контакты, WhatsApp, нижняя панель скрыта", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 760 });
+  await page.goto("/");
+  await page.locator(".s-menu > summary").click();
+  const panel = page.locator(".s-menu__panel");
+  await expect(panel.locator(".s-menu__chip")).toHaveText([
+    "Крыша",
+    "Фасад",
+    "Забор",
+    "Водосток",
+    "Доборные",
+  ]);
+  await expect(panel.getByRole("link", { name: "Написать в WhatsApp" })).toHaveAttribute(
+    "href",
+    /^https:\/\/wa\.me\//,
+  );
+  await expect(page.locator(".s-bar")).toBeHidden();
+  await panel.getByRole("link", { name: /Контакты/ }).click();
+  await expect(page.locator(".s-menu")).not.toHaveAttribute("open");
+  await expect(page.locator("#contacts")).toBeInViewport();
 });

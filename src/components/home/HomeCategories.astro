@@ -47,7 +47,9 @@ const cats = [
     <h2 id="cats-title" class="s-h2">
       Всё для дома — от крыши до забора
     </h2>
-    <a href="/catalog">Весь каталог →</a>
+    <a href="/catalog" class="cats__all">
+      Весь каталог →
+    </a>
   </div>
   <div class="cats">
     {cats.map((c) => (
@@ -70,8 +72,8 @@ const cats = [
             <h3 class="cats__title">{c.title}</h3>
             <p class="cats__text">{c.text}</p>
           </div>
-          <span class={`cats__badge${c.ready ? " cats__badge--ok" : ""}`}>
-            {c.ready ? "в наличии" : "цена в WhatsApp"}
+          <span class="cats__go" aria-hidden="true">
+            →
           </span>
         </div>
       </a>
@@ -105,8 +107,10 @@ const cats = [
     height: 200px;
   }
   .cats__body {
+    flex: 1;
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
     gap: 10px;
     padding: 4px 20px 20px;
   }
@@ -121,26 +125,44 @@ const cats = [
     line-height: 1.4;
     color: var(--muted);
   }
-  .cats__badge {
-    align-self: flex-start;
-    padding: 4px 9px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 600;
+  .cats__go {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
     background: #ffffff;
-    color: var(--muted);
+    border: 1px solid var(--line);
+    font-size: 18px;
+    color: var(--ink);
+    transition:
+      background-color 0.2s,
+      color 0.2s;
   }
-  .cats__badge--ok {
-    background: #eef7ee;
-    color: #24572a;
+  .cats__item:hover .cats__go {
+    background: var(--ink);
+    color: #ffffff;
   }
+  /* Телефон: лента карточек с прокруткой вбок */
   @media (max-width: 640px) {
     .cats {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      display: flex;
       gap: 10px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      margin-inline: calc(var(--gutter) * -1);
+      padding-inline: var(--gutter);
+      scroll-padding-inline: var(--gutter);
+      scrollbar-width: none;
+    }
+    .cats__item {
+      flex: 0 0 62%;
+      scroll-snap-align: start;
     }
     .cats__art canvas {
-      height: 120px;
+      height: 130px;
     }
     .cats__body {
       padding: 2px 12px 14px;
@@ -151,6 +173,10 @@ const cats = [
     }
     .cats__text {
       font-size: 13px;
+    }
+    .cats__go {
+      width: 34px;
+      height: 34px;
     }
   }
   @media (prefers-reduced-motion: reduce) {

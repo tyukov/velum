@@ -64,6 +64,12 @@ function initCalc() {
     sheet.textContent = String(s);
     total.textContent = money(s * price);
   };
+  const house = box.querySelector<HTMLImageElement>("[data-house]");
+  box.querySelectorAll<HTMLInputElement>('input[name="hcalc-color"]').forEach((r) =>
+    r.addEventListener("change", () => {
+      if (house && r.checked) house.src = `/images/house/${r.value}.svg`;
+    }),
+  );
   box.addEventListener("input", update);
   box.addEventListener("change", update);
   box.querySelectorAll<HTMLButtonElement>("[data-step]").forEach((b) =>

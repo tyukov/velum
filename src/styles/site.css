@@ -194,13 +194,23 @@ body {
 .s-menu > summary::-webkit-details-marker {
   display: none;
 }
+.s-menu__close,
+.s-menu[open] .s-menu__open {
+  display: none;
+}
+.s-menu[open] .s-menu__close {
+  display: inline;
+}
 .s-menu__panel {
   position: absolute;
   left: 0;
   right: 0;
   top: 100%;
-  max-height: calc(100vh - 64px);
+  /* Во весь экран под шапкой */
+  height: calc(100vh - var(--header-h));
+  height: calc(100dvh - var(--header-h));
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 8px var(--gutter) 24px;
   background: var(--paper-2);
   border-bottom: 1px solid var(--line);
@@ -217,6 +227,32 @@ body {
   font-weight: 600;
   text-decoration: none;
 }
+/* Пока меню открыто: страница под ним не прокручивается, нижняя панель кнопок скрыта */
+html:has(.s-menu[open]) {
+  overflow: hidden;
+}
+body:has(.s-menu[open]) .s-bar {
+  display: none;
+}
+.s-menu__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 0 10px;
+}
+.s-menu__panel a.s-menu__chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 20px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+}
 .s-menu__hours {
   margin: 16px 0 0;
   font-size: 14px;
@@ -229,8 +265,7 @@ body {
 }
 
 @media (max-width: 960px) {
-  .s-nav,
-  .s-header__tel {
+  .s-nav {
     display: none;
   }
   .s-menu {
@@ -242,6 +277,7 @@ body {
   }
 }
 @media (max-width: 640px) {
+  .s-header__tel,
   .s-header__call {
     display: none;
   }

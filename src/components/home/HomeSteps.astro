@@ -30,6 +30,7 @@ const steps = [
 </section>
 
 <style>
+  /* Компьютер: шесть карточек в ряд, номер в кружке (первый — тёмный) */
   .steps {
     display: grid;
     grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -39,49 +40,77 @@ const steps = [
     list-style: none;
   }
   .steps__item {
-    padding-top: 16px;
-    border-top: 2px solid var(--ink);
+    padding: 22px;
+    border-radius: 20px;
+    background: var(--paper-2);
+    border: 1px solid #f0ebe4;
   }
   .steps__num {
-    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid #e7e2da;
+    background: #ffffff;
+    font-size: 13px;
     font-weight: 600;
-    color: var(--accent-ink);
+    color: var(--ink);
+  }
+  .steps__item:first-child .steps__num {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #ffffff;
   }
   .steps__item h3 {
-    margin: 10px 0 4px;
-    font-size: 18px;
+    margin: 14px 0 4px;
+    font-size: 17px;
     font-weight: 600;
   }
   .steps__item p {
     margin: 0;
     font-size: 14px;
-    line-height: 1.45;
+    line-height: 1.5;
     color: var(--muted);
   }
-  @media (max-width: 960px) {
+  @media (max-width: 1100px) {
     .steps {
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      row-gap: 24px;
     }
   }
+  /* Телефон: лента сверху вниз, кружки соединены линией */
   @media (max-width: 640px) {
     .steps {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 0 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
     }
     .steps__item {
+      position: relative;
       display: flex;
-      gap: 10px;
-      align-items: baseline;
-      padding: 12px 0;
-      border-top: 1px solid var(--line);
+      gap: 14px;
+      align-items: flex-start;
+      padding: 0 0 18px;
+      border: 0;
+      background: none;
+    }
+    .steps__item:not(:last-child)::before {
+      content: "";
+      position: absolute;
+      left: 16px;
+      top: 34px;
+      bottom: 0;
+      width: 2px;
+      background: var(--line);
+    }
+    .steps__num {
+      position: relative;
+      flex: none;
     }
     .steps__item h3 {
-      margin: 0 0 2px;
+      margin: 6px 0 2px;
       font-size: 16px;
-    }
-    .steps__item p {
-      font-size: 13px;
     }
   }
 </style>

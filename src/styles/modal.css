@@ -234,3 +234,40 @@
     border-radius: 24px;
   }
 }
+
+/* Телефон: окно выезжает снизу шторкой с «ручкой» */
+@media (max-width: 640px) {
+  .blocker {
+    padding: 48px 0 0;
+  }
+  .blocker .modal.lead {
+    vertical-align: bottom;
+    max-width: none;
+    border-radius: 24px 24px 0 0;
+    animation: lead-sheet 0.25s ease-out;
+  }
+  .modal.lead::before {
+    content: "";
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    width: 40px;
+    height: 4px;
+    margin-left: -20px;
+    border-radius: 2px;
+    background: #d9d3ca;
+  }
+  .lead__form {
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+  }
+}
+@keyframes lead-sheet {
+  from {
+    transform: translateY(40px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .blocker .modal.lead {
+    animation: none;
+  }
+}
