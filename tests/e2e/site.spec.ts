@@ -274,6 +274,19 @@ test.describe("статьи", () => {
   });
 });
 
+test("часы работы: в подвале и в окне «Заказать звонок»", async ({ page }) => {
+  await page.goto("/privacy");
+  await expect(page.locator("footer")).toContainText("Работаем с 8:00 до 19:00");
+  const call = page.locator(".s-header__call");
+  if (await call.isVisible()) await call.click();
+  else {
+    await page.locator(".s-menu > summary").click();
+    await expect(page.locator(".s-menu__panel")).toContainText("с 8:00 до 19:00");
+    await page.locator('.s-menu__panel a[href="#ex2"]').click();
+  }
+  await expect(page.locator(".blocker .modal")).toContainText("Работаем с 8:00 до 19:00");
+});
+
 test("несуществующая страница — 404", async ({ page }) => {
   const res = await page.goto("/no-such-page");
   expect(res?.status()).toBe(404);
