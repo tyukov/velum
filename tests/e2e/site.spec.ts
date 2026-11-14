@@ -203,6 +203,19 @@ test("инструкции: шаги и разметка HowTo, ссылка в 
   expect(ld.filter((d) => d["@type"] === "HowTo")).toHaveLength(4);
 });
 
+test("нижняя панель на телефоне: цена товара и «Получить расчёт»", async ({ page, isMobile }) => {
+  test.skip(!isMobile, "панель только на телефоне");
+  await page.goto("/catalog/metallocherepitsa/lamonterra-x");
+  const bar = page.locator(".s-bar");
+  await expect(bar.locator(".s-bar__price b")).toHaveText(
+    (await page.locator(".product-view__price-value").innerText()).split(" за")[0]!.trim(),
+  );
+  await bar.getByRole("link", { name: "Получить расчёт" }).click();
+  await expect(page.locator(".blocker .modal")).toBeVisible();
+  await page.goto("/");
+  await expect(page.locator(".s-bar").getByRole("link", { name: "Оставить заявку" })).toBeVisible();
+});
+
 test("несуществующая страница — 404", async ({ page }) => {
   const res = await page.goto("/no-such-page");
   expect(res?.status()).toBe(404);
