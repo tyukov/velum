@@ -1,20 +1,19 @@
 ---
 import Base from "../layouts/Base.astro";
 import Header from "../components/Header.astro";
-import HeroSection from "../components/HeroSection.astro";
-import BrandsSection from "../components/BrandsSection.astro";
-import StepsSection from "../components/StepsSection.astro";
-import FeaturesSection from "../components/FeaturesSection.astro";
+import HomeHero from "../components/home/HomeHero.astro";
+import HomeCategories from "../components/home/HomeCategories.astro";
+import HomeCalc from "../components/home/HomeCalc.astro";
+import HomeWhy from "../components/home/HomeWhy.astro";
+import HomeSteps from "../components/home/HomeSteps.astro";
+import HomeWorks from "../components/home/HomeWorks.astro";
+import HomeReviews from "../components/home/HomeReviews.astro";
 import FaqSection from "../components/FaqSection.astro";
-import ProjectsSection from "../components/ProjectsSection.astro";
-import ReviewsSection from "../components/ReviewsSection.astro";
-import PromoAdvSection from "../components/PromoAdvSection.astro";
 import LeadModal from "../components/LeadModal.astro";
 import Footer from "../components/Footer.astro";
 import { business } from "../lib/business";
+// Старые стили нужны окну заявки (.modal, .blocker)
 import "../styles/style.css";
-// Фон первого экрана на компьютере (CSS background) — самый крупный элемент, грузим заранее
-import desktopHero from "../assets/img/def.webp";
 
 // WebSite — по нему Google и Яндекс показывают название сайта в выдаче
 const jsonLd = {
@@ -54,28 +53,25 @@ const jsonLd = {
   title="Velum | Металлочерепица, профлист и водостоки в Атырау"
   description="Velum — магазин кровельных и фасадных материалов в Атырау: металлочерепица, профнастил, водосточные системы, сайдинг. Доставка, консультация, скидки до 50%."
   ogTitle="Velum — кровельные и фасадные материалы в Атырау"
+  bar
 >
-  <link
-    slot="head"
-    rel="preload"
-    as="image"
-    href={desktopHero.src}
-    media="(min-width: 67.5rem)"
-    fetchpriority="high"
-  />
   <script slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   <Header />
-  <main class="main">
-    <HeroSection />
-    <BrandsSection />
-    <StepsSection />
-    <FeaturesSection />
+  <main class="main home">
+    <HomeHero />
+    <HomeCategories />
+    <HomeCalc />
+    <HomeWhy />
+    <HomeSteps />
+    <HomeWorks />
+    <HomeReviews />
     <FaqSection />
-    <ProjectsSection />
-    <ReviewsSection />
-    <PromoAdvSection />
   </main>
   <Footer />
   <LeadModal id="ex1" title="Оставьте заявку" submitText="Отправить заявку" withMessage />
   <LeadModal id="ex2" title="Заказать звонок" submitText="Заказать звонок" />
 </Base>
+
+<script>
+  import "../scripts/home.ts";
+</script>

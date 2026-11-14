@@ -65,11 +65,15 @@ test.describe("главная", () => {
   test("кнопка WhatsApp: на всех страницах с текстом про страницу, кроме визитки", async ({
     page,
   }) => {
-    const wa = page.getByRole("link", { name: "Написать в WhatsApp" });
+    // На телефоне плавающая кнопка скрыта там, где есть нижняя панель (там своя ссылка WhatsApp)
+    const wa = page.locator("a.whatsapp-float");
+    await expect(wa).toHaveAttribute("aria-label", "Написать в WhatsApp");
     await expect(wa).toHaveAttribute("href", /^https:\/\/wa\.me\/77010131359\?text=/);
     await page.goto("/catalog/metallocherepitsa/kaskad");
     const href = decodeURIComponent((await wa.getAttribute("href")) ?? "");
     expect(href).toContain("Металлочерепица Каскад");
+    const bar = decodeURIComponent((await page.locator(".s-bar__wa").getAttribute("href")) ?? "");
+    expect(bar).toContain("Металлочерепица Каскад");
     await page.goto("/taplink");
     await expect(page.locator(".whatsapp-float")).toHaveCount(0);
   });
@@ -87,7 +91,7 @@ test.describe("главная", () => {
   });
 
   test("заявка: маска телефона, отправка, закрытие окна", async ({ page }) => {
-    await page.locator('.promo-message a[href="#ex1"]').click();
+    await page.locator('.hero a[href="#ex1"]').click();
     const modal = page.locator(".blocker .modal");
     await expect(modal).toBeVisible();
     await expect(modal.getByRole("link", { name: "политикой конфиденциальности" })).toHaveAttribute(
@@ -116,7 +120,7 @@ test.describe("главная", () => {
 
   test("крестик окна не закрыт шапкой на маленьком экране", async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 568 });
-    await page.locator('.promo-message a[href="#ex1"]').click();
+    await page.locator('.hero a[href="#ex1"]').click();
     await page.locator(".blocker").evaluate((el) => (el.scrollTop = 0));
     const close = page.locator(".close-modal");
     await close.click();
@@ -124,9 +128,13 @@ test.describe("главная", () => {
   });
 
   test("неполный телефон не отправляется", async ({ page }) => {
-    // На телефоне кнопка «Перезвоните мне» на баннере, на компьютере — «Заказать звонок» в шапке
-    const hero = page.locator('.promo-message a[href="#ex2"]');
-    await ((await hero.isVisible()) ? hero : page.locator(".header-list__btn")).click();
+    // На компьютере «Заказать звонок» в шапке, на телефоне — в меню
+    const call = page.locator(".s-header__call");
+    if (await call.isVisible()) await call.click();
+    else {
+      await page.locator(".s-menu > summary").click();
+      await page.locator('.s-menu__panel a[href="#ex2"]').click();
+    }
     const modal = page.locator(".blocker .modal");
     await modal.getByLabel("Ваше имя").fill("Тест");
     await modal.getByLabel("Ваш телефон").pressSequentially("701");
@@ -152,7 +160,7 @@ test.describe("главная", () => {
     await expect(page.locator("body")).toHaveClass(/medium-zoom--opened/);
     // На телефоне шапка закреплена: затемнение с фото должно быть поверх неё
     if (!isMobile) return;
-    const header = page.locator(".header");
+    const header = page.locator(".s-header");
     const box = await header.boundingBox();
     const topEl = await page.evaluate(
       ([x, y]) => document.elementFromPoint(x, y)?.className ?? "",
@@ -228,7 +236,7 @@ test("переходы между страницами без перезагру
   expect(await page.evaluate(() => (window as unknown as { marker?: number }).marker)).toBe(1);
 
   // Скрипты страницы работают после перехода
-  await page.locator('.promo-message a[href="#ex1"]').click();
+  await page.locator('.hero a[href="#ex1"]').click();
   const phone = page.locator(".blocker").getByLabel("Ваш телефон");
   await phone.pressSequentially("7011234567");
   await expect(phone).toHaveValue("+7 (701) 123-45-67");
@@ -295,7 +303,7 @@ test("все переходы по сайту без перезагрузки", 
 test.describe("каталог металлочерепицы", () => {
   test("с главной в раздел и на страницу модели", async ({ page }) => {
     await page.goto("/");
-    await page.locator(".promo-header__title-link").click();
+    await page.locator('.cats a[href="/catalog/metallocherepitsa"]').click();
     await expect(page).toHaveURL(/\/catalog\/metallocherepitsa$/);
     await expect(page.locator(".model-card")).toHaveCount(7);
     await page

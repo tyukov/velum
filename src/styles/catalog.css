@@ -9,9 +9,8 @@
 }
 
 @media (min-width: 67.5rem) {
-  /* На компьютере шапка лежит поверх страницы (как на главной) */
   .catalog {
-    padding-top: 6.5rem;
+    padding-top: 2rem;
   }
   .catalog__wrap {
     padding: 0 1.875rem;

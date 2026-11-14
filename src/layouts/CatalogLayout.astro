@@ -23,7 +23,7 @@ interface Props {
 const { title, description, path, canonicalPath, ogImage, product, supply } = Astro.props;
 ---
 
-<Base title={title} description={description} path={canonicalPath ?? path} ogImage={ogImage}>
+<Base title={title} description={description} path={canonicalPath ?? path} ogImage={ogImage} bar>
   <Header />
   <main class="main catalog">
     <div class="wrap catalog__wrap">

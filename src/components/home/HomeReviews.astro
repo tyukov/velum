@@ -1,0 +1,106 @@
+---
+// Отзывы клиентов
+import { Image } from "astro:assets";
+import ava1 from "../../assets/img/ava1.jpg";
+import ava2 from "../../assets/img/ava2.jpg";
+import ava3 from "../../assets/img/ava3.jpg";
+
+const reviews = [
+  {
+    ava: ava1,
+    name: "Сая Айткужина",
+    text: "Всё планировали менять крышу. Менеджеры помогли с выбором металлочерепицы. Теперь крыша просто великолепно выглядит, качество просто класс, всем теперь советую.",
+  },
+  {
+    ava: ava2,
+    name: "Акылжан Анаев",
+    text: "Давно планировал обновить на даче забор, но никак руки не доходили. Как всё-таки решился, появилась другая проблема — закупка качественного материала. Здесь всё нашёл.",
+  },
+  {
+    ava: ava3,
+    name: "Жансая Нугманова",
+    text: "Очень отзывчивые консультанты, заказы быстро обрабатывают, металл соответствует параметрам. Часто здесь заказываю.",
+  },
+];
+---
+
+<section id="reviews" class="s-section s-wrap" aria-labelledby="reviews-title">
+  <div class="s-section__head">
+    <h2 id="reviews-title" class="s-h2">
+      Отзывы клиентов
+    </h2>
+  </div>
+  <ul class="reviews" tabindex="0" aria-label="Отзывы">
+    {reviews.map((r) => (
+      <li class="reviews__item s-card">
+        <span class="reviews__stars" role="img" aria-label="Оценка 5 из 5">
+          ★★★★★
+        </span>
+        <p>{r.text}</p>
+        <div class="reviews__user">
+          <Image src={r.ava} width={40} height={40} class="reviews__ava" alt="" />
+          <span>{r.name}</span>
+        </div>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .reviews {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .reviews__item {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 24px;
+  }
+  .reviews__stars {
+    color: var(--accent-ink);
+    letter-spacing: 2px;
+    font-size: 15px;
+  }
+  .reviews__item p {
+    flex: 1;
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--text);
+  }
+  .reviews__user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .reviews__ava {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  @media (max-width: 640px) {
+    .reviews {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      margin-inline: calc(var(--gutter) * -1);
+      padding-inline: var(--gutter);
+      scroll-padding-inline: var(--gutter);
+      scrollbar-width: none;
+    }
+    .reviews__item {
+      flex: 0 0 85%;
+      padding: 18px;
+      scroll-snap-align: start;
+    }
+  }
+</style>

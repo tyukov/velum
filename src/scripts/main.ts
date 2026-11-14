@@ -189,13 +189,16 @@ function initPhoneMasks() {
 // ---------- FAQ ----------
 function initFaq() {
   document.querySelectorAll<HTMLElement>(".faq-list__question").forEach((question) => {
+    question.setAttribute("aria-expanded", "false");
     question.addEventListener("click", () => {
       const active = document.querySelector<HTMLElement>(".faq-list__question.active");
       if (active && active !== question) {
         active.classList.remove("active");
         (active.nextElementSibling as HTMLElement).style.maxHeight = "0";
       }
+      if (active && active !== question) active.setAttribute("aria-expanded", "false");
       question.classList.toggle("active");
+      question.setAttribute("aria-expanded", String(question.classList.contains("active")));
       const answer = question.nextElementSibling as HTMLElement;
       answer.style.maxHeight = question.classList.contains("active")
         ? answer.scrollHeight + "px"

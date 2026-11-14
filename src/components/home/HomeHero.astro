@@ -1,0 +1,363 @@
+---
+// Первый экран: список частей дома слева, эскиз дома справа. Выбранная часть заливается
+// цветом, остальное — тонкая линия. Дом сам по очереди показывает части, пока посетитель
+// не выберет сам (src/scripts/home.ts). Под списком — карточка выбранной части.
+import houseInner from "../../assets/sketch/house-inner.svg?raw";
+import "../../assets/sketch/house.css";
+import { business } from "../../lib/business";
+import { formatPrice, metalTileModels, minPrice } from "../../data/catalog/metal-tile";
+
+const [wash, house] = houseInner.split("<!--HOUSE-->");
+const fromPrice = formatPrice(minPrice(metalTileModels));
+const wa = (topic: string) =>
+  `https://wa.me/${business.phoneE164.replace("+", "")}?text=${encodeURIComponent(`Здравствуйте! Пишу с сайта velum.kz: ${topic}`)}`;
+
+const parts = [
+  {
+    id: "roof",
+    label: "Крыша",
+    text: "Металлочерепица — ходовые покрытия на складе в Атырау.",
+    art: { kind: "tile", model: "classic", color: "#45322E" },
+    ready: true,
+  },
+  {
+    id: "facade",
+    label: "Фасад",
+    text: "Сайдинг, подконструкция, плёнки и крепёж для стен.",
+    art: { kind: "siding", model: "", color: "#E6D2B5" },
+  },
+  {
+    id: "fence",
+    label: "Забор",
+    text: "Профнастил и крепёж — посчитаем листы под длину участка.",
+    art: { kind: "profnastil", model: "c20", color: "#55443a" },
+  },
+  {
+    id: "gutter",
+    label: "Водосток",
+    text: "Желоба, трубы, воронки и крепления в цвет крыши.",
+    art: { kind: "gutter", model: "", color: "#45322E" },
+  },
+  {
+    id: "trims",
+    label: "Доборные элементы",
+    text: "Коньки, торцевые и карнизные планки, саморезы.",
+    art: { kind: "ridge", model: "", color: "#474A51" },
+  },
+];
+---
+
+<section class="hero s-wrap" aria-labelledby="hero-title" data-hero>
+  <div class="hero__text">
+    <h1 id="hero-title" class="hero__kicker">
+      Металлочерепица, кровельные и фасадные материалы в Атырау
+    </h1>
+    <div class="hero__title">
+      <div class="hero__parts" role="group" aria-label="Части дома">
+        {parts.map((p, i) => (
+          <button
+            type="button"
+            class="hero__part"
+            data-part={p.id}
+            aria-pressed={i === 0 ? "true" : "false"}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+    </div>
+    <div class="hero__cards" aria-live="polite">
+      {parts.map((p, i) => (
+        <div class="hero-card" data-card={p.id} hidden={i !== 0}>
+          <div class="hero-card__art">
+            <canvas
+              data-art
+              data-kind={p.art.kind}
+              data-model={p.art.model}
+              data-color={p.art.color}
+              data-wash="false"
+              aria-hidden="true"
+            />
+          </div>
+          <div class="hero-card__body">
+            <span class={`hero-card__badge${p.ready ? " hero-card__badge--ok" : ""}`}>
+              {p.ready ? "7 моделей · в наличии" : "Скоро в каталоге"}
+            </span>
+            <p class="hero-card__text">{p.text}</p>
+            <div class="hero-card__row">
+              {p.ready && (
+                <span class="hero-card__price">
+                  от <b>{fromPrice}</b>/м²
+                </span>
+              )}
+              {p.ready ? (
+                <a class="s-btn s-btn--dark hero-card__cta" href="/catalog/metallocherepitsa">
+                  Смотреть модели →
+                </a>
+              ) : (
+                <a
+                  class="s-btn s-btn--light hero-card__cta hero-card__cta--wa"
+                  href={wa(p.label)}
+                  target="_blank"
+                  rel="noopener"
+                >
+                  Цена в WhatsApp →
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+    <div class="hero__actions">
+      <a href="#ex1" rel="modal:open" class="s-btn s-btn--dark">
+        Оставить заявку
+      </a>
+      <a href="#calc" class="s-btn s-btn--light">
+        Рассчитать крышу
+      </a>
+    </div>
+  </div>
+  <div class="hero__art">
+    <svg
+      class="hero__house"
+      viewBox="0 0 760 600"
+      role="img"
+      aria-label="Эскиз дома: выбранная часть показана в цвете"
+    >
+      <Fragment set:html={wash} />
+      <g class="la" data-active="roof" style="--roof:#454a52;--trim:#24272b;--gutter:#2f3237">
+        <Fragment set:html={house} />
+      </g>
+    </svg>
+  </div>
+</section>
+
+<style>
+  .hero {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
+    align-items: center;
+    gap: 24px 32px;
+    padding-block: clamp(16px, 4vw, 48px) clamp(24px, 4vw, 56px);
+    font-family: Inter, system-ui, sans-serif;
+  }
+  .hero__kicker {
+    margin: 0 0 18px;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.4;
+    color: var(--muted);
+  }
+  .hero__title {
+    margin: 0;
+    font-weight: 600;
+  }
+  .hero__parts {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .hero__part {
+    all: unset;
+    cursor: pointer;
+    font-size: clamp(32px, 3.4vw, 46px);
+    line-height: 1.22;
+    letter-spacing: -0.015em;
+    color: #8f8f8f;
+    border-bottom: 3px solid transparent;
+    transition:
+      color 0.2s,
+      border-color 0.2s;
+  }
+  .hero__part[aria-pressed="true"] {
+    color: var(--ink);
+    border-bottom-color: var(--accent);
+  }
+  .hero__part:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+  .hero__cards {
+    margin-top: 26px;
+  }
+  .hero-card {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+    gap: 16px;
+    align-items: center;
+    min-height: 132px;
+    padding: 12px;
+    border-radius: 20px;
+    background: #ffffff;
+    border: 1px solid var(--line);
+    box-shadow: 0 6px 24px rgba(43, 38, 34, 0.05);
+  }
+  .hero-card[hidden] {
+    display: none;
+  }
+  .hero-card__art {
+    align-self: stretch;
+    min-height: 108px;
+    border-radius: 14px;
+    background: var(--paper-2);
+    overflow: hidden;
+  }
+  .hero-card__art canvas {
+    display: block;
+    width: 100%;
+    height: 108px;
+  }
+  .hero-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
+  .hero-card__badge {
+    align-self: flex-start;
+    padding: 3px 8px;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #f3f1ee;
+    color: var(--muted);
+  }
+  .hero-card__badge--ok {
+    background: #eef7ee;
+    color: #24572a;
+  }
+  .hero-card__text {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.45;
+    color: #444444;
+  }
+  .hero-card__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 12px;
+  }
+  .hero-card__price {
+    font-size: 14px;
+    color: #555555;
+  }
+  .hero-card__price b {
+    font-size: 17px;
+    color: var(--ink);
+  }
+  .hero-card__cta {
+    min-height: 40px;
+    padding: 0 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .hero-card__cta--wa {
+    color: #157a3f;
+    border-color: #cfe6d6;
+  }
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  .hero__art {
+    display: flex;
+    justify-content: center;
+  }
+  .hero__house {
+    width: 100%;
+    max-width: 760px;
+    height: auto;
+  }
+
+  @media (max-width: 960px) {
+    .hero__house {
+      max-width: 560px;
+    }
+  }
+
+  /* Телефон: короткий заголовок, части кнопками в ряд, дом поменьше */
+  @media (max-width: 640px) {
+    .hero {
+      gap: 8px;
+      padding-top: 12px;
+    }
+    .hero__kicker {
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    .hero__parts {
+      flex-direction: row;
+      gap: 8px;
+      overflow-x: auto;
+      margin-inline: calc(var(--gutter) * -1);
+      padding: 2px var(--gutter);
+      scrollbar-width: none;
+    }
+    .hero__part {
+      flex: none;
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 15px;
+      border: 0;
+      border-radius: 20px;
+      background: #f3f1ee;
+      color: #333333;
+      font-size: 15px;
+      line-height: 1;
+    }
+    .hero__part[aria-pressed="true"] {
+      background: var(--ink);
+      color: #ffffff;
+    }
+    .hero__text {
+      display: contents;
+    }
+    .hero__kicker,
+    .hero__title {
+      grid-row: auto;
+    }
+    .hero__art {
+      order: 0;
+      height: 210px;
+      overflow: hidden;
+      align-items: center;
+    }
+    .hero__house {
+      width: 300px;
+      flex: none;
+    }
+    .hero__cards {
+      order: 1;
+      margin-top: 0;
+    }
+    .hero-card {
+      grid-template-columns: 84px minmax(0, 1fr);
+    }
+    .hero__actions {
+      order: 2;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .hero__actions .s-btn {
+      padding: 0 10px;
+      font-size: 15px;
+      white-space: nowrap;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__part {
+      transition: none;
+    }
+  }
+</style>

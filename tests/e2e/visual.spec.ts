@@ -14,6 +14,8 @@ const pages = [
 
 for (const { name, path } of pages) {
   test(`вид страницы: ${name}`, async ({ page }) => {
+    // Без анимаций: дом на главной не листает части сам
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto(path);
     await page.evaluate(() => document.fonts.ready);
     // Картинки с loading="lazy" подгружаем заранее, иначе на скриншоте пустые места

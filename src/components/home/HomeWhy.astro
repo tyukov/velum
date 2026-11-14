@@ -1,0 +1,83 @@
+---
+// Почему Velum: четыре коротких довода
+const items = [
+  {
+    title: "Склад в Атырау",
+    text: "Ходовые покрытия забираете сразу, остальное везём под заказ из Караганды.",
+  },
+  {
+    title: "Расчёт под вашу крышу",
+    text: "Посчитаем листы, доборные элементы и крепёж, чтобы не переплачивать за лишнее.",
+  },
+  {
+    title: "Гарантия до 50 лет",
+    text: "Гарантия завода-производителя на металл с полимерным покрытием.",
+  },
+  {
+    title: "Доставка и монтаж",
+    text: "Привезём до объекта, при необходимости — монтаж с проверенными бригадами.",
+  },
+];
+---
+
+<section class="s-section s-wrap" aria-labelledby="why-title">
+  <div class="s-section__head">
+    <h2 id="why-title" class="s-h2">
+      Почему Velum
+    </h2>
+  </div>
+  <ul class="why">
+    {items.map((it, i) => (
+      <li class="why__item s-card">
+        <span class="why__num" aria-hidden="true">
+          {String(i + 1).padStart(2, "0")}
+        </span>
+        <h3>{it.title}</h3>
+        <p>{it.text}</p>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .why {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .why__item {
+    padding: 24px;
+  }
+  .why__num {
+    display: block;
+    margin-bottom: 18px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent-ink);
+  }
+  .why__item h3 {
+    margin: 0 0 8px;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .why__item p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+  @media (max-width: 640px) {
+    .why {
+      gap: 10px;
+    }
+    .why__item {
+      padding: 18px;
+    }
+    .why__num {
+      margin-bottom: 8px;
+    }
+  }
+</style>
