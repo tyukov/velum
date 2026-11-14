@@ -129,6 +129,29 @@ const jsonLd = guides.map((g) => ({
   </div>
 </PageLayout>
 
+<script>
+  // Верхние кнопки разделов: подсвечиваем раздел, который сейчас на экране
+  document.addEventListener("astro:page-load", () => {
+    const links = [...document.querySelectorAll<HTMLAnchorElement>(".guides__toc a")];
+    if (!links.length) return;
+    const update = () => {
+      let current = links[0]!.hash;
+      for (const a of links) {
+        const el = document.getElementById(a.hash.slice(1));
+        if (el && el.getBoundingClientRect().top < window.innerHeight * 0.4) current = a.hash;
+      }
+      links.forEach((a) => a.classList.toggle("is-active", a.hash === current));
+    };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    document.addEventListener(
+      "astro:before-swap",
+      () => window.removeEventListener("scroll", update),
+      { once: true },
+    );
+  });
+</script>
+
 <style>
   .guides {
     padding-top: 24px;
@@ -174,6 +197,11 @@ const jsonLd = guides.map((g) => ({
   }
   .guides__toc a:hover {
     border-color: var(--ink);
+  }
+  .guides__toc a.is-active {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: #ffffff;
   }
   .guide {
     display: grid;
@@ -264,11 +292,25 @@ const jsonLd = guides.map((g) => ({
   @media (max-width: 760px) {
     .guide {
       grid-template-columns: minmax(0, 1fr);
-      gap: 16px;
+      gap: 12px;
+    }
+    /* Телефон: «Шаг N» и заголовок, потом рисунок, потом пункты */
+    .guide__text {
+      display: contents;
+    }
+    .guide__step {
+      order: 0;
+    }
+    .guide h2 {
+      order: 1;
+      margin-bottom: 0;
     }
     .guide__art,
     .guide_flip .guide__art {
-      order: -1;
+      order: 2;
+    }
+    .guide ol {
+      order: 3;
     }
     .guide__art canvas {
       height: 180px;

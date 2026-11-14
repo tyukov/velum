@@ -29,6 +29,21 @@ export const articles: Article[] = (data as Article[])
 
 export const categories = ORDER.filter((c) => articles.some((a) => a.category === c));
 
+/** Короткие названия для хлебных крошек */
+export const SHORT: Record<string, string> = {
+  raschet: "Расчёт металлочерепицы",
+  vybor: "Выбор металлочерепицы",
+  pokrytiya: "Покрытия",
+  "vs-profnastil": "Металлочерепица или профнастил",
+  cvet: "Цвет крыши",
+  oshibki: "Ошибки монтажа",
+  samorezy: "Саморезы",
+  vodostok: "Водосток",
+  zabor: "Забор из профнастила",
+  uhod: "Уход за крышей",
+  hranenie: "Разгрузка и хранение",
+};
+
 export const articleBySlug = (slug: string) => articles.find((a) => a.slug === slug);
 
 export const formatDate = (iso: string) => iso.split("-").reverse().join(".");

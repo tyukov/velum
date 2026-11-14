@@ -148,7 +148,9 @@ test.describe("главная", () => {
   });
 
   test("FAQ раскрывается", async ({ page }) => {
-    const question = page.locator(".faq-list__question").first();
+    // Первый вопрос раскрыт сразу; проверяем второй
+    await expect(page.locator(".faq-list__question").first()).toHaveClass(/active/);
+    const question = page.locator(".faq-list__question").nth(1);
     await question.click();
     await expect(question).toHaveClass(/active/);
   });

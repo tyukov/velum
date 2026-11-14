@@ -28,6 +28,12 @@ html {
 body.page {
   margin: 0;
 }
+/* Шрифт по умолчанию для всех страниц (раньше его задавали старые стили отдельных страниц) */
+body {
+  font-family: Inter, system-ui, sans-serif;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
 
 /* Текст только для экранного диктора */
 .sr-only {
@@ -550,18 +556,19 @@ body.page {
   display: block;
   width: 100%;
   height: auto;
+  margin-top: 18%;
 }
 .s-done__code {
   position: absolute;
   inset: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  font-size: clamp(140px, 26vw, 300px);
+  font-size: clamp(130px, 26vw, 300px);
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.04em;
-  color: #f5ebe0;
+  color: #f1e0cd;
 }
 @media (max-width: 640px) {
   .s-done__actions {
