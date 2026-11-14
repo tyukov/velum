@@ -211,6 +211,11 @@ body.page {
   font-weight: 600;
   text-decoration: none;
 }
+.s-menu__hours {
+  margin: 16px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+}
 .s-menu__panel .s-menu__actions {
   display: grid;
   gap: 10px;
@@ -313,6 +318,15 @@ body.page {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #8f877e;
+}
+.s-footer__nav .s-footer__hours {
+  margin: 8px 0 0;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+  color: #a39b91;
 }
 .s-footer__nav a {
   display: flex;

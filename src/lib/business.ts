@@ -4,6 +4,8 @@ export const business = {
   url: "https://velum.kz/",
   city: "Атырау",
   phoneE164: "+77010131359",
+  /** Часы работы (дни недели уточняются) */
+  hours: "с 8:00 до 19:00",
   phoneDisplay: "8\u00a0701\u00a0013\u00a013\u00a059",
   /** Профили компании: поисковики связывают их с сайтом (schema.org sameAs) */
   sameAs: ["https://www.instagram.com/velum.kz"],

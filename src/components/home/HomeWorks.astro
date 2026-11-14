@@ -10,11 +10,11 @@ import work5 from "../../assets/img/work-5.jpg";
 
 // Подписи как в макете: что за объект и какой материал
 const works = [
-  { src: work1, title: "Двухэтажный дом", material: "Металлочерепица, водосток" },
-  { src: work2, title: "Дом с мансардой", material: "Металлочерепица" },
-  { src: work3, title: "Частный дом", material: "Металлочерепица" },
-  { src: work4, title: "Жилой дом", material: "Металлочерепица, водосток" },
-  { src: work5, title: "Коттедж", material: "Металлочерепица, водосток" },
+  { src: work1, title: "Двухэтажный кирпичный дом", material: "Металлочерепица и водосток" },
+  { src: work2, title: "Дом со сложной крышей", material: "Металлочерепица" },
+  { src: work3, title: "Вальмовая крыша", material: "Металлочерепица, графит" },
+  { src: work4, title: "Дом с крыльцом", material: "Металлочерепица и водосток" },
+  { src: work5, title: "Мансардная крыша", material: "Металлочерепица и водосток" },
 ].map((w) => ({ ...w, alt: `${w.title}: ${w.material.toLowerCase()}` }));
 // Для просмотра — фото покрупнее, целиком (на странице плитки обрезаны)
 const full = await Promise.all(
