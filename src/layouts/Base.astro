@@ -8,7 +8,7 @@ import {
 import "../styles/global.css";
 import "../styles/site.css";
 import WhatsAppButton from "../components/WhatsAppButton.astro";
-import MobileBar from "../components/MobileBar.astro";
+import MobileBar, { type BarPrice } from "../components/MobileBar.astro";
 import interCyrillic from "../assets/fonts/inter-cyrillic-wght-normal.woff2?url";
 
 interface Props {
@@ -25,6 +25,8 @@ interface Props {
   whatsapp?: boolean;
   /** Нижняя панель «Звонок / WhatsApp / Заявка» на телефоне: только где есть окно заявки #ex1 */
   bar?: boolean;
+  /** Цена и наличие в нижней панели (страница товара) */
+  barPrice?: BarPrice;
 }
 
 const {
@@ -37,6 +39,7 @@ const {
   bodyClass = "page",
   whatsapp = true,
   bar = false,
+  barPrice,
 } = Astro.props;
 const topic = ogTitle.replace(/ \| Velum$/, "");
 
@@ -96,7 +99,7 @@ const verification =
   <body class={bar ? `${bodyClass} has-bar` : bodyClass}>
     <slot />
     {whatsapp && <WhatsAppButton topic={topic} />}
-    {bar && <MobileBar topic={topic} />}
+    {bar && <MobileBar topic={topic} price={barPrice} />}
     <!-- Скрипт сайта на всех страницах: при переходах без перезагрузки он уже загружен -->
     <script>
       import "../scripts/main.ts";
