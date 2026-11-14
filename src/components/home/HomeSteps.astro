@@ -1,0 +1,87 @@
+---
+// Как мы работаем: 6 шагов. На компьютере — ряд, на телефоне — компактная лента сверху вниз.
+const steps = [
+  ["Заявка", "Уточняем, что нужно"],
+  ["Замер", "Выезжаем на объект"],
+  ["Смета", "Считаем материалы"],
+  ["Оплата", "Фиксируем цену"],
+  ["Доставка", "Везём до дома"],
+  ["Монтаж", "По смете, если нужен"],
+];
+---
+
+<section class="s-section s-wrap" aria-labelledby="steps-title">
+  <div class="s-section__head">
+    <h2 id="steps-title" class="s-h2">
+      Как мы работаем
+    </h2>
+  </div>
+  <ol class="steps">
+    {steps.map(([title, text], i) => (
+      <li class="steps__item">
+        <span class="steps__num">{String(i + 1).padStart(2, "0")}</span>
+        <div>
+          <h3>{title}</h3>
+          <p>{text}</p>
+        </div>
+      </li>
+    ))}
+  </ol>
+</section>
+
+<style>
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .steps__item {
+    padding-top: 16px;
+    border-top: 2px solid var(--ink);
+  }
+  .steps__num {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent-ink);
+  }
+  .steps__item h3 {
+    margin: 10px 0 4px;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .steps__item p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--muted);
+  }
+  @media (max-width: 960px) {
+    .steps {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      row-gap: 24px;
+    }
+  }
+  @media (max-width: 640px) {
+    .steps {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0 12px;
+    }
+    .steps__item {
+      display: flex;
+      gap: 10px;
+      align-items: baseline;
+      padding: 12px 0;
+      border-top: 1px solid var(--line);
+    }
+    .steps__item h3 {
+      margin: 0 0 2px;
+      font-size: 16px;
+    }
+    .steps__item p {
+      font-size: 13px;
+    }
+  }
+</style>

@@ -1,45 +1,55 @@
 ---
+// Подвал: тёмный, сверху логотип и кнопки связи, ниже ссылки группами и реквизиты
+import Logo from "./Logo.astro";
 import { business } from "../lib/business";
 
 const year = new Date().getFullYear();
+const wa = `https://wa.me/${business.phoneE164.replace("+", "")}?text=${encodeURIComponent("Здравствуйте! Пишу с сайта velum.kz")}`;
 ---
 
-<footer class="footer">
-  <div class="wrap footer__wrap">
-    <p class="footer__text">
-      © {year} {business.name}. Кровельные и фасадные материалы, {business.city}
-    </p>
-    <nav class="footer__links" aria-label="Дополнительно">
-      <a href="/catalog">Каталог</a>
-      <a href={`tel:${business.phoneE164}`}>{business.phoneDisplay}</a>
-      <a href="/privacy">Политика конфиденциальности</a>
+<footer class="s-footer">
+  <div class="s-wrap s-footer__in">
+    <div class="s-footer__top">
+      <div class="s-footer__brand">
+        <Logo class="logo" />
+        <p>Кровельные и фасадные материалы в {business.city}</p>
+      </div>
+      <div class="s-footer__actions">
+        <a class="s-btn s-btn--light" href={`tel:${business.phoneE164}`}>
+          Позвонить
+        </a>
+        <a class="s-btn s-btn--wa" href={wa} target="_blank" rel="noopener">
+          WhatsApp
+        </a>
+      </div>
+    </div>
+    <nav class="s-footer__nav" aria-label="Нижнее меню">
+      <div>
+        <p>Магазин</p>
+        <a href="/catalog">Каталог</a>
+        <a href="/catalog/metallocherepitsa">Металлочерепица</a>
+        <a href="/#calc">Калькулятор</a>
+      </div>
+      <div>
+        <p>О нас</p>
+        <a href="/#works">Наши работы</a>
+        <a href="/#reviews">Отзывы</a>
+        <a href="/#faq">Вопросы и ответы</a>
+      </div>
+      <div>
+        <p>Связь</p>
+        <a href={`tel:${business.phoneE164}`}>{business.phoneDisplay}</a>
+        <a href={`mailto:${business.legal.email}`}>{business.legal.email}</a>
+        <a href={business.sameAs[0]} target="_blank" rel="noopener">
+          Instagram
+        </a>
+      </div>
     </nav>
+    <div class="s-footer__legal">
+      <span>
+        © {year} {business.legal.name} · ИИН {business.legal.iin} · г. {business.city}
+      </span>
+      <a href="/privacy">Политика конфиденциальности</a>
+    </div>
   </div>
 </footer>
-
-<style>
-  .footer {
-    padding: 2rem 20px;
-    font-size: 14px;
-    color: #666;
-    border-top: 1px solid #eee;
-  }
-  .footer__wrap {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem 2rem;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .footer__text {
-    margin: 0;
-  }
-  .footer__links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem 1.5rem;
-  }
-  .footer a {
-    color: inherit;
-  }
-</style>

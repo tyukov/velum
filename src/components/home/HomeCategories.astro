@@ -1,0 +1,161 @@
+---
+// «Всё для дома»: разделы с рисунками самих товаров в стиле эскиза
+import { business } from "../../lib/business";
+import { metalTileModels } from "../../data/catalog/metal-tile";
+
+const wa = (topic: string) =>
+  `https://wa.me/${business.phoneE164.replace("+", "")}?text=${encodeURIComponent(`Здравствуйте! Пишу с сайта velum.kz: ${topic}`)}`;
+const modelsCount = new Set(metalTileModels.map((m) => m.family?.id ?? m.slug)).size;
+
+const cats = [
+  {
+    title: "Крыша",
+    text: `Металлочерепица · ${modelsCount} моделей`,
+    href: "/catalog/metallocherepitsa",
+    ready: true,
+    art: ["tile", "classic", "#45322E"],
+  },
+  {
+    title: "Фасад",
+    text: "Сайдинг, подконструкция, плёнки",
+    href: wa("фасадные материалы"),
+    art: ["siding", "", "#E6D2B5"],
+  },
+  {
+    title: "Забор",
+    text: "Профнастил и крепёж",
+    href: wa("профнастил для забора"),
+    art: ["profnastil", "c20", "#55443a"],
+  },
+  {
+    title: "Водосток",
+    text: "Желоба, трубы, воронки",
+    href: wa("водосток"),
+    art: ["gutter", "", "#45322E"],
+  },
+  {
+    title: "Доборные элементы",
+    text: "Коньки, планки, саморезы",
+    href: wa("доборные элементы"),
+    art: ["ridge", "", "#474A51"],
+  },
+];
+---
+
+<section class="s-section s-wrap" aria-labelledby="cats-title">
+  <div class="s-section__head">
+    <h2 id="cats-title" class="s-h2">
+      Всё для дома — от крыши до забора
+    </h2>
+    <a href="/catalog">Весь каталог →</a>
+  </div>
+  <div class="cats">
+    {cats.map((c) => (
+      <a
+        class="cats__item s-card"
+        href={c.href}
+        {...(c.ready ? {} : { target: "_blank", rel: "noopener" })}
+      >
+        <div class="cats__art">
+          <canvas
+            data-art
+            data-kind={c.art[0]}
+            data-model={c.art[1]}
+            data-color={c.art[2]}
+            aria-hidden="true"
+          />
+        </div>
+        <div class="cats__body">
+          <div>
+            <h3 class="cats__title">{c.title}</h3>
+            <p class="cats__text">{c.text}</p>
+          </div>
+          <span class={`cats__badge${c.ready ? " cats__badge--ok" : ""}`}>
+            {c.ready ? "в наличии" : "цена в WhatsApp"}
+          </span>
+        </div>
+      </a>
+    ))}
+  </div>
+</section>
+
+<style>
+  .cats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+    gap: 20px;
+  }
+  .cats__item {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    color: var(--ink);
+    text-decoration: none;
+    transition:
+      box-shadow 0.2s,
+      transform 0.2s;
+  }
+  .cats__item:hover {
+    box-shadow: 0 12px 32px rgba(20, 20, 20, 0.08);
+    transform: translateY(-2px);
+  }
+  .cats__art canvas {
+    display: block;
+    width: 100%;
+    height: 200px;
+  }
+  .cats__body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 4px 20px 20px;
+  }
+  .cats__title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+  }
+  .cats__text {
+    margin: 4px 0 0;
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--muted);
+  }
+  .cats__badge {
+    align-self: flex-start;
+    padding: 4px 9px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #ffffff;
+    color: var(--muted);
+  }
+  .cats__badge--ok {
+    background: #eef7ee;
+    color: #24572a;
+  }
+  @media (max-width: 640px) {
+    .cats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .cats__art canvas {
+      height: 120px;
+    }
+    .cats__body {
+      padding: 2px 12px 14px;
+      gap: 6px;
+    }
+    .cats__title {
+      font-size: 17px;
+    }
+    .cats__text {
+      font-size: 13px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cats__item {
+      transition: none;
+    }
+  }
+</style>

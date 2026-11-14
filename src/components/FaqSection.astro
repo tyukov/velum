@@ -1,4 +1,5 @@
 ---
+import { business } from "../lib/business";
 // Вопросы и ответы: из одного списка строятся блок на главной и разметка FAQPage для поиска
 const faq = [
   {
@@ -32,48 +33,109 @@ const faqLd = {
     acceptedAnswer: { "@type": "Answer", text: a },
   })),
 };
+const wa = `https://wa.me/${business.phoneE164.replace("+", "")}?text=${encodeURIComponent("Здравствуйте! Пишу с сайта velum.kz: вопрос")}`;
 ---
 
-<section class="promo promo-faq">
-  <div class="promo__contet wrap">
-    <header class="promo-header">
-      <h2 class="promo-header__title">Часто задаваемые вопросы</h2>
-      <p class="promo-header__text">
-        Ответы на самые популярные вопросы.
-        <br />
-        Если у вас есть другие – просто{" "}
-        <a href="#ex2" rel="modal:open">
-          свяжитесь с&nbsp;нами
-        </a>
-      </p>
-    </header>
-    <ul class="list faq-list">
-      {faq.map(({ q, a }) => (
-        <li class="faq-list__item">
-          <div class="faq-list__question">
-            {q}
-            <svg
-              class="faq-list_icon_close"
-              role="presentation"
-              focusable="false"
-              width="24px"
-              height="24px"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-              xmlns:xlink="http://www.w3.org/1999/xlink"
-            >
-              <g stroke-width="2px" fill="none" fill-rule="evenodd" stroke-linecap="square">
-                <g transform="translate(1.000000, 1.000000)">
-                  <path d="M0,11 L22,11"></path>
-                  <path d="M11,0 L11,22"></path>
-                </g>
-              </g>
-            </svg>
-          </div>
-          <div class="faq-list__answer">{a}</div>
-        </li>
-      ))}
-    </ul>
-    <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />
+<section id="faq" class="s-section s-wrap faq" aria-labelledby="faq-title">
+  <div class="faq__aside">
+    <h2 id="faq-title" class="s-h2">
+      Частые вопросы
+    </h2>
+    <p>Не нашли ответ — напишите нам, ответим в течение рабочего дня.</p>
+    <a class="s-btn s-btn--wa" href={wa} target="_blank" rel="noopener">
+      Спросить в WhatsApp
+    </a>
   </div>
+  <ul class="faq-list">
+    {faq.map(({ q, a }, i) => (
+      <li class="faq-list__item">
+        <button type="button" class="faq-list__question" aria-controls={`faq-a${i}`}>
+          {q}
+          <svg
+            class="faq-list_icon_close"
+            aria-hidden="true"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+          >
+            <g stroke-width="2" fill="none" stroke-linecap="square">
+              <path d="M1 12h22M12 1v22"></path>
+            </g>
+          </svg>
+        </button>
+        <div class="faq-list__answer" id={`faq-a${i}`}>
+          <p>{a}</p>
+        </div>
+      </li>
+    ))}
+  </ul>
+  <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />
 </section>
+
+<style>
+  .faq {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+    gap: 20px 64px;
+    align-items: start;
+    padding-bottom: clamp(48px, 6vw, 88px);
+  }
+  .faq__aside p {
+    margin: 14px 0 20px;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+  .faq-list {
+    grid-column: span 2;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .faq-list__item {
+    padding: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .faq-list__question {
+    display: block;
+    width: 100%;
+    min-height: 56px;
+    padding: 18px 40px 18px 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.4;
+    text-align: left;
+    color: var(--ink);
+  }
+  .faq-list__question:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+  .faq-list_icon_close {
+    stroke: #8a8279;
+  }
+  .faq-list__answer p {
+    margin: 0;
+    padding: 0 0 20px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  @media (max-width: 960px) {
+    .faq-list {
+      grid-column: auto;
+    }
+  }
+  @media (max-width: 640px) {
+    .faq__aside .s-btn {
+      width: 100%;
+    }
+    .faq-list__question {
+      font-size: 16px;
+      padding-block: 14px;
+    }
+  }
+</style>

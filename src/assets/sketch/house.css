@@ -1,0 +1,98 @@
+.la {
+  --paper: #fffdf9;
+  --ink: #2b2622;
+}
+.la [data-part] {
+  transition:
+    fill 0.6s ease,
+    stroke 0.6s ease,
+    stroke-opacity 0.6s ease;
+}
+.la polygon[data-part],
+.la circle[data-part],
+.la ellipse[data-part],
+.la path[data-part]:not([fill="none"]) {
+  fill: var(--paper);
+  stroke: var(--ink);
+  stroke-width: 0.7;
+  stroke-linejoin: round;
+  stroke-opacity: 0.85;
+}
+.la path[data-part][fill="none"] {
+  stroke: var(--ink);
+  stroke-opacity: 0.22;
+}
+.la path.thick[data-part] {
+  stroke-opacity: 0.38;
+}
+.la [data-part] {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: la-draw 2.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+@keyframes la-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.la.la[data-active="roof"] [data-part="roof"] {
+  fill: var(--c, none);
+  stroke: var(--s, rgba(0, 0, 0, 0.25));
+  stroke-opacity: var(--so, 1);
+}
+.la.la[data-active="roof"] polygon[data-part="roof"] {
+  stroke: rgba(0, 0, 0, 0.18);
+  stroke-width: 0.5;
+}
+.la.la[data-active="facade"] [data-part="facade"] {
+  fill: var(--c, none);
+  stroke: var(--s, rgba(0, 0, 0, 0.25));
+  stroke-opacity: var(--so, 1);
+}
+.la.la[data-active="facade"] polygon[data-part="facade"] {
+  stroke: rgba(0, 0, 0, 0.18);
+  stroke-width: 0.5;
+}
+.la.la[data-active="fence"] [data-part="fence"] {
+  fill: var(--c, none);
+  stroke: var(--s, rgba(0, 0, 0, 0.25));
+  stroke-opacity: var(--so, 1);
+}
+.la.la[data-active="fence"] polygon[data-part="fence"] {
+  stroke: rgba(0, 0, 0, 0.18);
+  stroke-width: 0.5;
+}
+.la.la[data-active="gutter"] [data-part="gutter"] {
+  fill: var(--c, none);
+  stroke: var(--s, rgba(0, 0, 0, 0.25));
+  stroke-opacity: var(--so, 1);
+}
+.la.la[data-active="gutter"] polygon[data-part="gutter"] {
+  stroke: rgba(0, 0, 0, 0.18);
+  stroke-width: 0.5;
+}
+.la.la[data-active="trims"] [data-part="trims"] {
+  fill: var(--c, none);
+  stroke: var(--s, rgba(0, 0, 0, 0.25));
+  stroke-opacity: var(--so, 1);
+}
+.la.la[data-active="trims"] polygon[data-part="trims"] {
+  stroke: rgba(0, 0, 0, 0.18);
+  stroke-width: 0.5;
+}
+.la [data-part="roof"],
+.la [data-part="facade"],
+.la [data-part="fence"],
+.la [data-part="gutter"],
+.la [data-part="trims"] {
+  cursor: pointer;
+}
+@media (prefers-reduced-motion: reduce) {
+  .la [data-part] {
+    animation: none;
+    transition: none;
+  }
+}

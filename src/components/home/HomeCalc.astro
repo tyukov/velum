@@ -1,0 +1,225 @@
+---
+// Мини-калькулятор крыши на главной: площадь × 1,1 (запас) × цена от. Считает src/scripts/home.ts.
+// Класс hcalc, а не calc: .calc занят калькулятором на странице товара.
+import { catalogEntries, formatPrice, minPrice } from "../../data/catalog/metal-tile";
+
+const models = catalogEntries().map((e) => ({
+  name: e.name,
+  slug: e.slug,
+  price: minPrice(e.models),
+}));
+const area = 100;
+const first = models[0]!;
+---
+
+<section id="calc" class="s-section s-wrap" aria-labelledby="calc-title">
+  <div class="hcalc s-card" data-hcalc>
+    <div class="hcalc__intro">
+      <h2 id="calc-title" class="s-h2">
+        Посчитайте крышу за минуту
+      </h2>
+      <p>
+        Площадь крыши и модель — сумма сразу, с запасом 10% на подрезку. Точную смету с доборными
+        элементами посчитает менеджер.
+      </p>
+    </div>
+    <div class="hcalc__form">
+      <div class="hcalc__field">
+        <label for="hcalc-area">Площадь крыши, м²</label>
+        <div class="hcalc__area">
+          <button
+            type="button"
+            class="hcalc__step"
+            data-step="-10"
+            aria-label="Уменьшить площадь на 10 м²"
+          >
+            −
+          </button>
+          <input
+            id="hcalc-area"
+            type="number"
+            inputmode="numeric"
+            min="1"
+            max="5000"
+            value={area}
+            data-area
+          />
+          <button
+            type="button"
+            class="hcalc__step"
+            data-step="10"
+            aria-label="Увеличить площадь на 10 м²"
+          >
+            +
+          </button>
+        </div>
+      </div>
+      <fieldset class="hcalc__field">
+        <legend>Модель</legend>
+        <div class="hcalc__models">
+          {models.map((m, i) => (
+            <label class="hcalc__model">
+              <input
+                type="radio"
+                name="hcalc-model"
+                value={m.price}
+                data-name={m.name}
+                checked={i === 0}
+              />
+              <span>
+                <b>{m.name}</b>
+                <small>от {formatPrice(m.price)}/м²</small>
+              </span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+      <div class="hcalc__result" aria-live="polite">
+        <span>
+          Лист с запасом — <b data-sheet>{Math.ceil(area * 1.1)}</b> м²
+        </span>
+        <strong data-total>≈ {formatPrice(Math.ceil(area * 1.1) * first.price)}</strong>
+      </div>
+      <a href="#ex1" rel="modal:open" class="s-btn s-btn--dark hcalc__cta">
+        Получить точный расчёт
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hcalc {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+    gap: 24px 48px;
+    padding: clamp(20px, 4vw, 48px);
+  }
+  .hcalc__intro p {
+    margin: 14px 0 0;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+  .hcalc__form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 0;
+  }
+  .hcalc__field {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+  .hcalc__field > label,
+  .hcalc__field > legend {
+    display: block;
+    margin-bottom: 8px;
+    padding: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .hcalc__area {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr) 52px;
+    max-width: 280px;
+    height: 52px;
+    border: 1px solid #e3ddd3;
+    border-radius: 14px;
+    background: #ffffff;
+    overflow: hidden;
+  }
+  .hcalc__step {
+    border: 0;
+    background: none;
+    font-size: 22px;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .hcalc__area input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    text-align: center;
+    font: inherit;
+    font-size: 18px;
+    font-weight: 600;
+    -moz-appearance: textfield;
+  }
+  .hcalc__area input::-webkit-inner-spin-button,
+  .hcalc__area input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+  }
+  .hcalc__models {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
+    gap: 8px;
+  }
+  .hcalc__model {
+    position: relative;
+    cursor: pointer;
+  }
+  .hcalc__model input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+  }
+  .hcalc__model span {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-height: 48px;
+    padding: 9px 12px;
+    border-radius: 12px;
+    border: 1px solid #e3ddd3;
+    background: #ffffff;
+  }
+  .hcalc__model b {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .hcalc__model small {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .hcalc__model input:checked + span {
+    border-color: var(--ink);
+    box-shadow: inset 0 0 0 1px var(--ink);
+  }
+  .hcalc__model input:focus-visible + span {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+  .hcalc__result {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 6px 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    font-size: 15px;
+    color: var(--muted);
+  }
+  .hcalc__result strong {
+    font-size: clamp(26px, 3vw, 34px);
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .hcalc__cta {
+    align-self: flex-start;
+  }
+  @media (max-width: 640px) {
+    .hcalc__models {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .hcalc__area {
+      max-width: none;
+    }
+    .hcalc__cta {
+      align-self: stretch;
+    }
+  }
+</style>

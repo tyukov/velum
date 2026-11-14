@@ -1,27 +1,85 @@
 ---
+// Шапка сайта: прилипает сверху. На планшете и телефоне меню сворачивается в «≡»
+// (раскрывается без скриптов — элемент details), на телефоне вместо номера иконка звонка.
 import Logo from "./Logo.astro";
+import { business } from "../lib/business";
+
+const path = Astro.url.pathname;
+const links = [
+  { href: "/catalog", label: "Каталог" },
+  { href: "/catalog/metallocherepitsa", label: "Металлочерепица" },
+  { href: "/#calc", label: "Калькулятор" },
+  { href: "/#works", label: "Наши работы" },
+  { href: "/#faq", label: "Вопросы" },
+];
+const current = (href: string) =>
+  href.startsWith("/#")
+    ? false
+    : path === href || (href !== "/catalog" && path.startsWith(href + "/"));
 ---
 
-<header class="header">
-  <nav class="header-nav" aria-label="Основное меню">
-    <div class="wrap header__wrap">
-      <div class="header-logo">
-        <Logo class="logo header__logo" />
-      </div>
-      <a class="header-list__callback-link" href="tel:87010131359">
-        8&nbsp;701&nbsp;013&nbsp;13&nbsp;59
-      </a>
-      <ul class="list header-list">
-        <li class="header-list__item header-list__item_push_right">
-          <a
-            href="#ex2"
-            rel="modal:open"
-            class="btn btn_theme_soft-sky btn_size_m header-list__btn"
-          >
-            <span class="btn__text">Заказать звонок</span>
+<header class="s-header">
+  <div class="s-wrap s-header__in">
+    <Logo class="logo header__logo" />
+    <nav class="s-nav" aria-label="Основное меню">
+      {links.map((l) => (
+        <a href={l.href} aria-current={current(l.href) ? "page" : undefined}>
+          {l.label}
+        </a>
+      ))}
+    </nav>
+    <a class="s-header__tel" href={`tel:${business.phoneE164}`}>
+      {business.phoneDisplay}
+    </a>
+    <a href="#ex2" rel="modal:open" class="s-btn s-btn--dark s-btn--sm s-header__call">
+      Заказать звонок
+    </a>
+    <a class="s-header__icon" href={`tel:${business.phoneE164}`} aria-label="Позвонить">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        aria-hidden="true"
+      >
+        <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"></path>
+      </svg>
+    </a>
+    <details class="s-menu">
+      <summary aria-label="Меню">
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <path d="M4 7h16M4 12h16M4 17h16"></path>
+        </svg>
+      </summary>
+      <div class="s-menu__panel">
+        <nav aria-label="Меню">
+          {links.map((l) => (
+            <a class="s-menu__link" href={l.href}>
+              {l.label}
+              <span aria-hidden="true">→</span>
+            </a>
+          ))}
+        </nav>
+        <div class="s-menu__actions">
+          <a class="s-btn s-btn--dark" href={`tel:${business.phoneE164}`}>
+            Позвонить: {business.phoneDisplay}
           </a>
-        </li>
-      </ul>
-    </div>
-  </nav>
+          <a class="s-btn s-btn--light" href="#ex2" rel="modal:open">
+            Заказать звонок
+          </a>
+        </div>
+      </div>
+    </details>
+  </div>
 </header>
