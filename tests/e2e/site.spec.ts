@@ -164,6 +164,10 @@ test.describe("главная", () => {
     await expect(viewer.locator(".lightbox__img")).toHaveCSS("object-fit", "contain");
     await viewer.getByRole("button", { name: "Следующее фото" }).click();
     await expect(viewer.locator(".lightbox__count")).toHaveText("2 / 5");
+    // Клавиши-стрелки листают, с первого фото назад — на последнее
+    await page.keyboard.press("ArrowLeft");
+    await page.keyboard.press("ArrowLeft");
+    await expect(viewer.locator(".lightbox__count")).toHaveText("5 / 5");
     await page.keyboard.press("Escape");
     await expect(viewer).toBeHidden();
   });
