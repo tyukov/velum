@@ -1,0 +1,190 @@
+---
+import PageLayout from "../../layouts/PageLayout.astro";
+import Breadcrumbs from "../../components/catalog/Breadcrumbs.astro";
+import ArticleCard from "../../components/articles/ArticleCard.astro";
+import { articles, categories } from "../../data/articles";
+
+const site = Astro.site ?? new URL("https://velum.kz");
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: "Статьи о кровле и фасаде",
+  url: new URL("/articles", site).href,
+  hasPart: articles.map((a) => ({
+    "@type": "Article",
+    headline: a.title,
+    url: new URL(`/articles/${a.slug}`, site).href,
+  })),
+};
+---
+
+<PageLayout
+  title="Статьи о кровле и фасаде: выбор, расчёт, монтаж | Velum"
+  description="Как выбрать металлочерепицу, посчитать крышу и водосток, смонтировать и ухаживать. Простым языком и с примерами для частного дома в Атырау."
+  path="/articles"
+  lead
+>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  <div class="s-wrap a-list">
+    <Breadcrumbs
+      items={[
+        { name: "Главная", href: "/" },
+        { name: "Статьи", href: "/articles" },
+      ]}
+    />
+    <header class="a-list__head">
+      <h1>Статьи о кровле и фасаде</h1>
+      <p>
+        Как выбрать материал, посчитать крышу, смонтировать и ухаживать. Пишем простым языком и с
+        примерами для частного дома в Атырау.
+      </p>
+      <div class="a-list__filter" role="group" aria-label="Рубрики" data-article-filter>
+        <button type="button" data-cat="" aria-pressed="true">
+          Все
+        </button>
+        {categories.map((c) => (
+          <button type="button" data-cat={c} aria-pressed="false">
+            {c}
+          </button>
+        ))}
+      </div>
+    </header>
+    <ul class="a-list__grid">
+      {articles.map((a, i) => (
+        <li class:list={{ "a-list__first": i === 0 }} data-category={a.category}>
+          <ArticleCard article={a} />
+        </li>
+      ))}
+    </ul>
+    <section class="a-list__ask">
+      <div>
+        <h2>Не нашли ответ?</h2>
+        <p>Спросите менеджера — ответим и посчитаем материал под ваш дом.</p>
+      </div>
+      <div class="a-list__ask-actions">
+        <a href="#ex1" rel="modal:open" class="s-btn s-btn--accent">
+          Задать вопрос
+        </a>
+        <a href="/#calc" class="s-btn s-btn--light">
+          Открыть калькулятор
+        </a>
+      </div>
+    </section>
+  </div>
+</PageLayout>
+
+<script>
+  // Рубрики: показываем только статьи выбранной рубрики (все карточки уже на странице)
+  document.addEventListener("astro:page-load", () => {
+    const filter = document.querySelector<HTMLElement>("[data-article-filter]");
+    if (!filter) return;
+    const items = document.querySelectorAll<HTMLElement>(".a-list__grid > li");
+    filter.querySelectorAll<HTMLButtonElement>("button").forEach((b) =>
+      b.addEventListener("click", () => {
+        const cat = b.dataset.cat;
+        filter
+          .querySelectorAll("button")
+          .forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+        items.forEach((li) => (li.hidden = !!cat && li.dataset.category !== cat));
+      }),
+    );
+  });
+</script>
+
+<style>
+  .a-list {
+    padding-top: 24px;
+    padding-bottom: clamp(48px, 6vw, 88px);
+    font-family: Inter, system-ui, sans-serif;
+  }
+  .a-list__head h1 {
+    margin: 0 0 12px;
+    font-size: clamp(30px, 4vw, 48px);
+    line-height: 1.12;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .a-list__head p {
+    max-width: 40rem;
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--text);
+  }
+  .a-list__filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 24px 0 28px;
+  }
+  .a-list__filter button {
+    min-height: 40px;
+    padding: 0 16px;
+    border: 1px solid #e3ddd3;
+    border-radius: 20px;
+    background: #ffffff;
+    font: inherit;
+    font-size: 14px;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .a-list__filter button[aria-pressed="true"] {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: #ffffff;
+  }
+  .a-list__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    gap: 20px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .a-list__grid li[hidden] {
+    display: none;
+  }
+  .a-list__ask {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px 32px;
+    margin-top: clamp(32px, 4vw, 56px);
+    padding: clamp(22px, 3vw, 36px);
+    border-radius: 24px;
+    background: var(--ink);
+    color: #d6d0c8;
+  }
+  .a-list__ask h2 {
+    margin: 0 0 6px;
+    font-size: 22px;
+    font-weight: 600;
+    color: #ffffff;
+  }
+  .a-list__ask p {
+    margin: 0;
+    font-size: 15px;
+  }
+  .a-list__ask-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  @media (max-width: 640px) {
+    .a-list__filter {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      margin-inline: calc(var(--gutter) * -1);
+      padding-inline: var(--gutter);
+      scrollbar-width: none;
+    }
+    .a-list__filter button {
+      flex: none;
+    }
+    .a-list__ask-actions {
+      display: grid;
+      width: 100%;
+    }
+  }
+</style>

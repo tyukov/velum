@@ -7,10 +7,10 @@ import { business } from "../lib/business";
 const path = Astro.url.pathname;
 const links = [
   { href: "/catalog", label: "Каталог" },
-  { href: "/catalog/metallocherepitsa", label: "Металлочерепица" },
   { href: "/#calc", label: "Калькулятор" },
   { href: "/#works", label: "Наши работы" },
   { href: "/instructions", label: "Инструкции" },
+  { href: "/articles", label: "Статьи" },
 ];
 const current = (href: string) =>
   href.startsWith("/#")

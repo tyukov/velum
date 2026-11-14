@@ -29,6 +29,19 @@ body.page {
   margin: 0;
 }
 
+/* Текст только для экранного диктора */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .s-wrap {
   box-sizing: border-box;
   width: 100%;
@@ -253,6 +266,12 @@ body.page {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+.s-footer__brand .logo {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  min-height: 44px;
 }
 .s-footer__brand .logo svg {
   width: 117px;
