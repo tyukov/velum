@@ -1,10 +1,51 @@
 ---
 import CatalogLayout from "../../layouts/CatalogLayout.astro";
 import Breadcrumbs from "../../components/catalog/Breadcrumbs.astro";
-import TileVisual from "../../components/catalog/TileVisual.astro";
-import { catalogEntries } from "../../data/catalog/metal-tile";
+import {
+  catalogEntries,
+  formatPrice,
+  metalTileModels,
+  minPrice,
+} from "../../data/catalog/metal-tile";
+import { business } from "../../lib/business";
 
 const entries = catalogEntries();
+const wa = (topic: string) =>
+  `https://wa.me/${business.phoneE164.replace("+", "")}?text=${encodeURIComponent(`Здравствуйте! Пишу с сайта velum.kz: ${topic}`)}`;
+
+const cats = [
+  {
+    title: "Металлочерепица",
+    text: `${entries.length} моделей от ${formatPrice(minPrice(metalTileModels))} за м², калькулятор крыши.`,
+    href: "/catalog/metallocherepitsa",
+    badge: `${entries.length} моделей`,
+    art: ["tile", "classic", "#45322E"],
+  },
+  {
+    title: "Фасад",
+    text: "Сайдинг, подконструкция, плёнки и крепёж.",
+    href: wa("фасадные материалы"),
+    art: ["siding", "", "#E6D2B5"],
+  },
+  {
+    title: "Забор",
+    text: "Профнастил для забора и крепёж.",
+    href: wa("профнастил для забора"),
+    art: ["profnastil", "c20", "#55443a"],
+  },
+  {
+    title: "Водосток",
+    text: "Желоба, трубы, воронки и крепления в цвет крыши.",
+    href: wa("водосток"),
+    art: ["gutter", "", "#45322E"],
+  },
+  {
+    title: "Доборные элементы",
+    text: "Коньки, торцевые и карнизные планки, ендовы, саморезы.",
+    href: wa("доборные элементы"),
+    art: ["ridge", "", "#474A51"],
+  },
+];
 ---
 
 <CatalogLayout
@@ -19,7 +60,51 @@ const entries = catalogEntries();
     ]}
   />
   <header class="catalog-head">
-    <h1>Каталог</h1>
+    <h1>Каталог кровельных и фасадных материалов</h1>
+    <p>
+      Всё для дома в Атырау: от крыши до забора. Цены за м², наличие на складе и расчёт под ваш
+      объект.
+    </p>
+  </header>
+
+  <ul class="cat-grid">
+    {cats.map((c) => (
+      <li class="cat-card">
+        <a
+          href={c.href}
+          class="cat-card__link"
+          {...(c.badge ? {} : { target: "_blank", rel: "noopener" })}
+        >
+          <div class="art-box">
+            <canvas
+              data-art
+              data-kind={c.art[0]}
+              data-model={c.art[1]}
+              data-color={c.art[2]}
+              aria-hidden="true"
+            />
+          </div>
+          <div class="cat-card__head">
+            <h2 class="cat-card__title">{c.title}</h2>
+            <span class:list={["tag", { tag_ok: c.badge }]}>{c.badge ?? "цена в WhatsApp"}</span>
+          </div>
+          <p class="cat-card__text">{c.text}</p>
+        </a>
+      </li>
+    ))}
+    <li class="cat-card cat-card_dark">
+      <h2 class="cat-card__title">Не нашли нужное?</h2>
+      <p class="cat-card__text">
+        Каталог пополняется. Позвоните — подберём из полного ассортимента.
+      </p>
+      <a class="s-btn s-btn--accent" href={`tel:${business.phoneE164}`}>
+        {business.phoneDisplay}
+      </a>
+    </li>
+  </ul>
+
+  <section class="catalog-about">
+    <h2>Как устроен каталог</h2>
     <p>
       Velum продаёт кровельные и фасадные материалы в Атырау. В каталоге — металлочерепица с ценами
       за квадратный метр, выбором покрытия, толщины металла и цвета. Ходовые покрытия есть на складе
@@ -31,20 +116,8 @@ const entries = catalogEntries();
       расчёт с доборными элементами и доставкой сделает менеджер.
     </p>
     <p>
-      Каталог пополняется: профнастил, водосточные системы, сайдинг и доборные элементы появятся в
-      ближайшее время. Если нужного товара нет в списке, позвоните — подберём из полного
-      ассортимента.
+      Профнастил, водосточные системы, сайдинг и доборные элементы появятся в каталоге в ближайшее
+      время, а пока цену на них подскажем в WhatsApp.
     </p>
-  </header>
-
-  <ul class="model-grid">
-    <li class="model-card">
-      <a href="/catalog/metallocherepitsa" class="model-card__link">
-        <TileVisual hex="#45322E" label="Металлочерепица" size="small" />
-        <h2 class="model-card__title">Металлочерепица</h2>
-        <p class="model-card__text">{entries.map((e) => e.name).join(", ")}</p>
-        <p class="model-card__meta">{entries.length} модели</p>
-      </a>
-    </li>
-  </ul>
+  </section>
 </CatalogLayout>

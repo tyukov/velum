@@ -79,7 +79,7 @@ export function initCalc() {
   const result = $(".calc__result");
   const productField = document.querySelector<HTMLInputElement>('#ex1 input[name="product"]');
   const baseProduct = productField?.value ?? "";
-  const orderText = document.querySelector<HTMLElement>(".product-view__order .btn__text");
+  const orderText = document.querySelector<HTMLElement>(".product-view__order");
   const whatsapp = $<HTMLAnchorElement>(".calc__whatsapp");
 
   const saved = loadState();

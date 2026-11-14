@@ -1,6 +1,5 @@
 ---
 // Страница модели/варианта металлочерепицы: выбор покрытия, толщины и цвета
-import TileVisual from "./TileVisual.astro";
 import Breadcrumbs from "./Breadcrumbs.astro";
 import { colors, colorSlug } from "../../data/catalog/colors";
 import {
@@ -22,6 +21,7 @@ import {
 import { ROOF_TYPES, SLOPES } from "../../lib/roof";
 import { tileImagePath } from "../../lib/tile-svg";
 import { business } from "../../lib/business";
+import { lookOf } from "../../data/catalog/tile-look";
 
 interface Props {
   variant: Variant;
@@ -132,6 +132,24 @@ const productLd = isModelPage
       isVariantOf: { "@type": "ProductGroup", "@id": modelUrl },
     };
 
+const look = lookOf(model.slug, model.family?.id);
+// Покрытия карточками: класс и цена «от» по всем толщинам
+const coatingCards = coatingNames.map((name) => {
+  const list = model.coatings.filter((c) => c.name === name);
+  const prices = list.map((c) => priceOf(model, c)).filter((p): p is number => !!p);
+  return { name, cls: list[0]!.class, from: prices.length ? Math.min(...prices) : undefined };
+});
+const waLink = (text: string) =>
+  `https://wa.me/${business.phoneE164.replace("+", "")}?text=${encodeURIComponent(text)}`;
+const waProduct = waLink(
+  `Здравствуйте! Пишу с сайта velum.kz: металлочерепица ${model.name}, ${coating.name} ${formatThickness(coating.thickness)}, ${colorInfo.label}`,
+);
+const extras = [
+  { title: "Конёк", text: "Закрывает верх ската, в цвет листа.", kind: "ridge" },
+  { title: "Планки", text: "Торцевые и карнизные: защищают края крыши.", kind: "plank" },
+  { title: "Водосток", text: "Желоба и воронки в цвет крыши.", kind: "gutter" },
+  { title: "Трубы", text: "Водосточные трубы и крепления.", kind: "pipe" },
+];
 const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug === model.slug));
 ---
 
@@ -146,13 +164,30 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
 
 <article class="product-view">
   <div class="product-view__visual">
-    <TileVisual hex={colorInfo.hex} label={`Цвет ${colorInfo.label} ${colorInfo.name}`} />
+    <div class="art-box product-view__art">
+      <canvas
+        data-art
+        data-kind="tile"
+        data-model={look.art}
+        data-color={colorInfo.hex}
+        role="img"
+        aria-label={`Металлочерепица ${model.name}, цвет ${colorInfo.label} ${colorInfo.name}`}
+      ></canvas>
+      <span class="product-view__caption">
+        {colorInfo.label}
+        {colorInfo.label !== colorInfo.name && ` ${colorInfo.name}`} · {coating.name}
+      </span>
+    </div>
     <p class="product-view__note">
-      Цвет на экране может отличаться от настоящего. Образцы цвета покажем по запросу.
+      Цвет на экране может отличаться от настоящего. Образцы цвета покажем вживую или пришлём фото.
     </p>
   </div>
 
   <div class="product-view__info">
+    <p class="product-view__kicker">
+      Металлочерепица · {look.type.toLowerCase()}{" "}
+      {model.family ? "· одна модель в четырёх исполнениях" : ""}
+    </p>
     <h1 class="product-view__title">
       Металлочерепица {model.name}
       <span class="product-view__subtitle">
@@ -203,19 +238,29 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
 
     <div class="picker" role="group" aria-label="Покрытие">
       <p class="picker__label">Покрытие</p>
-      <div class="picker__options">
-        {coatingNames.map((name) => (
+      <div class="picker__options picker__options_coats">
+        {coatingCards.map(({ name, cls, from }) => (
           <a
             href={linkTo(name)}
-            class:list={["picker__chip", { picker__chip_active: name === coating.name }]}
+            class:list={[
+              "picker__chip",
+              "picker__coat",
+              { picker__chip_active: name === coating.name },
+            ]}
             aria-current={name === coating.name ? "true" : undefined}
           >
-            {name}
-            {inStockNames.has(name) && (
-              <span class="picker__stock" title="В наличии в Атырау">
-                <span class="sr-only">, в наличии в Атырау</span>
-              </span>
-            )}
+            <span class="picker__coat-name">
+              {name}
+              {inStockNames.has(name) && (
+                <span class="picker__stock" title="В наличии в Атырау">
+                  <span class="sr-only">, в наличии в Атырау</span>
+                </span>
+              )}
+            </span>
+            <span class="picker__coat-meta">
+              <span>{cls}</span>
+              {from && <b>от {formatPrice(from)}</b>}
+            </span>
           </a>
         ))}
       </div>
@@ -271,162 +316,168 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
       </div>
     </div>
 
-    {price && (
-      <div class="product-view__price">
-        <p class="product-view__price-value">
-          {formatPrice(price)} <span>за м²</span>
-        </p>
-        <p class="product-view__price-note">
-          Цена с НДС, актуальна на {priceDateOf(model, coating)}.
-          {supplierPrices(model, coating).p1 !== undefined &&
-            ` На заказы до 50 м² действует наценка.${model.priceNote ? ` ${model.priceNote}` : ""}`}{" "}
-          Точную сумму с доставкой рассчитает менеджер.
-        </p>
-      </div>
-    )}
-
-    {price && (
-      <div
-        class="calc"
-        data-nosnippet
-        data-price={price}
-        data-small-markup={supplierPrices(model, coating).p1 !== undefined ? "" : undefined}
-        data-options={JSON.stringify(calcOptions)}
-        data-whatsapp={business.phoneE164.replace("+", "")}
-      >
-        <p class="calc__title">Сколько нужно на вашу крышу?</p>
-        <div class="calc__chips" role="radiogroup" aria-label="Как считать">
-          <label class="calc__chip">
-            <input type="radio" name="calc-mode" value="area" checked />
-            <span>Знаю площадь</span>
-          </label>
-          <label class="calc__chip">
-            <input type="radio" name="calc-mode" value="house" />
-            <span>По размерам дома</span>
-          </label>
+    <div class="product-view__buy">
+      {price && (
+        <div class="product-view__price">
+          <p class="product-view__price-value">
+            {formatPrice(price)} <span>за м²</span>
+          </p>
+          <p class="product-view__price-note">
+            Цена с НДС, актуальна на {priceDateOf(model, coating)}.
+            {supplierPrices(model, coating).p1 !== undefined &&
+              ` На заказы до 50 м² действует наценка.${model.priceNote ? ` ${model.priceNote}` : ""}`}{" "}
+            Точную сумму с доставкой рассчитает менеджер.
+          </p>
         </div>
+      )}
 
-        <div class="calc__mode" data-mode="area">
-          <label class="calc__label" for="calc-area">
-            Площадь крыши
-          </label>
-          <div class="calc__field">
-            <input
-              id="calc-area"
-              class="calc__input"
-              type="number"
-              inputmode="decimal"
-              min="1"
-              max="100000"
-              step="any"
-              autocomplete="off"
-            />
-            <span class="calc__unit">м²</span>
+      {price && (
+        <div
+          class="calc"
+          data-nosnippet
+          data-price={price}
+          data-small-markup={supplierPrices(model, coating).p1 !== undefined ? "" : undefined}
+          data-options={JSON.stringify(calcOptions)}
+          data-whatsapp={business.phoneE164.replace("+", "")}
+        >
+          <p class="calc__title">Сколько нужно на вашу крышу?</p>
+          <div class="calc__chips" role="radiogroup" aria-label="Как считать">
+            <label class="calc__chip">
+              <input type="radio" name="calc-mode" value="area" checked />
+              <span>Знаю площадь</span>
+            </label>
+            <label class="calc__chip">
+              <input type="radio" name="calc-mode" value="house" />
+              <span>По размерам дома</span>
+            </label>
           </div>
-        </div>
 
-        <div class="calc__mode" data-mode="house" hidden>
-          <div class="calc__fields">
-            <div>
-              <label class="calc__label" for="calc-length">
-                Длина дома
-              </label>
-              <div class="calc__field">
-                <input
-                  id="calc-length"
-                  class="calc__input"
-                  type="number"
-                  inputmode="decimal"
-                  min="1"
-                  max="500"
-                  step="any"
-                  autocomplete="off"
-                />
-                <span class="calc__unit">м</span>
-              </div>
-            </div>
-            <div>
-              <label class="calc__label" for="calc-width">
-                Ширина дома
-              </label>
-              <div class="calc__field">
-                <input
-                  id="calc-width"
-                  class="calc__input"
-                  type="number"
-                  inputmode="decimal"
-                  min="1"
-                  max="500"
-                  step="any"
-                  autocomplete="off"
-                />
-                <span class="calc__unit">м</span>
-              </div>
+          <div class="calc__mode" data-mode="area">
+            <label class="calc__label" for="calc-area">
+              Площадь крыши
+            </label>
+            <div class="calc__field">
+              <input
+                id="calc-area"
+                class="calc__input"
+                type="number"
+                inputmode="decimal"
+                min="1"
+                max="100000"
+                step="any"
+                autocomplete="off"
+              />
+              <span class="calc__unit">м²</span>
             </div>
           </div>
-          <p class="calc__label">Наклон крыши</p>
-          <div class="calc__chips" role="radiogroup" aria-label="Наклон крыши">
-            {Object.entries(SLOPES).map(([value, s]) => (
+
+          <div class="calc__mode" data-mode="house" hidden>
+            <div class="calc__fields">
+              <div>
+                <label class="calc__label" for="calc-length">
+                  Длина дома
+                </label>
+                <div class="calc__field">
+                  <input
+                    id="calc-length"
+                    class="calc__input"
+                    type="number"
+                    inputmode="decimal"
+                    min="1"
+                    max="500"
+                    step="any"
+                    autocomplete="off"
+                  />
+                  <span class="calc__unit">м</span>
+                </div>
+              </div>
+              <div>
+                <label class="calc__label" for="calc-width">
+                  Ширина дома
+                </label>
+                <div class="calc__field">
+                  <input
+                    id="calc-width"
+                    class="calc__input"
+                    type="number"
+                    inputmode="decimal"
+                    min="1"
+                    max="500"
+                    step="any"
+                    autocomplete="off"
+                  />
+                  <span class="calc__unit">м</span>
+                </div>
+              </div>
+            </div>
+            <p class="calc__label">Наклон крыши</p>
+            <div class="calc__chips" role="radiogroup" aria-label="Наклон крыши">
+              {Object.entries(SLOPES).map(([value, s]) => (
+                <label class="calc__chip">
+                  <input type="radio" name="calc-slope" value={value} checked={value === "mid"} />
+                  <span>
+                    {s.label}, ~{s.degrees}°
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <p class="calc__label">Тип крыши</p>
+          <div class="calc__chips" role="radiogroup" aria-label="Тип крыши">
+            {Object.entries(ROOF_TYPES).map(([value, t]) => (
               <label class="calc__chip">
-                <input type="radio" name="calc-slope" value={value} checked={value === "mid"} />
-                <span>
-                  {s.label}, ~{s.degrees}°
-                </span>
+                <input type="radio" name="calc-roof" value={value} checked={value === "gable"} />
+                <span>{t.label}</span>
               </label>
             ))}
           </div>
-        </div>
 
-        <p class="calc__label">Тип крыши</p>
-        <div class="calc__chips" role="radiogroup" aria-label="Тип крыши">
-          {Object.entries(ROOF_TYPES).map(([value, t]) => (
-            <label class="calc__chip">
-              <input type="radio" name="calc-roof" value={value} checked={value === "gable"} />
-              <span>{t.label}</span>
-            </label>
-          ))}
+          <p class="calc__error" role="alert" hidden></p>
+          <div class="calc__result" aria-live="polite" hidden>
+            <p class="calc__total">
+              Примерно <b class="calc__sum"></b>
+            </p>
+            <p class="calc__detail"></p>
+            <p class="calc__note" hidden>
+              Для заказа до 50 м² цена будет выше: на небольшие заказы действует наценка.
+            </p>
+            <div class="calc__trims" hidden>
+              <p class="calc__subtitle">Ещё понадобится</p>
+              <ul class="calc__trims-list"></ul>
+              <p class="calc__detail">Цену доборных элементов рассчитает менеджер.</p>
+            </div>
+            <div class="calc__compare">
+              <p class="calc__subtitle">С другим покрытием на эту площадь</p>
+              <ul class="calc__compare-list"></ul>
+            </div>
+            <a class="calc__whatsapp" href="#" target="_blank" rel="noopener">
+              Отправить расчёт в WhatsApp
+            </a>
+          </div>
         </div>
+      )}
 
-        <p class="calc__error" role="alert" hidden></p>
-        <div class="calc__result" aria-live="polite" hidden>
-          <p class="calc__total">
-            Примерно <b class="calc__sum"></b>
-          </p>
-          <p class="calc__detail"></p>
-          <p class="calc__note" hidden>
-            Для заказа до 50 м² цена будет выше: на небольшие заказы действует наценка.
-          </p>
-          <div class="calc__trims" hidden>
-            <p class="calc__subtitle">Ещё понадобится</p>
-            <ul class="calc__trims-list"></ul>
-            <p class="calc__detail">Цену доборных элементов рассчитает менеджер.</p>
-          </div>
-          <div class="calc__compare">
-            <p class="calc__subtitle">С другим покрытием на эту площадь</p>
-            <ul class="calc__compare-list"></ul>
-          </div>
-          <a class="calc__whatsapp" href="#" target="_blank" rel="noopener">
-            Отправить расчёт в WhatsApp
-          </a>
-        </div>
+      <div class="product-view__actions">
+        <a href="#ex1" rel="modal:open" class="s-btn s-btn--dark product-view__order">
+          Узнать стоимость
+        </a>
+        <a href={waProduct} class="s-btn s-btn--wa" target="_blank" rel="noopener">
+          WhatsApp
+        </a>
       </div>
-    )}
-
-    <div class="product-view__actions">
-      <a
-        href="#ex1"
-        rel="modal:open"
-        class="btn btn_theme_grab btn_size_l product-view__btn product-view__order"
-      >
-        <span class="btn__text">Узнать стоимость</span>
-      </a>
-      <a
-        href={`tel:${business.phoneE164}`}
-        class="btn btn_theme_outline-grab btn_size_l product-view__btn"
-      >
-        <span class="btn__text">Позвонить</span>
-      </a>
     </div>
+    <ul class="product-trust">
+      <li>
+        <b>Доставка</b> до дома в Атырау
+      </li>
+      <li>
+        <b>Расчёт</b> листов и доборных под вашу крышу
+      </li>
+      <li>
+        <b>ГОСТ</b> металл и покрытие по стандарту
+      </li>
+    </ul>
   </div>
 </article>
 
@@ -553,6 +604,28 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
   </table>
 </section>
 
+<section class="extras">
+  <h2>Что ещё понадобится для крыши</h2>
+  <ul class="extras__list">
+    {extras.map((x) => (
+      <li>
+        <a
+          class="extras__item"
+          href={waLink(
+            `Здравствуйте! Пишу с сайта velum.kz: ${x.title.toLowerCase()} к металлочерепице ${model.name}, ${colorInfo.label}`,
+          )}
+          target="_blank"
+          rel="noopener"
+        >
+          <canvas data-art data-kind={x.kind} data-color={colorInfo.hex} aria-hidden="true" />
+          <b>{x.title}</b>
+          <span>{x.text}</span>
+          <span class="extras__cta">Цена в WhatsApp →</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</section>
 <section class="other-models">
   <h2>Другие модели металлочерепицы</h2>
   <ul class="other-models__list">

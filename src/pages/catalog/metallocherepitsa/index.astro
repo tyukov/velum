@@ -1,24 +1,49 @@
 ---
 import CatalogLayout from "../../../layouts/CatalogLayout.astro";
 import Breadcrumbs from "../../../components/catalog/Breadcrumbs.astro";
-import TileVisual from "../../../components/catalog/TileVisual.astro";
 import { colors } from "../../../data/catalog/colors";
 import {
   catalogEntries,
   formatPrice,
   maxWarranty,
+  metalTileModels,
   minPrice,
   variantsOf,
 } from "../../../data/catalog/metal-tile";
+import { lookOf, type TileType } from "../../../data/catalog/tile-look";
 
 // Карточки в разных ходовых цветах, чтобы сразу было видно палитру
 const cardPalette = ["8017", "3005", "6005", "7024"];
 const entries = catalogEntries();
-const cardColor = (index: number) => {
-  const codes = entries[index]!.models.flatMap((m) => variantsOf(m).map((v) => v.color));
-  const wanted = cardPalette[index % cardPalette.length]!;
-  return colors[codes.includes(wanted) ? wanted : codes[0]!]!;
-};
+const cards = entries.map((entry, i) => {
+  const codes = [...new Set(entry.models.flatMap((m) => variantsOf(m).map((v) => v.color)))];
+  const wanted = cardPalette[i % cardPalette.length]!;
+  const color = colors[codes.includes(wanted) ? wanted : codes[0]!]!;
+  const coatings = entry.models.flatMap((m) => m.coatings);
+  const inStock = [...new Set(coatings.filter((c) => c.stock === "atyrau").map((c) => c.name))];
+  const look = lookOf(entry.slug, entry.models[0]!.family?.id);
+  const widths = [...new Set(entry.models.map((m) => m.width).filter(Boolean))].sort();
+  return {
+    order: i,
+    entry,
+    color,
+    codes,
+    look,
+    inStock,
+    price: minPrice(entry.models),
+    coatingsCount: new Set(coatings.map((c) => c.name)).size,
+    warranty: maxWarranty(entry.models),
+    width: widths.length ? `${widths.join("–")} мм` : "—",
+  };
+});
+// Сначала дешевле; «Популярные» — порядок моделей в каталоге (data-order)
+cards.sort((a, b) => a.price - b.price || a.order - b.order);
+const stockCount = cards.filter((c) => c.inStock.length).length;
+const types: TileType[] = ["Классическая", "Модульная", "Объёмная"];
+// Цвета для фильтра: ходовые оттенки, которые есть хотя бы у одной модели
+const filterColors = ["8017", "8019", "3005", "6005", "7024", "5002", "3011", "1015"].filter(
+  (code) => cards.some((c) => c.codes.includes(code)),
+);
 ---
 
 <CatalogLayout
@@ -33,44 +58,231 @@ const cardColor = (index: number) => {
       { name: "Металлочерепица", href: "/catalog/metallocherepitsa" },
     ]}
   />
-  <header class="catalog-head">
-    <h1>Металлочерепица</h1>
-    <p>
-      Металлочерепица: {entries.length} моделей, больше десяти видов покрытия и больше тридцати
-      цветов. Выберите модель, а на её странице — покрытие, толщину и цвет. Цены за м² указаны с
-      НДС, точную сумму с доставкой под ваш объём рассчитает менеджер.
-    </p>
+  <header class="cat-hero">
+    <div class="cat-hero__text">
+      <h1>Металлочерепица в Атырау</h1>
+      <p>
+        {entries.length} моделей, больше десяти видов покрытия и больше тридцати цветов. Цены за м²
+        указаны с НДС. Ходовые покрытия лежат на складе в Атырау, остальное привезём под заказ.
+        Выберите модель, а на её странице — покрытие, толщину и цвет.
+      </p>
+      <dl class="cat-hero__stats">
+        <div>
+          <dt>моделей</dt>
+          <dd>{entries.length}</dd>
+        </div>
+        <div>
+          <dt>за м²</dt>
+          <dd>от {formatPrice(minPrice(metalTileModels))}</dd>
+        </div>
+        <div>
+          <dt>моделей на складе в Атырау</dt>
+          <dd>{stockCount}</dd>
+        </div>
+      </dl>
+    </div>
+    <div class="cat-hero__art">
+      <canvas
+        data-art
+        data-kind="tile"
+        data-model="classic"
+        data-color="#45322E"
+        aria-hidden="true"
+      ></canvas>
+    </div>
   </header>
 
-  <ul class="model-grid">
-    {entries.map((entry, i) => {
-      const color = cardColor(i);
-      const coatings = entry.models.flatMap((m) => m.coatings);
-      const colorCount = new Set(entry.models.flatMap((m) => variantsOf(m).map((v) => v.color)))
-        .size;
-      return (
-        <li class="model-card">
-          <a href={`/catalog/metallocherepitsa/${entry.slug}`} class="model-card__link">
-            <TileVisual hex={color.hex} label={`${entry.name}, ${color.name}`} size="small" />
-            <h2 class="model-card__title">{entry.name}</h2>
-            <p class="model-card__text">{entry.summary}</p>
-            <p class="model-card__price">от {formatPrice(minPrice(entry.models))} за м²</p>
-            <p class="model-card__stock">
-              {(() => {
-                const names = [
-                  ...new Set(coatings.filter((c) => c.stock === "atyrau").map((c) => c.name)),
-                ];
-                return names.length ? `В наличии в Атырау: ${names.join(", ")}` : "Под заказ";
-              })()}
-            </p>
-            <p class="model-card__meta">
-              {entry.models.length > 1 && `${entry.models.length} исполнения · `}
-              {new Set(coatings.map((c) => c.name)).size} покрытий · {colorCount} цветов · гарантия
-              до {maxWarranty(entry.models)} лет
-            </p>
-          </a>
+  <div class="cat-layout" data-filter>
+    <aside class="cat-filters" aria-label="Фильтры">
+      <fieldset>
+        <legend>Наличие</legend>
+        <label>
+          <input type="checkbox" name="stock" value="atyrau" /> В наличии в Атырау
+          <span>{stockCount}</span>
+        </label>
+        <label>
+          <input type="checkbox" name="stock" value="order" /> Под заказ
+          <span>{cards.length - stockCount}</span>
+        </label>
+      </fieldset>
+      <fieldset>
+        <legend>Тип листа</legend>
+        {types.map((t) => (
+          <label>
+            <input type="checkbox" name="type" value={t} /> {t}
+            <span>{cards.filter((c) => c.look.type === t).length}</span>
+          </label>
+        ))}
+      </fieldset>
+      <fieldset>
+        <legend>Цвет крыши</legend>
+        <div class="cat-filters__colors">
+          {filterColors.map((code) => {
+            const c = colors[code]!;
+            return (
+              <label
+                class="cat-filters__swatch"
+                style={`--swatch: ${c.hex}`}
+                title={`${c.label} ${c.name}`}
+              >
+                <input type="checkbox" name="color" value={code} />
+                <span class="sr-only">
+                  {c.label} {c.name}
+                </span>
+              </label>
+            );
+          })}
+        </div>
+      </fieldset>
+      <div class="cat-help">
+        <p class="cat-help__title">Не знаете, какую выбрать?</p>
+        <p>
+          Пришлите размеры крыши — подберём модель под бюджет и посчитаем всё вместе с доборными.
+        </p>
+        <a href="#ex1" rel="modal:open" class="s-btn s-btn--accent s-btn--sm">
+          Получить подбор
+        </a>
+      </div>
+    </aside>
+
+    <div class="cat-main">
+      <div class="cat-toolbar">
+        <p class="cat-toolbar__count" aria-live="polite">
+          Моделей: <b data-count>{cards.length}</b>
+        </p>
+        <div class="cat-sort" role="group" aria-label="Сортировка">
+          <button type="button" data-sort="price" aria-pressed="true">
+            Сначала дешевле
+          </button>
+          <button type="button" data-sort="popular" aria-pressed="false">
+            Популярные
+          </button>
+        </div>
+      </div>
+      <ul class="model-grid">
+        {cards.map((c) => (
+          <li
+            class="model-card"
+            data-stock={c.inStock.length ? "atyrau" : "order"}
+            data-type={c.look.type}
+            data-colors={c.codes.join(" ")}
+            data-price={c.price}
+            data-order={c.order}
+          >
+            <a href={`/catalog/metallocherepitsa/${c.entry.slug}`} class="model-card__link">
+              <div class="art-box model-card__art">
+                <canvas
+                  data-art
+                  data-kind="tile"
+                  data-model={c.look.art}
+                  data-color={c.color.hex}
+                  aria-hidden="true"
+                />
+                {c.look.badge && <span class="model-card__badge">{c.look.badge}</span>}
+                <span
+                  class:list={[
+                    "model-card__stock",
+                    { "model-card__stock_order": !c.inStock.length },
+                  ]}
+                >
+                  {c.inStock.length ? "В наличии в Атырау" : "Под заказ"}
+                </span>
+              </div>
+              <div class="model-card__head">
+                <h2 class="model-card__title">{c.entry.name}</h2>
+                <span class="model-card__type">{c.look.type}</span>
+              </div>
+              <p class="model-card__text">{c.entry.summary}</p>
+              <p class="model-card__meta">
+                {c.entry.models.length > 1 && `${c.entry.models.length} исполнения · `}
+                {c.coatingsCount} покрытий · {c.codes.length} цветов · гарантия до {c.warranty} лет
+              </p>
+              {c.inStock.length > 0 && (
+                <p class="sr-only">В наличии в Атырау: {c.inStock.join(", ")}</p>
+              )}
+              <div class="model-card__foot">
+                <p class="model-card__price">
+                  от <b>{formatPrice(c.price)}</b> за м²
+                </p>
+                <span class="model-card__go" aria-hidden="true">
+                  →
+                </span>
+              </div>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p class="cat-empty" hidden>
+        Таких моделей нет.{" "}
+        <button type="button" data-reset>
+          Сбросить фильтры
+        </button>
+      </p>
+
+      <section class="cat-compare">
+        <h2>Чем модели отличаются</h2>
+        <div class="cat-compare__scroll" tabindex="0" role="region" aria-label="Сравнение моделей">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Модель</th>
+                <th scope="col">Рисунок</th>
+                <th scope="col">Ширина листа</th>
+                <th scope="col">Наличие</th>
+                <th scope="col">Цена от</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cards.map((c) => (
+                <tr>
+                  <th scope="row">
+                    <a href={`/catalog/metallocherepitsa/${c.entry.slug}`}>{c.entry.name}</a>
+                  </th>
+                  <td>{c.look.type}</td>
+                  <td>{c.width}</td>
+                  <td
+                    class:list={[
+                      "cat-compare__stock",
+                      { "cat-compare__stock_order": !c.inStock.length },
+                    ]}
+                  >
+                    {c.inStock.length ? "В наличии в Атырау" : "Под заказ"}
+                  </td>
+                  <td>{formatPrice(c.price)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <ol class="cat-tips">
+        <li>
+          <h3>Сначала бюджет и срок</h3>
+          <p>
+            Полиэстер и VikingMP есть в Атырау — можно начинать сразу. Премиальные покрытия везём
+            под заказ, зато гарантия до 50 лет.
+          </p>
         </li>
-      );
-    })}
-  </ul>
+        <li>
+          <h3>Потом рисунок</h3>
+          <p>
+            Классика подходит почти любому дому, объёмная Трамонтана выглядит как натуральная
+            черепица, модульные удобны на сложных крышах.
+          </p>
+        </li>
+        <li>
+          <h3>Цвет — под фасад</h3>
+          <p>
+            Тёмные крыши — шоколад и графит — самые ходовые. Образцы покажем вживую или пришлём
+            фото.
+          </p>
+        </li>
+      </ol>
+    </div>
+  </div>
 </CatalogLayout>
+
+<script>
+  import "../../../scripts/catalog-filter.ts";
+</script>

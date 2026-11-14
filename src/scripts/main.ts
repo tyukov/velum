@@ -7,6 +7,7 @@ import type {
 } from "astro:transitions/client";
 import { formatPhone } from "../lib/phone";
 import { initCalc } from "./calc";
+import "./art";
 import { inject as injectAnalytics, pageview } from "@vercel/analytics";
 import { injectSpeedInsights } from "@vercel/speed-insights";
 
