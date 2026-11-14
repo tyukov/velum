@@ -268,7 +268,7 @@ test.describe("статьи", () => {
     expect(
       await img.evaluate((el: HTMLImageElement) => el.decode().then(() => el.naturalWidth)),
     ).toBeGreaterThan(0);
-    await page.locator(".a-related").getByRole("link").first().click();
+    await page.locator(".a-related li a").first().click();
     await expect(page).toHaveURL(/\/articles\/[a-z-]+$/);
     await expect(page.locator(".a-body h2").first()).toBeVisible();
   });
