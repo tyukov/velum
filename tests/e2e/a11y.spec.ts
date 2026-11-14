@@ -21,6 +21,9 @@ for (const path of [
   "/catalog/metallocherepitsa/monterrosa-s/vikingmp-0-45-ral-7021",
   "/privacy",
   "/instructions",
+  "/articles",
+  "/articles/raschet",
+  "/articles/pokrytiya",
   "/thanks",
   "/taplink",
 ]) {

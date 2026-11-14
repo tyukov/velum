@@ -1,0 +1,467 @@
+---
+// Статья: шапка с рисунком, оглавление сбоку, текст, вопросы-ответы, «Читайте также».
+// Разметка Article (+ FAQPage, если есть вопросы) для поисковиков.
+import PageLayout from "../../layouts/PageLayout.astro";
+import Breadcrumbs from "../../components/catalog/Breadcrumbs.astro";
+import ArticleCard from "../../components/articles/ArticleCard.astro";
+import {
+  ARTICLES_UPDATED,
+  articleBySlug,
+  articles,
+  formatDate,
+  type Article,
+} from "../../data/articles";
+import { business } from "../../lib/business";
+
+export function getStaticPaths() {
+  return articles.map((article) => ({ params: { slug: article.slug }, props: { article } }));
+}
+
+const { article } = Astro.props as { article: Article };
+const [before, after = ""] = article.html.split("<!--CTA-->");
+const related = article.related.map(articleBySlug).filter((a): a is Article => !!a);
+const site = Astro.site ?? new URL("https://velum.kz");
+const url = new URL(`/articles/${article.slug}`, site).href;
+const ctaHref = article.cta?.button.toLowerCase().includes("калькулятор") ? "/#calc" : "#ex1";
+
+const jsonLd: object[] = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: article.title,
+    description: article.lead,
+    url,
+    mainEntityOfPage: url,
+    image: new URL(`/images/art/${article.art}.svg`, site).href,
+    datePublished: ARTICLES_UPDATED,
+    dateModified: ARTICLES_UPDATED,
+    inLanguage: "ru",
+    author: { "@type": "Organization", name: business.name, url: business.url },
+    publisher: { "@type": "Organization", name: business.name, url: business.url },
+  },
+];
+if (article.faq.length)
+  jsonLd.push({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: article.faq.map(({ q, a }) => ({
+      "@type": "Question",
+      name: q,
+      acceptedAnswer: { "@type": "Answer", text: a },
+    })),
+  });
+// Заголовок вкладки: короче 60 символов вместе с « | Velum»
+const title = article.title.length > 50 ? article.title : `${article.title} | Velum`;
+---
+
+<PageLayout title={title} description={article.lead} path={`/articles/${article.slug}`} lead>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  <div class="s-wrap a-page">
+    <Breadcrumbs
+      items={[
+        { name: "Главная", href: "/" },
+        { name: "Статьи", href: "/articles" },
+        { name: article.title, href: `/articles/${article.slug}` },
+      ]}
+    />
+    <header class="a-head">
+      <div>
+        <p class="a-head__meta">
+          {article.category}{" "}
+          <span>
+            · {article.minutes} мин чтения · обновлено{" "}
+            <time datetime={ARTICLES_UPDATED}>{formatDate(ARTICLES_UPDATED)}</time>
+          </span>
+        </p>
+        <h1>{article.title}</h1>
+        <p class="a-head__lead">{article.lead}</p>
+      </div>
+      <div class="a-head__art">
+        <img src={`/images/art/${article.art}.svg`} alt="" width="760" height="600" />
+      </div>
+    </header>
+
+    <div class="a-layout">
+      <aside class="a-aside">
+        <nav class="a-toc" aria-label="Содержание">
+          <p>Содержание</p>
+          {article.toc.map((t) => (
+            <a href={`#${t.id}`}>{t.title}</a>
+          ))}
+        </nav>
+        <div class="a-help">
+          <p class="a-help__title">Посчитаем за вас</p>
+          <p>Пришлите размеры — ответим в течение рабочего дня.</p>
+          <a href="#ex1" rel="modal:open" class="s-btn s-btn--accent s-btn--sm">
+            Отправить размеры
+          </a>
+        </div>
+      </aside>
+
+      <article class="a-body">
+        <Fragment set:html={before} />
+        {article.cta && (
+          <section class="a-cta">
+            <div>
+              <p class="a-cta__title">{article.cta.title}</p>
+              <p>{article.cta.text}</p>
+            </div>
+            <a
+              href={ctaHref}
+              class="s-btn s-btn--dark"
+              {...(ctaHref === "#ex1" ? { rel: "modal:open" } : {})}
+            >
+              {article.cta.button}
+            </a>
+          </section>
+        )}
+        <Fragment set:html={after} />
+        {article.faq.length > 0 && (
+          <div class="a-faq">
+            {article.faq.map(({ q, a }, i) => (
+              <details open={i === 0}>
+                <summary>{q}</summary>
+                <p>{a}</p>
+              </details>
+            ))}
+          </div>
+        )}
+      </article>
+    </div>
+
+    {related.length > 0 && (
+      <section class="a-related" aria-labelledby="related-title">
+        <div class="s-section__head">
+          <h2 id="related-title" class="s-h2">
+            Читайте также
+          </h2>
+          <a href="/articles">Все статьи →</a>
+        </div>
+        <ul>
+          {related.map((r) => (
+            <li>
+              <ArticleCard article={r} level={3} />
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+  </div>
+</PageLayout>
+
+<style>
+  .a-page {
+    padding-top: 24px;
+    padding-bottom: clamp(48px, 6vw, 88px);
+    font-family: Inter, system-ui, sans-serif;
+  }
+  .a-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+    align-items: center;
+    gap: 24px 48px;
+    padding: clamp(22px, 4vw, 48px);
+    border-radius: 28px;
+    background: var(--paper);
+  }
+  .a-head__meta {
+    margin: 0 0 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent-ink);
+  }
+  .a-head__meta span {
+    font-weight: 400;
+    color: var(--muted);
+  }
+  .a-head h1 {
+    margin: 0 0 14px;
+    font-size: clamp(28px, 3.2vw, 46px);
+    line-height: 1.12;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .a-head__lead {
+    max-width: 38rem;
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .a-head__art img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .a-layout {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 720px);
+    gap: 56px;
+    margin-top: clamp(28px, 4vw, 48px);
+  }
+  .a-aside {
+    position: sticky;
+    top: calc(var(--header-h) + 20px);
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .a-toc {
+    display: flex;
+    flex-direction: column;
+  }
+  .a-toc p {
+    margin: 0 0 8px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #6d665e;
+  }
+  .a-toc a {
+    display: flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 4px 0 4px 12px;
+    border-left: 2px solid var(--line);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.35;
+    text-decoration: none;
+  }
+  .a-toc a:hover {
+    border-left-color: var(--ink);
+    color: var(--ink);
+  }
+  .a-help {
+    padding: 18px;
+    border-radius: 20px;
+    background: var(--ink);
+    color: #d6d0c8;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .a-help p {
+    margin: 0 0 12px;
+  }
+  .a-help .a-help__title {
+    margin-bottom: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+  }
+
+  /* Текст статьи (приходит строкой HTML, поэтому стили через :global) */
+  .a-body {
+    min-width: 0;
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--text);
+  }
+  .a-body :global(h2) {
+    margin: 40px 0 12px;
+    font-size: clamp(22px, 2.4vw, 28px);
+    line-height: 1.25;
+    font-weight: 600;
+    color: var(--ink);
+    scroll-margin-top: calc(var(--header-h) + 16px);
+  }
+  .a-body :global(h2:first-child) {
+    margin-top: 0;
+  }
+  .a-body :global(p) {
+    margin: 0 0 16px;
+  }
+  .a-body :global(b) {
+    color: var(--ink);
+  }
+  .a-body :global(ul),
+  .a-body :global(ol) {
+    margin: 0 0 20px;
+    padding-left: 22px;
+  }
+  .a-body :global(li) {
+    margin-bottom: 8px;
+  }
+  .a-body :global(.a-formula) {
+    margin: 4px 0 20px;
+    padding: 16px 20px;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 14px 14px 0;
+    background: var(--paper);
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .a-body :global(.a-table) {
+    margin: 4px 0 20px;
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+  }
+  .a-body :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+    line-height: 1.45;
+  }
+  .a-body :global(th),
+  .a-body :global(td) {
+    padding: 11px 16px;
+    text-align: left;
+    vertical-align: top;
+    border-top: 1px solid var(--line);
+  }
+  .a-body :global(thead th) {
+    border-top: 0;
+    background: var(--paper);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .a-body :global(tbody th) {
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .a-body :global(tbody tr:first-child th),
+  .a-body :global(tbody tr:first-child td) {
+    border-top: 0;
+  }
+  .a-body :global(thead + tbody tr:first-child th),
+  .a-body :global(thead + tbody tr:first-child td) {
+    border-top: 1px solid var(--line);
+  }
+  .a-body :global(.a-art) {
+    margin: 8px 0 24px;
+    border-radius: 20px;
+    background: var(--paper);
+    overflow: hidden;
+  }
+  .a-body :global(.a-art canvas) {
+    display: block;
+    width: 100%;
+    height: 240px;
+  }
+  .a-body :global(.a-fig) {
+    margin: 8px 0 24px;
+  }
+  .a-body :global(.a-fig img) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .a-cta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px 24px;
+    margin: 32px 0;
+    padding: 22px 24px;
+    border-radius: 20px;
+    background: var(--paper);
+  }
+  .a-cta p {
+    margin: 0;
+    font-size: 15px;
+    color: var(--muted);
+  }
+  .a-cta .a-cta__title {
+    margin-bottom: 4px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .a-faq details {
+    border-bottom: 1px solid var(--line);
+  }
+  .a-faq summary {
+    display: flex;
+    align-items: center;
+    min-height: 56px;
+    padding: 12px 32px 12px 0;
+    position: relative;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    list-style: none;
+  }
+  .a-faq summary::-webkit-details-marker {
+    display: none;
+  }
+  .a-faq summary::after {
+    content: "+";
+    position: absolute;
+    right: 4px;
+    font-size: 24px;
+    font-weight: 400;
+    color: #8a8279;
+  }
+  .a-faq details[open] summary::after {
+    content: "−";
+  }
+  .a-faq details p {
+    margin: 0 0 16px;
+  }
+
+  .a-related {
+    margin-top: clamp(48px, 6vw, 80px);
+  }
+  .a-related ul {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (max-width: 960px) {
+    .a-layout {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 24px;
+    }
+    .a-aside {
+      position: static;
+    }
+    .a-help {
+      display: none;
+    }
+    .a-toc {
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: var(--paper);
+    }
+    .a-toc a {
+      border-left: 0;
+      padding-left: 0;
+    }
+    .a-related ul {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @media (max-width: 640px) {
+    .a-head {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 8px;
+      padding: 18px 20px 22px;
+    }
+    .a-head__art {
+      order: -1;
+      margin: -4px auto 0;
+      width: min(320px, 100%);
+    }
+    .a-head__lead {
+      font-size: 16px;
+    }
+    .a-body {
+      font-size: 16px;
+    }
+    .a-body :global(.a-art canvas) {
+      height: 180px;
+    }
+    .a-cta .s-btn {
+      width: 100%;
+    }
+  }
+</style>

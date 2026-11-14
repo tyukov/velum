@@ -238,6 +238,42 @@ test("меню: переход к разделу закрывает меню, з
   await expect.poll(gap).toBeLessThan(60);
 });
 
+test.describe("статьи", () => {
+  test("список: 11 статей, рубрики фильтруют карточки", async ({ page }) => {
+    await page.goto("/articles");
+    const cards = page.locator(".a-list__grid > li:not([hidden])");
+    await expect(cards).toHaveCount(11);
+    await page
+      .getByRole("group", { name: "Рубрики" })
+      .getByRole("button", { name: "Монтаж" })
+      .click();
+    await expect(cards).toHaveCount(3);
+    await page.getByRole("group", { name: "Рубрики" }).getByRole("button", { name: "Все" }).click();
+    await expect(cards).toHaveCount(11);
+  });
+
+  test("статья: разметка Article и FAQPage, рисунок, «Читайте также»", async ({ page }) => {
+    await page.goto("/articles/raschet");
+    await expect(page.locator("h1")).toHaveText(
+      "Как рассчитать металлочерепицу на крышу: формула и пример",
+    );
+    const ld = await page
+      .locator('script[type="application/ld+json"]')
+      .evaluateAll((els) => els.flatMap((e) => JSON.parse(e.textContent ?? "[]")));
+    const types = ld.map((d) => d["@type"]);
+    expect(types).toContain("Article");
+    expect(types).toContain("FAQPage");
+    expect(types).toContain("BreadcrumbList");
+    const img = page.locator(".a-head__art img");
+    expect(
+      await img.evaluate((el: HTMLImageElement) => el.decode().then(() => el.naturalWidth)),
+    ).toBeGreaterThan(0);
+    await page.locator(".a-related li a").first().click();
+    await expect(page).toHaveURL(/\/articles\/[a-z-]+$/);
+    await expect(page.locator(".a-body h2").first()).toBeVisible();
+  });
+});
+
 test("несуществующая страница — 404", async ({ page }) => {
   const res = await page.goto("/no-such-page");
   expect(res?.status()).toBe(404);
