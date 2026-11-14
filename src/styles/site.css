@@ -14,6 +14,16 @@
   --header-h: 76px;
 }
 
+/* Переход к разделу (#works, #calc…) — с отступом под липкую шапку */
+html {
+  scroll-padding-top: var(--header-h);
+}
+@media (max-width: 960px) {
+  :root {
+    --header-h: 60px;
+  }
+}
+
 /* Старая шапка на телефоне была fixed и сдвигала страницу вниз; новая — sticky */
 body.page {
   margin: 0;
@@ -416,6 +426,10 @@ body.page {
 /* ---------- Общие блоки разделов ---------- */
 .s-section {
   padding-block: clamp(48px, 6vw, 88px) 0;
+}
+/* При переходе к разделу заголовок встаёт сразу под шапкой, без пустого отступа сверху */
+.s-section[id] {
+  scroll-margin-top: calc(20px - clamp(48px, 6vw, 88px));
 }
 .s-h2 {
   margin: 0;

@@ -52,6 +52,20 @@ function resetTurnstile(form: HTMLElement) {
   if (id && id !== "pending") window.turnstile?.reset(id);
 }
 
+// ---------- Меню на телефоне ----------
+// Меню — элемент <details>: после выбора пункта, нажатия мимо или Esc закрываем его,
+// иначе раскрытая панель остаётся поверх раздела, к которому перешли
+const closeMenu = () => document.querySelector("details.s-menu[open]")?.removeAttribute("open");
+document.addEventListener("click", (e) => {
+  const target = e.target as Element;
+  const menu = document.querySelector("details.s-menu[open]");
+  if (!menu) return;
+  if (target.closest(".s-menu__panel a") || !menu.contains(target)) closeMenu();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeMenu();
+});
+
 // ---------- Модальные окна ----------
 // Разметка совместима со стилями: .blocker > .modal + a.close-modal
 let current: { modal: HTMLElement; blocker: HTMLElement } | null = null;
@@ -270,18 +284,6 @@ function initForms() {
   });
 }
 
-// ---------- Увеличение фото в галерее (библиотека грузится, только если есть галерея) ----------
-let zoom: import("medium-zoom").Zoom | null = null;
-async function initZoom() {
-  zoom?.detach();
-  if (!document.querySelector(".zoom")) return;
-  if (!zoom) {
-    const { default: mediumZoom } = await import("medium-zoom");
-    zoom = mediumZoom({ margin: 50 });
-  }
-  zoom.attach(".zoom");
-}
-
 // ---------- Vercel Web Analytics и Speed Insights ----------
 // Посещаемость и реальная скорость сайта у посетителей. Подключаем один раз здесь, а не
 // компонентами в шаблоне: при переходах без перезагрузки компоненты вставляли бы скрипты
@@ -312,5 +314,4 @@ document.addEventListener("astro:page-load", () => {
   initPhoneMasks();
   initFaq();
   initForms();
-  void initZoom();
 });

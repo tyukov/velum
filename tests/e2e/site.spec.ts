@@ -153,20 +153,19 @@ test.describe("главная", () => {
     await expect(question).toHaveClass(/active/);
   });
 
-  test("фото в галерее увеличивается", async ({ page, isMobile }) => {
-    const photo = page.locator(".zoom").first();
+  test("фото работ: просмотр целиком, листание, закрытие", async ({ page }) => {
+    const photo = page.locator(".works__open").first();
     await photo.scrollIntoViewIfNeeded();
     await photo.click();
-    await expect(page.locator("body")).toHaveClass(/medium-zoom--opened/);
-    // На телефоне шапка закреплена: затемнение с фото должно быть поверх неё
-    if (!isMobile) return;
-    const header = page.locator(".s-header");
-    const box = await header.boundingBox();
-    const topEl = await page.evaluate(
-      ([x, y]) => document.elementFromPoint(x, y)?.className ?? "",
-      [box!.x + 5, box!.y + 5],
-    );
-    expect(topEl).toContain("medium-zoom");
+    const viewer = page.locator("dialog.lightbox");
+    await expect(viewer).toBeVisible();
+    await expect(viewer.locator(".lightbox__count")).toHaveText("1 / 5");
+    // Фото не искажено: вписано целиком с сохранением пропорций
+    await expect(viewer.locator(".lightbox__img")).toHaveCSS("object-fit", "contain");
+    await viewer.getByRole("button", { name: "Следующее фото" }).click();
+    await expect(viewer.locator(".lightbox__count")).toHaveText("2 / 5");
+    await page.keyboard.press("Escape");
+    await expect(viewer).toBeHidden();
   });
 
   test("в подвале есть ссылка на политику", async ({ page }) => {
@@ -214,6 +213,25 @@ test("нижняя панель на телефоне: цена товара и 
   await expect(page.locator(".blocker .modal")).toBeVisible();
   await page.goto("/");
   await expect(page.locator(".s-bar").getByRole("link", { name: "Оставить заявку" })).toBeVisible();
+});
+
+test("меню: переход к разделу закрывает меню, заголовок не под шапкой", async ({
+  page,
+  isMobile,
+}) => {
+  await page.goto("/");
+  if (isMobile) {
+    await page.locator(".s-menu > summary").click();
+    await page.locator('.s-menu__panel a[href="/#works"]').click();
+    await expect(page.locator("details.s-menu")).not.toHaveAttribute("open");
+  } else {
+    await page.locator('.s-nav a[href="/#works"]').click();
+  }
+  const header = (await page.locator(".s-header").boundingBox())!;
+  const gap = async () =>
+    (await page.locator("#works-title").boundingBox())!.y - (header.y + header.height);
+  await expect.poll(gap).toBeGreaterThanOrEqual(0);
+  await expect.poll(gap).toBeLessThan(60);
 });
 
 test("несуществующая страница — 404", async ({ page }) => {
