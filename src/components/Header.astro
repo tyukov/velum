@@ -12,6 +12,15 @@ const links = [
   { href: "/instructions", label: "Инструкции" },
   { href: "/articles", label: "Статьи" },
 ];
+const wa = (topic?: string) =>
+  `https://wa.me/${business.phoneE164.replace("+", "")}?text=${encodeURIComponent(`Здравствуйте! Пишу с сайта velum.kz${topic ? `: ${topic}` : ""}`)}`;
+const chips = [
+  { label: "Крыша", href: "/catalog/metallocherepitsa" },
+  { label: "Фасад", href: wa("фасадные материалы"), ext: true },
+  { label: "Забор", href: wa("профнастил для забора"), ext: true },
+  { label: "Водосток", href: wa("водосток"), ext: true },
+  { label: "Доборные", href: wa("доборные элементы"), ext: true },
+];
 const current = (href: string) =>
   href.startsWith("/#")
     ? false
@@ -59,12 +68,24 @@ const current = (href: string) =>
           stroke-linecap="round"
           aria-hidden="true"
         >
-          <path d="M4 7h16M4 12h16M4 17h16"></path>
+          <path class="s-menu__open" d="M4 7h16M4 12h16M4 17h16"></path>
+          <path class="s-menu__close" d="M6 6l12 12M18 6L6 18"></path>
         </svg>
       </summary>
       <div class="s-menu__panel">
+        <div class="s-menu__chips" role="group" aria-label="Разделы каталога">
+          {chips.map((c) => (
+            <a
+              class="s-menu__chip"
+              href={c.href}
+              {...(c.ext ? { target: "_blank", rel: "noopener" } : {})}
+            >
+              {c.label}
+            </a>
+          ))}
+        </div>
         <nav aria-label="Меню">
-          {links.map((l) => (
+          {[...links, { href: "#contacts", label: "Контакты" }].map((l) => (
             <a class="s-menu__link" href={l.href}>
               {l.label}
               <span aria-hidden="true">→</span>
@@ -75,6 +96,9 @@ const current = (href: string) =>
         <div class="s-menu__actions">
           <a class="s-btn s-btn--dark" href={`tel:${business.phoneE164}`}>
             Позвонить: {business.phoneDisplay}
+          </a>
+          <a class="s-btn s-btn--wa" href={wa()} target="_blank" rel="noopener">
+            Написать в WhatsApp
           </a>
           <a class="s-btn s-btn--light" href="#ex2" rel="modal:open">
             Заказать звонок

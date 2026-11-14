@@ -110,13 +110,17 @@ const parts = [
       ))}
     </div>
     <div class="hero__actions">
-      <a href="#ex1" rel="modal:open" class="s-btn s-btn--dark">
-        Оставить заявку
+      <a href="#calc" class="s-btn s-btn--dark">
+        Рассчитать продукцию
       </a>
-      <a href="#calc" class="s-btn s-btn--light">
-        Рассчитать крышу
+      <a href="/instructions" class="s-btn s-btn--light">
+        Инструкции
       </a>
     </div>
+    <p class="hero__trust">
+      Приобретая продукцию в нашей компании, вы получаете гарантию качества по стандартам ГОСТ,
+      консультации менеджеров, доставку до дома и персональные скидки.
+    </p>
   </div>
   <div class="hero__art">
     <svg
@@ -266,6 +270,9 @@ const parts = [
     gap: 12px;
     margin-top: 24px;
   }
+  .hero__trust {
+    display: none;
+  }
   .hero__art {
     display: flex;
     justify-content: center;
@@ -289,8 +296,12 @@ const parts = [
       padding-top: 12px;
     }
     .hero__kicker {
-      margin-bottom: 10px;
-      font-size: 14px;
+      margin-bottom: 12px;
+      font-size: clamp(24px, 7vw, 30px);
+      font-weight: 600;
+      line-height: 1.18;
+      letter-spacing: -0.015em;
+      color: var(--ink);
     }
     .hero__parts {
       flex-direction: row;
@@ -344,14 +355,22 @@ const parts = [
     .hero__actions {
       order: 2;
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
       gap: 8px;
       margin-top: 4px;
     }
     .hero__actions .s-btn {
-      padding: 0 10px;
-      font-size: 15px;
+      padding: 0 8px;
+      font-size: 14px;
       white-space: nowrap;
+    }
+    .hero__trust {
+      order: 3;
+      display: block;
+      margin: 4px 0 0;
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--muted);
     }
   }
 

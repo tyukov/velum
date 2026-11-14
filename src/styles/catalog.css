@@ -195,11 +195,8 @@
   margin: 3rem 0 0;
 }
 
-@media (min-width: 60rem) {
-  .product-details {
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-    gap: 3rem;
-  }
+.product-details__text {
+  max-width: 60rem;
 }
 
 .product-details h2,
@@ -213,27 +210,27 @@
   line-height: 1.65;
 }
 
-.product-details dl {
+.product-specs dl {
   display: grid;
   grid-template-columns: auto 1fr;
   margin: 0;
   border-top: 1px solid #eee;
 }
 
-.product-details dt,
-.product-details dd {
+.product-specs dt,
+.product-specs dd {
   margin: 0;
   padding: 0.625rem 0;
   border-bottom: 1px solid #eee;
   font-size: 0.9375rem;
 }
 
-.product-details dt {
+.product-specs dt {
   padding-right: 1.5rem;
   color: #666;
 }
 
-.product-details dd {
+.product-specs dd {
   color: #111;
   text-align: right;
 }
@@ -1502,41 +1499,41 @@
 .catalog .extras h2 {
   font-size: clamp(22px, 2.4vw, 28px);
 }
-.product-details dl {
+.product-specs dl {
   border: 1px solid var(--line);
   border-radius: 20px;
   overflow: hidden;
 }
 /* Отступы внутри рамки: текст не прижат к краю */
-.product-details dt,
-.product-details dd {
+.product-specs dt,
+.product-specs dd {
   padding-block: 12px;
   border-bottom-color: var(--line);
 }
-.product-details dt {
+.product-specs dt {
   padding-left: 18px;
   padding-right: 12px;
 }
-.product-details dd {
+.product-specs dd {
   padding-right: 18px;
   text-align: left;
 }
-.product-details dt:nth-of-type(even),
-.product-details dt:nth-of-type(even) + dd {
+.product-specs dt:nth-of-type(even),
+.product-specs dt:nth-of-type(even) + dd {
   background: var(--paper-2);
 }
-.product-details dt:last-of-type,
-.product-details dd:last-of-type {
+.product-specs dt:last-of-type,
+.product-specs dd:last-of-type {
   border-bottom: 0;
 }
 @media (max-width: 640px) {
-  .product-details dl {
+  .product-specs dl {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
-  .product-details dt {
+  .product-specs dt {
     padding-left: 14px;
   }
-  .product-details dd {
+  .product-specs dd {
     padding-right: 14px;
   }
 }
@@ -1637,4 +1634,304 @@
 }
 .product-view__facts li {
   background: var(--paper);
+}
+
+/* ---------- Товар: виды, характеристики под фото, исполнения, покрытия, калькулятор ---------- */
+.product-view__art[hidden] {
+  display: none;
+}
+.product-view__art img {
+  display: block;
+  width: 100%;
+  height: clamp(260px, 36vw, 480px);
+  object-fit: contain;
+}
+.product-view__profile svg {
+  display: block;
+  width: 100%;
+  height: clamp(260px, 36vw, 480px);
+  font-family: Inter, system-ui, sans-serif;
+}
+.view-switch {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+.view-switch button {
+  min-height: 48px;
+  border: 1px solid #e7e2da;
+  border-radius: 14px;
+  background: #faf8f5;
+  font: inherit;
+  font-size: 15px;
+  color: var(--ink);
+  cursor: pointer;
+}
+.view-switch button[aria-pressed="true"] {
+  border-color: var(--ink);
+  background: #ffffff;
+  font-weight: 600;
+}
+.view-switch button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.product-specs {
+  margin-top: 28px;
+}
+.catalog .product-specs h2 {
+  margin: 0 0 12px;
+  font-size: clamp(20px, 2vw, 24px);
+}
+
+.picker__label_row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.picker__label_row .picker__hint {
+  margin: 0;
+  font-weight: 400;
+}
+.picker__versions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.picker__version {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-height: 56px;
+  justify-content: center;
+  border: 1px solid #e7e2da;
+  border-radius: 14px;
+  background: #faf8f5;
+  color: var(--ink);
+  text-decoration: none;
+}
+.picker__version b {
+  font-size: 18px;
+}
+.picker__version span {
+  font-size: 12px;
+  color: var(--muted);
+}
+.picker__version_active {
+  border-color: var(--ink);
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+.picker__note {
+  margin: 8px 0 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--paper);
+  font-size: 14px;
+  color: var(--text);
+}
+.picker__coat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+.picker__coat-row > b {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--ink);
+}
+.picker__coat .picker__coat-meta {
+  flex-direction: row;
+}
+
+.product-view__vat {
+  margin-left: auto;
+  float: right;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--muted);
+  letter-spacing: 0;
+}
+.calc__field_step {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 48px;
+  align-items: stretch;
+  max-width: 16rem;
+}
+.calc__field_step .calc__input {
+  text-align: center;
+  padding-inline: 2.2rem 2.4rem;
+}
+.calc__field_step .calc__unit {
+  right: 3.6rem;
+}
+.calc__step {
+  border: 1px solid #e3ddd3;
+  background: #ffffff;
+  font-size: 20px;
+  color: var(--ink);
+  cursor: pointer;
+}
+.calc__step:first-child {
+  border-radius: 14px 0 0 14px;
+  border-right: 0;
+}
+.calc__step:last-child {
+  border-radius: 0 14px 14px 0;
+  border-left: 0;
+}
+.calc__field_step .calc__input {
+  border-radius: 0;
+}
+
+.product-trust li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.product-trust__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #fbefe2;
+  color: var(--accent-ink);
+}
+
+.same-color {
+  margin-top: 24px;
+}
+.catalog .same-color h2 {
+  margin: 0 0 10px;
+  font-size: 18px;
+}
+.same-color ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.same-color li + li {
+  border-top: 1px solid var(--line);
+}
+.same-color a {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 20px;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 8px 16px;
+  color: var(--ink);
+  text-decoration: none;
+}
+.same-color a:hover {
+  background: var(--paper-2);
+}
+.same-color small {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.versions-table {
+  margin-top: clamp(40px, 5vw, 56px);
+}
+.catalog .versions-table h2 {
+  margin: 0 0 16px;
+  font-size: clamp(22px, 2.4vw, 28px);
+}
+.versions-table__scroll {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+}
+.versions-table table {
+  width: 100%;
+  min-width: 620px;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.versions-table th,
+.versions-table td {
+  padding: 12px 16px;
+  text-align: left;
+  vertical-align: top;
+  border-top: 1px solid var(--line);
+}
+.versions-table thead th {
+  border-top: 0;
+  background: var(--paper);
+  font-weight: 600;
+}
+.versions-table tbody th a {
+  color: var(--ink);
+  font-weight: 600;
+}
+.versions-table__current {
+  background: #fbefe2;
+}
+
+/* Телефон и планшет: фото и виды → название, покрытия, цена → характеристики */
+@media (max-width: 959px) {
+  .product-view {
+    gap: 12px;
+  }
+  .product-view__visual {
+    display: contents;
+  }
+  .view-switch {
+    margin-top: 0;
+  }
+  .product-view__note {
+    margin-top: 0;
+  }
+  .product-view__info {
+    margin-top: 12px;
+  }
+  .product-view__views,
+  .view-switch,
+  .product-view__note {
+    order: 0;
+  }
+  .product-view__info {
+    order: 1;
+  }
+  .product-specs {
+    order: 2;
+    margin-top: 8px;
+  }
+}
+@media (max-width: 640px) {
+  .picker__coat .picker__coat-meta {
+    flex-direction: column;
+    gap: 0;
+  }
+  .product-view__art img,
+  .product-view__profile svg {
+    height: 240px;
+  }
+  .picker__versions {
+    gap: 6px;
+  }
+  .view-switch button {
+    min-height: 44px;
+    font-size: 14px;
+  }
+  .calc__field_step {
+    max-width: none;
+  }
+}
+
+.catalog .product-view__title_variant {
+  font-size: clamp(26px, 2.6vw, 34px);
 }

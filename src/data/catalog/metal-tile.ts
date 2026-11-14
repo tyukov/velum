@@ -537,10 +537,27 @@ export const catalogEntries = (): CatalogEntry[] => {
 export const familyOf = (model: Model) =>
   model.family ? metalTileModels.filter((m) => m.family?.id === model.family!.id) : [model];
 
-/** Вариант по умолчанию для страницы модели: ходовой NormanMP 8017, иначе первый */
+/**
+ * Вариант по умолчанию для страницы модели: самое доступное покрытие от 0,45 мм со склада в Атырау
+ * (ходовой цвет RAL 8017, если есть), иначе NormanMP 8017, иначе первый вариант.
+ */
 export const defaultVariant = (model: Model): Variant => {
   const all = variantsOf(model);
-  return all.find((v) => v.coating.id === "normanmp" && v.color === "8017") ?? all[0]!;
+  const inStock = all
+    .filter((v) => v.coating.stock === "atyrau")
+    .sort(
+      (a, b) =>
+        // для жилого дома стандарт — от 0,45 мм; тоньше (эконом) — в последнюю очередь
+        Number(a.coating.thickness < 0.45) - Number(b.coating.thickness < 0.45) ||
+        (priceOf(model, a.coating) ?? Infinity) - (priceOf(model, b.coating) ?? Infinity),
+    );
+  const cheapest = inStock[0]?.coating;
+  return (
+    (cheapest && inStock.find((v) => v.coating === cheapest && v.color === "8017")) ??
+    (cheapest && inStock.find((v) => v.coating === cheapest)) ??
+    all.find((v) => v.coating.id === "normanmp" && v.color === "8017") ??
+    all[0]!
+  );
 };
 
 /** 8140 → «8 140 ₸» */

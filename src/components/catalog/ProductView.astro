@@ -9,6 +9,7 @@ import {
   modelFacts,
   formatPrice,
   formatThickness,
+  minPrice,
   priceDateOf,
   priceOf,
   supplierPrices,
@@ -43,8 +44,6 @@ const linkTo = (name: string, thickness?: number) => {
   return `${base}/${pick.slug}`;
 };
 
-const coatingNames = [...new Set(model.coatings.map((c) => c.name))];
-const thicknesses = model.coatings.filter((c) => c.name === coating.name);
 const colorOptions = all.filter(
   (v) => v.coating.name === coating.name && v.coating.thickness === coating.thickness,
 );
@@ -133,12 +132,36 @@ const productLd = isModelPage
     };
 
 const look = lookOf(model.slug, model.family?.id);
-// Покрытия карточками: класс и цена «от» по всем толщинам
-const coatingCards = coatingNames.map((name) => {
-  const list = model.coatings.filter((c) => c.name === name);
-  const prices = list.map((c) => priceOf(model, c)).filter((p): p is number => !!p);
-  return { name, cls: list[0]!.class, from: prices.length ? Math.min(...prices) : undefined };
-});
+// Покрытия карточками (покрытие + толщина), от дешёвых к дорогим: класс, толщина, цена,
+// гарантия (если не у двух поставщиков) или число цветов
+const coatingCards = model.coatings
+  .map((c) => {
+    const w = warrantyOf(model, c);
+    return {
+      c,
+      href: linkTo(c.name, c.thickness),
+      price: priceOf(model, c),
+      active: c === coating,
+      inStock: c.stock === "atyrau",
+      extra: w ? `гарантия ${w} лет` : `${c.colors.length} цв.`,
+    };
+  })
+  .sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity));
+// Исполнения семейства (Монтерроса A/S/M/X): цена «от», ширина, число покрытий
+const versionCards = versions.map((m) => ({
+  m,
+  href: versionLink(m),
+  from: minPrice([m]),
+  coatings: new Set(m.coatings.map((c) => c.name)).size,
+}));
+const colorText =
+  colorInfo.label === colorInfo.name ? colorInfo.name : `${colorInfo.label} ${colorInfo.name}`;
+const variantName = `${coating.name} ${formatThickness(coating.thickness)} · ${colorInfo.label}`;
+// Тот же цвет в других покрытиях этой модели (для страницы варианта)
+const sameColor = all
+  .filter((v) => v.color === color && v.coating !== coating)
+  .map((v) => ({ v, price: priceOf(model, v.coating) }))
+  .sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity));
 const waLink = (text: string) =>
   `https://wa.me/${business.phoneE164.replace("+", "")}?text=${encodeURIComponent(text)}`;
 const waProduct = waLink(
@@ -159,28 +182,121 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
     { name: "Каталог", href: "/catalog" },
     { name: "Металлочерепица", href: "/catalog/metallocherepitsa" },
     { name: model.name, href: base },
+    ...(isModelPage ? [] : [{ name: variantName, href: `${base}/${variant.slug}` }]),
   ]}
 />
 
 <article class="product-view">
   <div class="product-view__visual">
-    <div class="art-box product-view__art">
-      <canvas
-        data-art
-        data-kind="tile"
-        data-model={look.art}
-        data-color={colorInfo.hex}
-        role="img"
-        aria-label={`Металлочерепица ${model.name}, цвет ${colorInfo.label} ${colorInfo.name}`}
-      ></canvas>
-      <span class="product-view__caption">
-        {colorInfo.label}
-        {colorInfo.label !== colorInfo.name && ` ${colorInfo.name}`} · {coating.name}
-      </span>
+    <div class="product-view__views" data-views>
+      <div class="art-box product-view__art" data-view="sheet">
+        <canvas
+          data-art
+          data-kind="tile"
+          data-model={look.art}
+          data-color={colorInfo.hex}
+          role="img"
+          aria-label={`Металлочерепица ${model.name}, цвет ${colorText}`}
+        ></canvas>
+        <span class="product-view__caption">
+          {colorText} · {coating.name}
+        </span>
+      </div>
+      <div class="art-box product-view__art" data-view="house" hidden>
+        <img
+          src={`/images/house/${colorSlug(color)}.svg`}
+          alt={`Дом с крышей цвета ${colorText}`}
+          width="760"
+          height="600"
+          loading="lazy"
+        />
+        <span class="product-view__caption">{colorText} на доме</span>
+      </div>
+      <div class="art-box product-view__art product-view__profile" data-view="profile" hidden>
+        <svg
+          viewBox="0 0 640 520"
+          role="img"
+          aria-label={`Профиль листа${model.width ? `: ширина ${model.width} мм` : ""}`}
+        >
+          <path
+            d="M60 260 C80 260 84 220 104 220 C124 220 128 260 148 260 C168 260 172 220 192 220 C212 220 216 260 236 260 C256 260 260 220 280 220 C300 220 304 260 324 260 C344 260 348 220 368 220 C388 220 392 260 412 260 C432 260 436 220 456 220 C476 220 480 260 500 260 C520 260 524 220 544 220 C564 220 570 250 580 256"
+            fill="none"
+            stroke="#141414"
+            stroke-width="3"
+            stroke-linejoin="round"
+          ></path>
+          <path
+            d="M60 300 V320 M580 300 V320 M60 310 H580"
+            stroke="#9a9a9a"
+            stroke-width="1.2"
+            fill="none"
+          ></path>
+          <text x="320" y="342" font-size="15" fill="#555555" text-anchor="middle">
+            {model.width ? `ширина листа ${model.width} мм` : "волна поперёк листа"}
+          </text>
+          <g transform="translate(60 380)">
+            <path d="M0 80 H520" stroke="#141414" stroke-width="3"></path>
+            <path
+              d="M0 80 L0 40 C20 40 30 30 40 30 H120 L120 60 C140 60 150 50 160 50 H240 L240 20 C260 20 270 10 280 10 H360 L360 40 C380 40 390 30 400 30 H480 L480 60"
+              fill="none"
+              stroke="#141414"
+              stroke-width="3"
+              stroke-linejoin="round"
+            ></path>
+            <text x="260" y="108" font-size="15" fill="#555555" text-anchor="middle">
+              вид сбоку: ряды со ступенькой
+            </text>
+          </g>
+        </svg>
+      </div>
+    </div>
+    <div class="view-switch" role="group" aria-label="Вид товара" data-nosnippet>
+      <button type="button" data-view-btn="sheet" aria-pressed="true">
+        Лист
+      </button>
+      <button type="button" data-view-btn="house" aria-pressed="false">
+        На доме
+      </button>
+      <button type="button" data-view-btn="profile" aria-pressed="false">
+        Профиль
+      </button>
     </div>
     <p class="product-view__note">
       Цвет на экране может отличаться от настоящего. Образцы цвета покажем вживую или пришлём фото.
     </p>
+    <section class="product-specs" aria-labelledby="specs-title">
+      <h2 id="specs-title">Характеристики</h2>
+      <dl>
+        <dt>Модель</dt>
+        <dd>{model.name}</dd>
+        {model.width && (
+          <>
+            <dt>Ширина листа</dt>
+            <dd>{model.width} мм</dd>
+          </>
+        )}
+        <dt>Толщина металла</dt>
+        <dd>{formatThickness(coating.thickness)}</dd>
+        <dt>Покрытие</dt>
+        <dd>{coating.name}</dd>
+        <dt>Класс покрытия</dt>
+        <dd>{coating.class}</dd>
+        <dt>Полимерный слой</dt>
+        <dd>{coating.layer}</dd>
+        <dt>Цвет</dt>
+        <dd>{colorText}</dd>
+        <dt>Гарантия</dt>
+        <dd>{warranty ? `${warranty} лет` : "уточнит менеджер"}</dd>
+        <dt>Наличие</dt>
+        <dd>{coating.stock === "atyrau" ? "склад в Атырау" : "под заказ"}</dd>
+        {price && (
+          <>
+            <dt>Цена за м²</dt>
+            <dd>{formatPrice(price)}</dd>
+          </>
+        )}
+      </dl>
+    </section>
   </div>
 
   <div class="product-view__info">
@@ -188,8 +304,10 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
       Металлочерепица · {look.type.toLowerCase()}{" "}
       {model.family ? "· одна модель в четырёх исполнениях" : ""}
     </p>
-    <h1 class="product-view__title">
+    <h1 class:list={["product-view__title", { "product-view__title_variant": !isModelPage }]}>
       Металлочерепица {model.name}
+      {!isModelPage &&
+        `, ${coating.name} ${formatThickness(coating.thickness)}, ${colorInfo.label}`}
       <span class="product-view__subtitle">
         {coating.name}, {formatThickness(coating.thickness)}, {colorInfo.label}
         {colorInfo.label !== colorInfo.name && ` ${colorInfo.name}`}
@@ -210,6 +328,9 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
       <li>
         <b>{coating.class}</b> класс покрытия
       </li>
+      <li>
+        <b>{formatThickness(coating.thickness)}</b> металл
+      </li>
       {model.width && (
         <li>
           <b>{model.width} мм</b> ширина листа
@@ -219,72 +340,56 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
 
     {model.family && (
       <div class="picker" role="group" aria-label="Исполнение">
-        <p class="picker__label">
-          Исполнение: <span>{model.family.versionNote}</span>
-        </p>
-        <div class="picker__options">
-          {versions.map((m) => (
+        <p class="picker__label">Исполнение</p>
+        <div class="picker__versions">
+          {versionCards.map(({ m, href, from }) => (
             <a
-              href={versionLink(m)}
-              class:list={["picker__chip", { picker__chip_active: m.slug === model.slug }]}
+              href={href}
+              class:list={["picker__version", { picker__version_active: m.slug === model.slug }]}
               aria-current={m.slug === model.slug ? "true" : undefined}
             >
-              {m.family!.version}
+              <b>{m.family!.version}</b>
+              <span>от {formatPrice(from)}</span>
             </a>
           ))}
         </div>
+        <p class="picker__note">{model.family.versionNote}</p>
       </div>
     )}
 
     <div class="picker" role="group" aria-label="Покрытие">
-      <p class="picker__label">Покрытие</p>
+      <p class="picker__label picker__label_row">
+        Покрытие
+        {inStockNames.size > 0 && (
+          <span class="picker__hint">
+            <span class="picker__stock" aria-hidden="true" /> — есть в Атырау
+          </span>
+        )}
+      </p>
       <div class="picker__options picker__options_coats">
-        {coatingCards.map(({ name, cls, from }) => (
+        {coatingCards.map(({ c, href, price: p, active, inStock, extra }) => (
           <a
-            href={linkTo(name)}
-            class:list={[
-              "picker__chip",
-              "picker__coat",
-              { picker__chip_active: name === coating.name },
-            ]}
-            aria-current={name === coating.name ? "true" : undefined}
+            href={href}
+            class:list={["picker__chip", "picker__coat", { picker__chip_active: active }]}
+            aria-current={active ? "true" : undefined}
           >
-            <span class="picker__coat-name">
-              {name}
-              {inStockNames.has(name) && (
-                <span class="picker__stock" title="В наличии в Атырау">
-                  <span class="sr-only">, в наличии в Атырау</span>
-                </span>
-              )}
+            <span class="picker__coat-row">
+              <span class="picker__coat-name">
+                {c.name}
+                {inStock && (
+                  <span class="picker__stock" title="В наличии в Атырау">
+                    <span class="sr-only">, в наличии в Атырау</span>
+                  </span>
+                )}
+              </span>
+              {p && <b>{formatPrice(p)}</b>}
             </span>
-            <span class="picker__coat-meta">
-              <span>{cls}</span>
-              {from && <b>от {formatPrice(from)}</b>}
+            <span class="picker__coat-row picker__coat-meta">
+              <span>
+                {c.class} · {formatThickness(c.thickness)}
+              </span>
+              <span>{extra}</span>
             </span>
-          </a>
-        ))}
-      </div>
-      {inStockNames.size > 0 && (
-        <p class="picker__hint">
-          <span class="picker__stock" aria-hidden="true" /> есть на складе в Атырау, остальные — под
-          заказ
-        </p>
-      )}
-    </div>
-
-    <div class="picker" role="group" aria-label="Толщина металла">
-      <p class="picker__label">Толщина металла</p>
-      <div class="picker__options">
-        {thicknesses.map((c) => (
-          <a
-            href={linkTo(c.name, c.thickness)}
-            class:list={[
-              "picker__chip",
-              { picker__chip_active: c.thickness === coating.thickness },
-            ]}
-            aria-current={c.thickness === coating.thickness ? "true" : undefined}
-          >
-            {formatThickness(c.thickness)}
           </a>
         ))}
       </div>
@@ -292,11 +397,20 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
 
     <div class="picker" role="group" aria-label="Цвет">
       <p class="picker__label">
-        Цвет:{" "}
-        <span>
-          {colorInfo.label}
-          {colorInfo.label !== colorInfo.name && `, ${colorInfo.name}`}
-        </span>
+        {isModelPage ? (
+          <>
+            Цвет:{" "}
+            <span>
+              {colorInfo.label}
+              {colorInfo.label !== colorInfo.name && `, ${colorInfo.name}`}
+            </span>
+          </>
+        ) : (
+          <>
+            Другие цвета {coating.name} {formatThickness(coating.thickness)}{" "}
+            <span>· {colorOptions.length} цв.</span>
+          </>
+        )}
       </p>
       <div class="picker__options picker__options_colors">
         {colorOptions.map((v) => {
@@ -321,6 +435,7 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
         <div class="product-view__price">
           <p class="product-view__price-value">
             {formatPrice(price)} <span>за м²</span>
+            <small class="product-view__vat">с НДС</small>
           </p>
           <p class="product-view__price-note">
             Цена с НДС, актуальна на {priceDateOf(model, coating)}.
@@ -356,7 +471,15 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
             <label class="calc__label" for="calc-area">
               Площадь крыши
             </label>
-            <div class="calc__field">
+            <div class="calc__field calc__field_step">
+              <button
+                type="button"
+                class="calc__step"
+                data-calc-step="-10"
+                aria-label="Уменьшить площадь на 10 м²"
+              >
+                −
+              </button>
               <input
                 id="calc-area"
                 class="calc__input"
@@ -368,6 +491,14 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
                 autocomplete="off"
               />
               <span class="calc__unit">м²</span>
+              <button
+                type="button"
+                class="calc__step"
+                data-calc-step="10"
+                aria-label="Увеличить площадь на 10 м²"
+              >
+                +
+              </button>
             </div>
           </div>
 
@@ -467,24 +598,96 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
         </a>
       </div>
     </div>
-    <ul class="product-trust">
-      <li>
-        <b>Доставка</b> до дома в Атырау
-      </li>
-      <li>
-        <b>Расчёт</b> листов и доборных под вашу крышу
-      </li>
-      <li>
-        <b>ГОСТ</b> металл и покрытие по стандарту
-      </li>
-    </ul>
+    <div data-nosnippet>
+      <ul class="product-trust">
+        <li>
+          <span class="product-trust__icon" aria-hidden="true">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M3 6h11v9H3zM14 9h4l3 3v3h-7"></path>
+              <circle cx="7" cy="17" r="1.8"></circle>
+              <circle cx="17" cy="17" r="1.8"></circle>
+            </svg>
+          </span>
+          <span>
+            <b>Доставка</b> до дома в Атырау
+          </span>
+        </li>
+        <li>
+          <span class="product-trust__icon" aria-hidden="true">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="5" y="3" width="14" height="18" rx="2"></rect>
+              <path d="M8 7h8M8 11h2M12 11h2M16 11h0M8 15h2M12 15h2M8 18h2M12 18h2"></path>
+            </svg>
+          </span>
+          <span>
+            <b>Расчёт</b> листов и доборных под вашу крышу
+          </span>
+        </li>
+        <li>
+          <span class="product-trust__icon" aria-hidden="true">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M5 12.5l4.5 4.5L19 7.5"></path>
+            </svg>
+          </span>
+          <span>
+            <b>ГОСТ</b> металл и покрытие по стандарту
+          </span>
+        </li>
+      </ul>
+    </div>
+    {!isModelPage && sameColor.length > 0 && (
+      <section class="same-color" aria-labelledby="same-color-title">
+        <h2 id="same-color-title">{colorInfo.label} в других покрытиях</h2>
+        <ul>
+          {sameColor.map(({ v, price: p }) => (
+            <li>
+              <a href={`${base}/${v.slug}`}>
+                <span>
+                  {v.coating.name} {formatThickness(v.coating.thickness)}
+                  <small>{v.coating.class}</small>
+                </span>
+                {p && <b>{formatPrice(p)}</b>}
+                <span aria-hidden="true">→</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
   </div>
 </article>
 
 <script type="application/ld+json" set:html={JSON.stringify(productLd)} />
 <section class="product-details">
   <div class="product-details__text">
-    <h2>О модели</h2>
+    <h2>{isModelPage ? "О модели" : "О модели и покрытии"}</h2>
     {[...model.description, ...modelFacts(model)].map((p) => (
       <p>{p}</p>
     ))}
@@ -494,46 +697,39 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
       {warranty ? `, гарантия ${warranty} лет` : ""}.
     </p>
   </div>
-  <div class="product-details__specs">
-    <h2>Характеристики</h2>
-    <dl>
-      <dt>Модель</dt>
-      <dd>{model.name}</dd>
-      <dt>Покрытие</dt>
-      <dd>{coating.name}</dd>
-      <dt>Класс покрытия</dt>
-      <dd>{coating.class}</dd>
-      <dt>Толщина полимерного слоя</dt>
-      <dd>{coating.layer}</dd>
-      <dt>Толщина металла</dt>
-      <dd>{formatThickness(coating.thickness)}</dd>
-      <dt>Цвет</dt>
-      <dd>
-        {colorInfo.label}
-        {colorInfo.label !== colorInfo.name && `, ${colorInfo.name}`}
-      </dd>
-      {model.width && (
-        <>
-          <dt>Полная ширина листа</dt>
-          <dd>{model.width} мм</dd>
-        </>
-      )}
-      {warranty && (
-        <>
-          <dt>Гарантия</dt>
-          <dd>{warranty} лет</dd>
-        </>
-      )}
-      {price && (
-        <>
-          <dt>Цена за м²</dt>
-          <dd>{formatPrice(price)}</dd>
-        </>
-      )}
-    </dl>
-  </div>
 </section>
 
+{model.family && (
+  <section class="versions-table" aria-labelledby="versions-title">
+    <h2 id="versions-title">Чем отличаются исполнения</h2>
+    <div class="versions-table__scroll" tabindex="0" role="region" aria-label="Исполнения">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Исполнение</th>
+            <th scope="col">Особенность</th>
+            <th scope="col">Ширина листа</th>
+            <th scope="col">Покрытий</th>
+            <th scope="col">Цена от</th>
+          </tr>
+        </thead>
+        <tbody>
+          {versionCards.map(({ m, href, from, coatings }) => (
+            <tr class:list={{ "versions-table__current": m.slug === model.slug }}>
+              <th scope="row">
+                <a href={href}>{m.family!.version}</a>
+              </th>
+              <td>{m.family!.versionNote}</td>
+              <td>{m.width ? `${m.width} мм` : "—"}</td>
+              <td>{coatings}</td>
+              <td>{formatPrice(from)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+)}
 <section class="coatings-table">
   <h2>Покрытия, цвета и цены {model.name}</h2>
   <!-- На телефоне строки таблицы показываются карточками (catalog.css) -->
@@ -605,26 +801,28 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
 </section>
 
 <section class="extras">
-  <h2>Что ещё понадобится для крыши</h2>
-  <ul class="extras__list">
-    {extras.map((x) => (
-      <li>
-        <a
-          class="extras__item"
-          href={waLink(
-            `Здравствуйте! Пишу с сайта velum.kz: ${x.title.toLowerCase()} к металлочерепице ${model.name}, ${colorInfo.label}`,
-          )}
-          target="_blank"
-          rel="noopener"
-        >
-          <canvas data-art data-kind={x.kind} data-color={colorInfo.hex} aria-hidden="true" />
-          <b>{x.title}</b>
-          <span>{x.text}</span>
-          <span class="extras__cta">Цена в WhatsApp →</span>
-        </a>
-      </li>
-    ))}
-  </ul>
+  <div data-nosnippet>
+    <h2>Что ещё понадобится для крыши</h2>
+    <ul class="extras__list">
+      {extras.map((x) => (
+        <li>
+          <a
+            class="extras__item"
+            href={waLink(
+              `Здравствуйте! Пишу с сайта velum.kz: ${x.title.toLowerCase()} к металлочерепице ${model.name}, ${colorInfo.label}`,
+            )}
+            target="_blank"
+            rel="noopener"
+          >
+            <canvas data-art data-kind={x.kind} data-color={colorInfo.hex} aria-hidden="true" />
+            <b>{x.title}</b>
+            <span>{x.text}</span>
+            <span class="extras__cta">Цена в WhatsApp →</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
 </section>
 <section class="other-models">
   <h2>Другие модели металлочерепицы</h2>
@@ -636,3 +834,22 @@ const otherEntries = catalogEntries().filter((e) => !e.models.some((m) => m.slug
     ))}
   </ul>
 </section>
+
+<script>
+  // Вид товара: лист, на доме, профиль
+  document.addEventListener("astro:page-load", () => {
+    const views = document.querySelector<HTMLElement>("[data-views]");
+    if (!views) return;
+    document.querySelectorAll<HTMLButtonElement>("[data-view-btn]").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        const id = btn.dataset.viewBtn;
+        document
+          .querySelectorAll<HTMLButtonElement>("[data-view-btn]")
+          .forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
+        views.querySelectorAll<HTMLElement>("[data-view]").forEach((v) => {
+          v.hidden = v.dataset.view !== id;
+        });
+      }),
+    );
+  });
+</script>

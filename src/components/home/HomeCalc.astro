@@ -1,7 +1,13 @@
 ---
 // Мини-калькулятор крыши на главной: площадь × 1,1 (запас) × цена от. Считает src/scripts/home.ts.
 // Класс hcalc, а не calc: .calc занят калькулятором на странице товара.
-import { catalogEntries, formatPrice, minPrice } from "../../data/catalog/metal-tile";
+import { colors, colorSlug } from "../../data/catalog/colors";
+import {
+  catalogEntries,
+  formatPrice,
+  metalTileModels,
+  minPrice,
+} from "../../data/catalog/metal-tile";
 
 const models = catalogEntries().map((e) => ({
   name: e.name,
@@ -10,6 +16,11 @@ const models = catalogEntries().map((e) => ({
 }));
 const area = 100;
 const first = models[0]!;
+// Ходовые цвета крыши: эскиз дома перекрашивается при выборе (для наглядности, на сумму не влияет)
+const used = new Set(metalTileModels.flatMap((m) => m.coatings.flatMap((c) => c.colors)));
+const swatches = ["8017", "7024", "3005", "6005", "8004"]
+  .filter((code) => used.has(code))
+  .map((code) => ({ ...colors[code]!, code, slug: colorSlug(code) }));
 ---
 
 <section id="calc" class="s-section s-wrap" aria-labelledby="calc-title">
@@ -22,6 +33,34 @@ const first = models[0]!;
         Площадь крыши и модель — сумма сразу, с запасом 10% на подрезку. Точную смету с доборными
         элементами посчитает менеджер.
       </p>
+      <div class="hcalc__look">
+        <img
+          class="hcalc__house"
+          src={`/images/house/${swatches[0]!.slug}.svg`}
+          alt=""
+          width="760"
+          height="600"
+          loading="lazy"
+          data-house
+        />
+        <fieldset class="hcalc__colors">
+          <legend>Цвет крыши</legend>
+          <div class="hcalc__swatches">
+            {swatches.map((c, i) => (
+              <label class="hcalc__swatch" title={`RAL ${c.code} — ${c.name}`}>
+                <input
+                  type="radio"
+                  name="hcalc-color"
+                  value={c.slug}
+                  checked={i === 0}
+                  aria-label={`RAL ${c.code} — ${c.name}`}
+                />
+                <span style={`background:${c.hex}`} />
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      </div>
     </div>
     <div class="hcalc__form">
       <div class="hcalc__field">
@@ -99,6 +138,61 @@ const first = models[0]!;
     font-size: 16px;
     line-height: 1.5;
     color: var(--muted);
+  }
+  .hcalc__look {
+    margin-top: 20px;
+  }
+  .hcalc__house {
+    display: block;
+    width: 100%;
+    max-width: 420px;
+    height: auto;
+  }
+  .hcalc__colors {
+    margin: 8px 0 0;
+    padding: 0;
+    border: 0;
+  }
+  .hcalc__colors legend {
+    margin-bottom: 8px;
+    padding: 0;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .hcalc__swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .hcalc__swatch {
+    position: relative;
+    cursor: pointer;
+  }
+  .hcalc__swatch input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+  .hcalc__swatch span {
+    display: block;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    box-shadow:
+      inset 0 0 0 1px rgba(0, 0, 0, 0.12),
+      0 0 0 3px #ffffff;
+  }
+  .hcalc__swatch input:checked + span {
+    box-shadow:
+      inset 0 0 0 1px rgba(0, 0, 0, 0.12),
+      0 0 0 3px #ffffff,
+      0 0 0 5px var(--ink);
+  }
+  .hcalc__swatch input:focus-visible + span {
+    outline: 2px solid var(--ink);
+    outline-offset: 6px;
   }
   .hcalc__form {
     display: flex;
@@ -220,6 +314,18 @@ const first = models[0]!;
     }
     .hcalc__cta {
       align-self: stretch;
+    }
+    .hcalc__look {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .hcalc__swatches {
+      display: grid;
+      grid-template-columns: repeat(3, 36px);
+      gap: 10px;
     }
   }
 </style>
