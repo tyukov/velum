@@ -33,6 +33,13 @@ const name = `Металлочерепица ${model.name} ${coating.name} ${for
 const price = priceOf(model, coating);
 const warranty = warrantyOf(model, coating);
 const modelPath = `/catalog/metallocherepitsa/${model.slug}`;
+const barPrice = price
+  ? {
+      price: formatPrice(price),
+      stock: stockInfo[coating.stock].label,
+      inStock: coating.stock === "atyrau",
+    }
+  : undefined;
 // Толщину пишем в заголовке, только если у покрытия модели их несколько (полиэстер 0,4 и 0,45)
 const multiThickness = model.coatings.filter((c) => c.id === coating.id).length > 1;
 const shortName = [
@@ -54,6 +61,7 @@ const shortName = [
   canonicalPath={modelPath}
   product={name}
   supply={supplyNote(model, coating)}
+  barPrice={barPrice}
 >
   <ProductView variant={variant} />
 </CatalogLayout>

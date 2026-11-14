@@ -1,29 +1,31 @@
 ---
-import Base from "../layouts/Base.astro";
-import Logo from "../components/Logo.astro";
-import "../styles/taplink.css";
+import PageLayout from "../layouts/PageLayout.astro";
+import { business } from "../lib/business";
 ---
 
-<Base
+<PageLayout
   title="Страница не найдена | Velum"
   description="Такой страницы нет. Перейдите на главную Velum или позвоните нам: 8 701 013 13 59."
   path="/404"
   noindex
-  bodyClass="page page-done"
 >
-  <div>
-    <Logo />
-  </div>
-  <div class="page-done__middle">
-    <h1 class="page-done__title">Страница не найдена</h1>
-    <p class="page-done__description">
-      Возможно, ссылка устарела. Перейдите на главную или позвоните:{" "}
-      <a href="tel:+77010131359">8&nbsp;701&nbsp;013&nbsp;13&nbsp;59</a>
+  <section class="s-wrap s-done s-done_404">
+    <div class="s-done__art" aria-hidden="true">
+      <span class="s-done__code">404</span>
+      <img src="/images/house-line.svg" alt="" width="760" height="600" />
+    </div>
+    <h1>Страница не найдена</h1>
+    <p>
+      Возможно, ссылка устарела. Перейдите на главную, в <a href="/catalog">каталог</a> или
+      позвоните: <a href={`tel:${business.phoneE164}`}>{business.phoneDisplay}</a>.
     </p>
-  </div>
-  <div class="page-done__bottom">
-    <a href="/" class="btn btn_theme_grab btn_size_m btn_size_l">
-      <span class="btn__text">Вернуться на главную</span>
-    </a>
-  </div>
-</Base>
+    <div class="s-done__actions">
+      <a href="/" class="s-btn s-btn--dark">
+        Вернуться на главную
+      </a>
+      <a href={`tel:${business.phoneE164}`} class="s-btn s-btn--light">
+        Позвонить
+      </a>
+    </div>
+  </section>
+</PageLayout>

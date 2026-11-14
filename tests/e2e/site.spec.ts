@@ -104,7 +104,7 @@ test.describe("главная", () => {
     const phone = modal.getByLabel("Ваш телефон");
     await phone.pressSequentially("87011234567");
     await expect(phone).toHaveValue("+7 (701) 123-45-67");
-    await modal.getByLabel("Ваш вопрос:").fill("Нужна черепица <b>");
+    await modal.getByLabel("Ваш вопрос").fill("Нужна черепица <b>");
     await humanPause(modal);
     await modal.getByRole("button", { name: "Отправить заявку" }).click();
 
@@ -153,20 +153,23 @@ test.describe("главная", () => {
     await expect(question).toHaveClass(/active/);
   });
 
-  test("фото в галерее увеличивается", async ({ page, isMobile }) => {
-    const photo = page.locator(".zoom").first();
+  test("фото работ: просмотр целиком, листание, закрытие", async ({ page }) => {
+    const photo = page.locator(".works__open").first();
     await photo.scrollIntoViewIfNeeded();
     await photo.click();
-    await expect(page.locator("body")).toHaveClass(/medium-zoom--opened/);
-    // На телефоне шапка закреплена: затемнение с фото должно быть поверх неё
-    if (!isMobile) return;
-    const header = page.locator(".s-header");
-    const box = await header.boundingBox();
-    const topEl = await page.evaluate(
-      ([x, y]) => document.elementFromPoint(x, y)?.className ?? "",
-      [box!.x + 5, box!.y + 5],
-    );
-    expect(topEl).toContain("medium-zoom");
+    const viewer = page.locator("dialog.lightbox");
+    await expect(viewer).toBeVisible();
+    await expect(viewer.locator(".lightbox__count")).toHaveText("1 / 5");
+    // Фото не искажено: вписано целиком с сохранением пропорций
+    await expect(viewer.locator(".lightbox__img")).toHaveCSS("object-fit", "contain");
+    await viewer.getByRole("button", { name: "Следующее фото" }).click();
+    await expect(viewer.locator(".lightbox__count")).toHaveText("2 / 5");
+    // Клавиши-стрелки листают, с первого фото назад — на последнее
+    await page.keyboard.press("ArrowLeft");
+    await page.keyboard.press("ArrowLeft");
+    await expect(viewer.locator(".lightbox__count")).toHaveText("5 / 5");
+    await page.keyboard.press("Escape");
+    await expect(viewer).toBeHidden();
   });
 
   test("в подвале есть ссылка на политику", async ({ page }) => {
@@ -186,6 +189,53 @@ test("политика конфиденциальности", async ({ page }) =
   await page.goto("/privacy");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Политика конфиденциальности");
   await expect(page.getByText("№ 94-V")).toBeVisible();
+});
+
+test("инструкции: шаги и разметка HowTo, ссылка в шапке", async ({ page, isMobile }) => {
+  await page.goto("/");
+  if (isMobile) await page.locator(".s-menu > summary").click();
+  await page
+    .locator(isMobile ? ".s-menu__panel" : ".s-nav")
+    .getByRole("link", { name: "Инструкции" })
+    .click();
+  await expect(page).toHaveURL(/\/instructions$/);
+  await expect(page.getByRole("heading", { level: 2, name: "Как измерить крышу" })).toBeVisible();
+  const ld = await page
+    .locator('script[type="application/ld+json"]')
+    .evaluateAll((els) => els.flatMap((e) => JSON.parse(e.textContent ?? "[]")));
+  expect(ld.filter((d) => d["@type"] === "HowTo")).toHaveLength(4);
+});
+
+test("нижняя панель на телефоне: цена товара и «Получить расчёт»", async ({ page, isMobile }) => {
+  test.skip(!isMobile, "панель только на телефоне");
+  await page.goto("/catalog/metallocherepitsa/lamonterra-x");
+  const bar = page.locator(".s-bar");
+  await expect(bar.locator(".s-bar__price b")).toHaveText(
+    (await page.locator(".product-view__price-value").innerText()).split(" за")[0]!.trim(),
+  );
+  await bar.getByRole("link", { name: "Получить расчёт" }).click();
+  await expect(page.locator(".blocker .modal")).toBeVisible();
+  await page.goto("/");
+  await expect(page.locator(".s-bar").getByRole("link", { name: "Оставить заявку" })).toBeVisible();
+});
+
+test("меню: переход к разделу закрывает меню, заголовок не под шапкой", async ({
+  page,
+  isMobile,
+}) => {
+  await page.goto("/");
+  if (isMobile) {
+    await page.locator(".s-menu > summary").click();
+    await page.locator('.s-menu__panel a[href="/#works"]').click();
+    await expect(page.locator("details.s-menu")).not.toHaveAttribute("open");
+  } else {
+    await page.locator('.s-nav a[href="/#works"]').click();
+  }
+  const header = (await page.locator(".s-header").boundingBox())!;
+  const gap = async () =>
+    (await page.locator("#works-title").boundingBox())!.y - (header.y + header.height);
+  await expect.poll(gap).toBeGreaterThanOrEqual(0);
+  await expect.poll(gap).toBeLessThan(60);
 });
 
 test("несуществующая страница — 404", async ({ page }) => {

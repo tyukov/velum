@@ -1,6 +1,7 @@
 ---
 // Страницы каталога: общая шапка, подвал и окно заявки
 import Base from "./Base.astro";
+import type { BarPrice } from "../components/MobileBar.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import LeadModal from "../components/LeadModal.astro";
@@ -18,12 +19,21 @@ interface Props {
   product?: string;
   /** Цены поставщиков для менеджера */
   supply?: string;
+  /** Цена и наличие в нижней панели на телефоне */
+  barPrice?: BarPrice;
 }
 
-const { title, description, path, canonicalPath, ogImage, product, supply } = Astro.props;
+const { title, description, path, canonicalPath, ogImage, product, supply, barPrice } = Astro.props;
 ---
 
-<Base title={title} description={description} path={canonicalPath ?? path} ogImage={ogImage} bar>
+<Base
+  title={title}
+  description={description}
+  path={canonicalPath ?? path}
+  ogImage={ogImage}
+  bar
+  barPrice={barPrice}
+>
   <Header />
   <main class="main catalog">
     <div class="s-wrap catalog__wrap">

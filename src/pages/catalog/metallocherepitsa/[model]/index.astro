@@ -9,6 +9,8 @@ import {
   metalTileModels,
   maxWarranty,
   minPrice,
+  priceOf,
+  stockInfo,
   supplyNote,
   variantsOf,
   type Model,
@@ -21,6 +23,14 @@ export function getStaticPaths() {
 const { model } = Astro.props as { model: Model };
 const variant = defaultVariant(model);
 const warranty = maxWarranty([model]);
+const price = priceOf(model, variant.coating);
+const barPrice = price
+  ? {
+      price: formatPrice(price),
+      stock: stockInfo[variant.coating.stock].label,
+      inStock: variant.coating.stock === "atyrau",
+    }
+  : undefined;
 const coatingCount = new Set(model.coatings.map((c) => c.name)).size;
 const colorCount = new Set(variantsOf(model).map((v) => v.color)).size;
 ---
@@ -32,6 +42,7 @@ const colorCount = new Set(variantsOf(model).map((v) => v.color)).size;
   path={`/catalog/metallocherepitsa/${model.slug}`}
   product={`Металлочерепица ${model.name}`}
   supply={supplyNote(model, variant.coating)}
+  barPrice={barPrice}
 >
   <ProductView variant={variant} isModelPage />
 </CatalogLayout>

@@ -14,9 +14,19 @@
   --header-h: 76px;
 }
 
+/* Переход к разделу (#works, #calc…) — с отступом под липкую шапку */
+html {
+  scroll-padding-top: var(--header-h);
+}
+@media (max-width: 960px) {
+  :root {
+    --header-h: 60px;
+  }
+}
+
 /* Старая шапка на телефоне была fixed и сдвигала страницу вниз; новая — sticky */
 body.page {
-  margin-top: 0;
+  margin: 0;
 }
 
 .s-wrap {
@@ -326,26 +336,29 @@ body.page {
     right: 0;
     bottom: 0;
     z-index: 950;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    display: flex;
+    align-items: center;
     gap: 8px;
     padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
-    background: rgba(255, 255, 255, 0.96);
+    background: rgba(255, 255, 255, 0.97);
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     border-top: 1px solid var(--line);
+    box-shadow: 0 -6px 20px rgb(43 38 34 / 6%);
     font-family: Inter, system-ui, sans-serif;
   }
   .s-bar a {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    min-height: 48px;
-    border-radius: 14px;
-    font-size: 14px;
-    font-weight: 600;
+    min-height: 50px;
+    border-radius: 16px;
     text-decoration: none;
+  }
+  /* Звонок и WhatsApp — квадратные кнопки-иконки */
+  .s-bar__icon {
+    flex: none;
+    width: 50px;
   }
   .s-bar__call {
     background: #ffffff;
@@ -356,9 +369,50 @@ body.page {
     background: var(--wa);
     color: #ffffff;
   }
+  /* Главное действие — широкая тёмная кнопка */
   .s-bar__lead {
+    flex: 1;
+    min-width: 0;
+    padding: 0 16px;
     background: var(--ink);
     color: #ffffff;
+    font-size: 16px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  /* На странице товара: цена и наличие слева */
+  .s-bar__price {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    line-height: 1.2;
+  }
+  .s-bar__price b {
+    font-size: 19px;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .s-bar__price > span:not(.s-bar__stock) {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .s-bar__stock {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #24572a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .s-bar__stock_order {
+    color: var(--accent-ink);
+  }
+  .s-bar_price .s-bar__lead {
+    flex: none;
+    padding: 0 18px;
+    font-size: 15px;
   }
   /* место под панель внизу страницы; плавающая кнопка WhatsApp не нужна */
   body.has-bar {
@@ -372,6 +426,10 @@ body.page {
 /* ---------- Общие блоки разделов ---------- */
 .s-section {
   padding-block: clamp(48px, 6vw, 88px) 0;
+}
+/* При переходе к разделу заголовок встаёт сразу под шапкой, без пустого отступа сверху */
+.s-section[id] {
+  scroll-margin-top: calc(20px - clamp(48px, 6vw, 88px));
 }
 .s-h2 {
   margin: 0;
@@ -401,6 +459,82 @@ body.page {
   border-radius: 24px;
   background: var(--paper-2);
   border: 1px solid #f0ebe4;
+}
+
+/* ---------- Страницы «Спасибо» и 404 ---------- */
+.s-done {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-block: clamp(48px, 10vh, 120px);
+  text-align: center;
+  font-family: Inter, system-ui, sans-serif;
+}
+.s-done h1 {
+  margin: 24px 0 12px;
+  font-size: clamp(30px, 4vw, 46px);
+  line-height: 1.15;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+.s-done p {
+  max-width: 34rem;
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.6;
+  color: #555555;
+}
+.s-done p a {
+  color: var(--ink);
+}
+.s-done__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: #fbefe2;
+  color: var(--accent-ink);
+}
+.s-done__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 28px;
+}
+.s-done_404 {
+  padding-top: 24px;
+}
+.s-done__art {
+  position: relative;
+  width: min(560px, 100%);
+}
+.s-done__art img {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.s-done__code {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(140px, 26vw, 300px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: #f5ebe0;
+}
+@media (max-width: 640px) {
+  .s-done__actions {
+    display: grid;
+    width: 100%;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

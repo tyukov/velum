@@ -1,29 +1,39 @@
 ---
-import { Image } from "astro:assets";
-import Base from "../layouts/Base.astro";
-import Logo from "../components/Logo.astro";
-import done from "../assets/img/icons/done.svg";
-import "../styles/taplink.css";
+import PageLayout from "../layouts/PageLayout.astro";
+import { business } from "../lib/business";
 ---
 
-<Base
+<PageLayout
   title="Спасибо за заявку | Velum"
   description="Заявка отправлена. Менеджер Velum свяжется с вами в ближайшее время."
   path="/thanks"
   noindex
-  bodyClass="page page-done"
 >
-  <div>
-    <Logo />
-  </div>
-  <div class="page-done__middle">
-    <Image src={done} alt="" width={69} height={69} loading="eager" />
-    <h1 class="page-done__title">Спасибо, что оставили заявку!</h1>
-    <p class="page-done__description">Мы свяжемся с вами в ближайшее время</p>
-  </div>
-  <div class="page-done__bottom">
-    <a href="/" class="btn btn_theme_grab btn_size_m btn_size_l">
-      <span class="btn__text">Вернуться на главную</span>
-    </a>
-  </div>
-</Base>
+  <section class="s-wrap s-done">
+    <span class="s-done__icon" aria-hidden="true">
+      <svg
+        width="40"
+        height="40"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.2"
+      >
+        <path d="M5 12.5l4.5 4.5L19 7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </span>
+    <h1>Спасибо, что оставили заявку!</h1>
+    <p>
+      Мы свяжемся с вами в ближайшее время. Пока можно посмотреть <a href="/catalog">каталог</a> или
+      посчитать крышу в <a href="/#calc">калькуляторе</a>.
+    </p>
+    <div class="s-done__actions">
+      <a href="/" class="s-btn s-btn--dark">
+        Вернуться на главную
+      </a>
+      <a href={`tel:${business.phoneE164}`} class="s-btn s-btn--light">
+        Позвонить
+      </a>
+    </div>
+  </section>
+</PageLayout>

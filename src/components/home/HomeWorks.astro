@@ -1,19 +1,25 @@
 ---
-// Наши работы: реальные фото объектов, по нажатию — крупно (medium-zoom по классу .zoom)
-import { Picture } from "astro:assets";
+// Наши работы: реальные фото объектов. По нажатию открывается просмотр (src/scripts/gallery.ts):
+// фото целиком на тёмном фоне, листание стрелками и свайпом, счётчик, закрытие по Esc.
+import { Picture, getImage } from "astro:assets";
 import work1 from "../../assets/img/work-1.jpg";
 import work2 from "../../assets/img/work-2.jpg";
 import work3 from "../../assets/img/work-3.jpg";
 import work4 from "../../assets/img/work-4.jpg";
 import work5 from "../../assets/img/work-5.jpg";
 
+// Подписи как в макете: что за объект и какой материал
 const works = [
-  { src: work1, alt: "Проект компании в выполненном состоянии" },
-  { src: work2, alt: "Завершённая работа по установке кровли" },
-  { src: work3, alt: "Монтаж кровельной системы" },
-  { src: work4, alt: "Пример выполненного строительного проекта" },
-  { src: work5, alt: "Готовый строительный объект" },
-];
+  { src: work1, title: "Двухэтажный дом", material: "Металлочерепица, водосток" },
+  { src: work2, title: "Дом с мансардой", material: "Металлочерепица" },
+  { src: work3, title: "Частный дом", material: "Металлочерепица" },
+  { src: work4, title: "Жилой дом", material: "Металлочерепица, водосток" },
+  { src: work5, title: "Коттедж", material: "Металлочерепица, водосток" },
+].map((w) => ({ ...w, alt: `${w.title}: ${w.material.toLowerCase()}` }));
+// Для просмотра — фото покрупнее, целиком (на странице плитки обрезаны)
+const full = await Promise.all(
+  works.map((w) => getImage({ src: w.src, width: 1600, format: "webp" })),
+);
 ---
 
 <section id="works" class="s-section s-wrap" aria-labelledby="works-title">
@@ -21,45 +27,184 @@ const works = [
     <h2 id="works-title" class="s-h2">
       Наши работы
     </h2>
+    <div class="works__nav">
+      <button type="button" class="works__arrow" data-scroll="-1" aria-label="Предыдущие работы">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
+          <path d="M15 5l-7 7 7 7" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      </button>
+      <button type="button" class="works__arrow" data-scroll="1" aria-label="Следующие работы">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
+          <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      </button>
+    </div>
   </div>
-  <div class="works" tabindex="0" role="region" aria-label="Фото объектов">
+  <div class="works" tabindex="0" role="region" aria-label="Фото объектов" data-gallery>
     {works.map((w, i) => (
-      <figure class={`works__item works__item--${i + 1}`}>
-        <Picture
-          src={w.src}
-          formats={["avif"]}
-          fallbackFormat="webp"
-          widths={[480, 800, 1200]}
-          sizes="(max-width: 640px) 80vw, (max-width: 960px) 50vw, 33vw"
-          class="zoom works__img"
-          alt={w.alt}
-        />
+      <figure class="works__item">
+        <button
+          type="button"
+          class="works__open"
+          data-full={full[i]!.src}
+          data-alt={w.alt}
+          aria-label={`Открыть фото ${i + 1} из ${works.length}: ${w.alt}`}
+        >
+          <Picture
+            src={w.src}
+            formats={["avif"]}
+            fallbackFormat="webp"
+            widths={[480, 800, 1200]}
+            sizes="(max-width: 640px) 80vw, (max-width: 960px) 45vw, 30vw"
+            class="works__img"
+            alt={w.alt}
+          />
+        </button>
+        <figcaption>
+          <b>{w.title}</b>
+          <span>{w.material}</span>
+        </figcaption>
       </figure>
     ))}
   </div>
+  <dialog class="lightbox" aria-label="Фото объекта">
+    <img class="lightbox__img" alt="" />
+    <p class="lightbox__count" aria-live="polite"></p>
+    <button type="button" class="lightbox__btn lightbox__close" aria-label="Закрыть">
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.2"
+        aria-hidden="true"
+      >
+        <path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"></path>
+      </svg>
+    </button>
+    <button type="button" class="lightbox__btn lightbox__prev" aria-label="Предыдущее фото">
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.2"
+        aria-hidden="true"
+      >
+        <path d="M15 5l-7 7 7 7" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </button>
+    <button type="button" class="lightbox__btn lightbox__next" aria-label="Следующее фото">
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.2"
+        aria-hidden="true"
+      >
+        <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </button>
+  </dialog>
 </section>
 
 <style>
+  /* Лента карточек как в макете: на компьютере видно три, остальные — стрелками или прокруткой */
   .works {
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    grid-auto-rows: clamp(160px, 18vw, 260px);
-    gap: 16px;
+    grid-auto-flow: column;
+    grid-auto-columns: calc((100% - 40px) / 3);
+    gap: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .works::-webkit-scrollbar {
+    display: none;
   }
   .works__item {
     margin: 0;
-    border-radius: 20px;
+    scroll-snap-align: start;
+  }
+  .works__open {
+    aspect-ratio: 8 / 7;
+    border-radius: 24px;
     overflow: hidden;
     background: var(--paper);
   }
-  .works__item--1,
-  .works__item--2 {
-    grid-column: span 3;
+  .works__item figcaption {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    padding: 12px 2px 0;
+    font-size: 15px;
   }
-  .works__item--3,
-  .works__item--4,
-  .works__item--5 {
-    grid-column: span 2;
+  .works__item figcaption b {
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .works__item figcaption span {
+    color: var(--muted);
+    text-align: right;
+  }
+  .works__nav {
+    display: flex;
+    gap: 8px;
+  }
+  .works__arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid #e3ddd3;
+    border-radius: 50%;
+    background: #ffffff;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .works__arrow:hover {
+    border-color: var(--ink);
+  }
+  .works__arrow:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+  .works__open {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    cursor: zoom-in;
+  }
+  .works__open:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: -3px;
+  }
+  .works__open :global(picture) {
+    display: block;
+    height: 100%;
   }
   .works__item :global(img) {
     display: block;
@@ -67,22 +212,130 @@ const works = [
     height: 100%;
     object-fit: cover;
   }
-  /* Телефон: лента с прокруткой вбок, следующее фото выглядывает */
+  /* Планшет: две карточки */
+  @media (max-width: 960px) {
+    .works {
+      grid-auto-columns: calc((100% - 20px) / 2);
+    }
+  }
+  /* Телефон: свайп, следующая карточка выглядывает; стрелки не нужны */
   @media (max-width: 640px) {
     .works {
-      display: flex;
-      gap: 10px;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
+      grid-auto-columns: 80%;
+      gap: 12px;
       margin-inline: calc(var(--gutter) * -1);
       padding-inline: var(--gutter);
       scroll-padding-inline: var(--gutter);
-      scrollbar-width: none;
     }
-    .works__item {
-      flex: 0 0 80%;
-      height: 220px;
-      scroll-snap-align: start;
+    .works__nav {
+      display: none;
+    }
+    .works__item figcaption {
+      flex-direction: column;
+      gap: 2px;
+      font-size: 14px;
+    }
+    .works__item figcaption span {
+      text-align: left;
+    }
+  }
+
+  /* Просмотр фото */
+  .lightbox {
+    width: 100vw;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: #0c0b0a;
+    color: #ffffff;
+    overflow: hidden;
+  }
+  .lightbox::backdrop {
+    background: transparent;
+  }
+  .lightbox[open] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  /* Фото занимает всё место между кнопками, пропорции сохраняются (contain) */
+  .lightbox__img {
+    display: block;
+    width: calc(100vw - 180px);
+    height: calc(100dvh - 130px);
+    object-fit: contain;
+    user-select: none;
+    touch-action: pan-y;
+  }
+  .lightbox__count {
+    position: absolute;
+    left: 50%;
+    bottom: calc(20px + env(safe-area-inset-bottom));
+    margin: 0;
+    transform: translateX(-50%);
+    font-size: 15px;
+    font-weight: 500;
+    color: #d6d0c8;
+  }
+  .lightbox__btn {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border: 0;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 12%);
+    color: #ffffff;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  .lightbox__btn:hover {
+    background: rgb(255 255 255 / 22%);
+  }
+  .lightbox__btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .lightbox__close {
+    top: calc(16px + env(safe-area-inset-top));
+    right: 16px;
+  }
+  .lightbox__prev,
+  .lightbox__next {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .lightbox__prev {
+    left: 20px;
+  }
+  .lightbox__next {
+    right: 20px;
+  }
+  /* Телефон: фото на всю ширину, стрелки внизу рядом со счётчиком; листать можно свайпом */
+  @media (max-width: 640px) {
+    .lightbox__img {
+      width: 100vw;
+      height: calc(100dvh - 190px);
+    }
+    .lightbox__prev,
+    .lightbox__next {
+      top: auto;
+      bottom: calc(10px + env(safe-area-inset-bottom));
+      transform: none;
+    }
+    .lightbox__prev {
+      left: 16px;
+    }
+    .lightbox__next {
+      right: 16px;
+    }
+    .lightbox__count {
+      bottom: calc(26px + env(safe-area-inset-bottom));
     }
   }
 </style>

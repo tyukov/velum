@@ -1,0 +1,29 @@
+---
+// Простые страницы (спасибо, 404, политика, инструкции): шапка, подвал и окно «Заказать звонок»
+import Base from "./Base.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import LeadModal from "../components/LeadModal.astro";
+
+interface Props {
+  title: string;
+  description: string;
+  path: string;
+  noindex?: boolean;
+  /** Окно заявки #ex1 (для страниц с кнопкой «Оставить заявку») */
+  lead?: boolean;
+}
+
+const { title, description, path, noindex, lead = false } = Astro.props;
+---
+
+<Base title={title} description={description} path={path} noindex={noindex} bar={lead}>
+  <slot name="head" slot="head" />
+  <Header />
+  <main class="main s-page">
+    <slot />
+  </main>
+  <Footer />
+  {lead && <LeadModal id="ex1" title="Оставьте заявку" submitText="Отправить заявку" withMessage />}
+  <LeadModal id="ex2" title="Заказать звонок" submitText="Заказать звонок" />
+</Base>
