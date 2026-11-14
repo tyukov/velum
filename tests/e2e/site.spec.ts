@@ -420,15 +420,19 @@ test.describe("каталог металлочерепицы", () => {
       .first()
       .click();
     await expect(page.locator("h1")).toContainText("Трамонтана");
-    // По умолчанию открывается NormanMP, RAL 8017
+    // Трамонтаны нет на складе: по умолчанию NormanMP, RAL 8017
     await expect(page.locator(".product-view__subtitle")).toContainText("NormanMP");
     await expect(page.locator(".product-view__subtitle")).toContainText("RAL 8017");
   });
 
   test("выбор покрытия и цвета переводит на страницу варианта", async ({ page }) => {
+    // По умолчанию — самое доступное покрытие от 0,45 мм со склада: полиэстер 0,45, RAL 8017
     await page.goto("/catalog/metallocherepitsa/lamonterra-x");
-    await page.locator(".picker__chip", { hasText: "Полиэстер" }).click();
-    await expect(page).toHaveURL(/\/lamonterra-x\/polyester-0-45-ral-8017$/);
+    await expect(page.locator(".product-view__subtitle")).toContainText("Полиэстер, 0,45 мм");
+    await expect(page.locator(".stock")).toContainText("В наличии в Атырау");
+    await page.locator(".picker__chip", { hasText: "NormanMP" }).click();
+    await expect(page).toHaveURL(/\/lamonterra-x\/normanmp-0-5-ral-8017$/);
+    // Карточка покрытия с толщиной ведёт сразу на нужную толщину
     await page.locator(".picker__chip", { hasText: "0,4 мм" }).click();
     await expect(page).toHaveURL(/polyester-0-4-ral-8017$/);
     await page
@@ -454,7 +458,7 @@ test.describe("каталог металлочерепицы", () => {
       await expect(page).toHaveURL(url);
       await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(before);
     };
-    await pickAndKeepScroll("Цвет", "RAL 3005 Красное вино", /normanmp-0-5-ral-3005$/);
+    await pickAndKeepScroll("Цвет", "RAL 3005 Красное вино", /polyester-0-45-ral-3005$/);
     await pickAndKeepScroll("Покрытие", /VikingMP E/, /vikingmp-e-0-5-ral-3005$/);
   });
 
@@ -519,15 +523,17 @@ test.describe("каталог металлочерепицы", () => {
     await calc.getByText("По размерам дома").click();
     await calc.getByLabel("Длина дома").fill("10");
     await calc.getByLabel("Ширина дома").fill("8");
-    // Дом 10 × 8 со свесами 11 × 9, наклон 30°: скаты 114,3 м², +10% → 126 м² по 3 875 ₸
-    await expect(calc.locator(".calc__sum")).toHaveText("488\u00a0250\u00a0₸");
+    // Дом 10 × 8 со свесами 11 × 9, наклон 30°: скаты 114,3 м², +10% → 126 м² по 3 075 ₸
+    await expect(calc.locator(".calc__sum")).toHaveText("387\u00a0450\u00a0₸");
     await expect(calc.locator(".calc__trims")).toContainText("конёк — 11 м");
     await expect(calc.locator(".calc__trims")).toContainText("саморезы — ~1\u00a0050 шт");
     // Сравнение: все покрытия модели, текущее отмечено, дешёвое сверху
     const options = calc.locator(".calc__option");
     await expect(options).toHaveCount(10);
     await expect(options.first()).toContainText("Полиэстер 0,4 мм");
-    await expect(calc.locator('.calc__option[aria-current="true"]')).toContainText("NormanMP");
+    await expect(calc.locator('.calc__option[aria-current="true"]')).toContainText(
+      "Полиэстер 0,45 мм",
+    );
     const wa = await calc
       .getByRole("link", { name: "Отправить расчёт в WhatsApp" })
       .getAttribute("href");
@@ -536,21 +542,21 @@ test.describe("каталог металлочерепицы", () => {
 
     // Вальмовая: запас 20%, доборные считает менеджер
     await calc.getByText("Вальмовая").click();
-    await expect(calc.locator(".calc__sum")).toHaveText("534\u00a0750\u00a0₸");
+    await expect(calc.locator(".calc__sum")).toHaveText("424\u00a0350\u00a0₸");
     await expect(calc.locator(".calc__trims")).toBeHidden();
 
     // Переход на другое покрытие из сравнения: расчёт сохраняется
-    await options.filter({ hasText: "Полиэстер 0,45 мм" }).click();
-    await expect(page).toHaveURL(/polyester-0-45/);
+    await options.filter({ hasText: "VikingMP 0,45 мм" }).click();
+    await expect(page).toHaveURL(/vikingmp-0-45/);
     await expect(page.locator("#calc-length")).toHaveValue("10");
-    await expect(page.locator(".calc__option[aria-current]")).toContainText("Полиэстер 0,45 мм");
+    await expect(page.locator(".calc__option[aria-current]")).toContainText("VikingMP 0,45 мм");
   });
 
   test("ловушка по времени: мгновенная отправка отклоняется, повторная проходит", async ({
     page,
   }) => {
     await page.goto("/catalog/metallocherepitsa/kaskad");
-    await page.getByRole("link", { name: "Узнать стоимость" }).click();
+    await page.getByRole("link", { name: "Получить точный расчёт" }).click();
     const modal = page.locator(".blocker .modal");
     const name = uniqueName();
     // Как бот: поля и отправка сразу после открытия окна
@@ -569,7 +575,7 @@ test.describe("каталог металлочерепицы", () => {
 
   test("двойное нажатие «Отправить» — одна заявка", async ({ page }) => {
     await page.goto("/catalog/metallocherepitsa/kaskad");
-    await page.getByRole("link", { name: "Узнать стоимость" }).click();
+    await page.getByRole("link", { name: "Получить точный расчёт" }).click();
     const modal = page.locator(".blocker .modal");
     const name = uniqueName();
     await modal.getByLabel("Ваше имя").fill(name);
@@ -590,7 +596,7 @@ test.describe("каталог металлочерепицы", () => {
 
   test("заявка с товара уходит с названием варианта", async ({ page }) => {
     await page.goto("/catalog/metallocherepitsa/tramontana/vikingmp-e-0-5-rr32");
-    await page.getByRole("link", { name: "Узнать стоимость" }).click();
+    await page.getByRole("link", { name: "Получить точный расчёт" }).click();
     const modal = page.locator(".blocker .modal");
     const name = uniqueName();
     await modal.getByLabel("Ваше имя").fill(name);
@@ -635,6 +641,41 @@ test.describe("каталог металлочерепицы", () => {
     expect(ld.find((d) => d["@type"] === "Product").image).toBe(og);
   });
 
+  test("товар: виды «Лист / На доме / Профиль», шаги площади, сумма сразу", async ({ page }) => {
+    await page.goto("/catalog/metallocherepitsa/lamonterra-x");
+    const views = page.getByRole("group", { name: "Вид товара" });
+    await views.getByRole("button", { name: "На доме" }).click();
+    const house = page.locator('[data-view="house"] img');
+    await expect(house).toBeVisible();
+    expect(
+      await house.evaluate((el: HTMLImageElement) => el.decode().then(() => el.naturalWidth)),
+    ).toBeGreaterThan(0);
+    await views.getByRole("button", { name: "Профиль" }).click();
+    await expect(page.locator('[data-view="profile"]')).toBeVisible();
+    await expect(house).toBeHidden();
+    // Площадь 100 м² по умолчанию, сумма видна сразу; «+» добавляет 10 м²
+    await expect(page.locator(".calc__sum")).toHaveText("338\u00a0250\u00a0₸");
+    await page.getByRole("button", { name: "Увеличить площадь на 10 м²" }).click();
+    await expect(page.locator("#calc-area")).toHaveValue("110");
+  });
+
+  test("Монтерроса: исполнения с ценами и таблица отличий; вариант: другие покрытия", async ({
+    page,
+  }) => {
+    await page.goto("/catalog/metallocherepitsa/monterrosa-s");
+    await expect(page.getByRole("group", { name: "Исполнение" })).toContainText("от 3 090");
+    await expect(page.locator(".versions-table tbody tr")).toHaveCount(4);
+    await expect(page.locator(".versions-table__current")).toContainText("S");
+    await page.goto("/catalog/metallocherepitsa/lamonterra-x/polyester-0-45-ral-8017");
+    await expect(page.locator("h1")).toContainText("Полиэстер 0,45 мм, RAL 8017");
+    await expect(page.locator(".breadcrumbs")).toContainText("Полиэстер 0,45 мм · RAL 8017");
+    await page
+      .locator(".same-color")
+      .getByRole("link", { name: /VikingMP 0,45 мм/ })
+      .click();
+    await expect(page).toHaveURL(/vikingmp-0-45-ral-8017$/);
+  });
+
   test("вариант: свой заголовок, canonical на модель; модель — ProductGroup", async ({ page }) => {
     await page.goto("/catalog/metallocherepitsa/monterrosa-s/vikingmp-0-45-ral-7021");
     await expect(page).toHaveTitle("Металлочерепица Монтерроса S VikingMP RAL 7021 | Velum");
@@ -676,7 +717,7 @@ test("наличие: полиэстер и VikingMP в Атырау, остал
   await page.locator(".picker__chip", { hasText: "PURMAN" }).click();
   await expect(page.locator(".stock")).toContainText("Под заказ");
   await expect(page.locator(".stock")).toContainText("из Караганды");
-  await expect(page.locator(".picker__chip", { hasText: "VikingMP" }).last()).toContainText(
+  await expect(page.locator(".picker__chip", { hasText: "VikingMP" }).first()).toContainText(
     "в наличии в Атырау",
   );
   const ld = await page
@@ -704,7 +745,7 @@ test.describe("второй поставщик", () => {
     await expect(page.locator(".product-view__price-note")).toContainText("12.10.2026");
     // Есть у обоих поставщиков — гарантию не показываем
     await expect(page.locator(".product-view__facts")).not.toContainText("гарантия");
-    await expect(page.locator(".product-details dl")).not.toContainText("Гарантия");
+    await expect(page.locator(".product-specs dl")).toContainText("уточнит менеджер");
     // Только у одного поставщика — показываем
     await page.locator(".picker__chip", { hasText: "NormanMP" }).click();
     await expect(page.locator(".product-view__facts")).toContainText("20 лет гарантия");
@@ -721,7 +762,7 @@ test.describe("второй поставщик", () => {
     await expect(page.locator(".product-view__facts")).not.toContainText("ширина листа");
     await expect(page.locator(".product-view__facts")).toContainText("5 лет гарантия");
 
-    await page.getByRole("link", { name: "Узнать стоимость" }).click();
+    await page.getByRole("link", { name: "Получить точный расчёт" }).click();
     const modal = page.locator(".blocker .modal");
     const name = uniqueName();
     await modal.getByLabel("Ваше имя").fill(name);

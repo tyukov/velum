@@ -83,12 +83,31 @@ export function initCalc() {
   const whatsapp = $<HTMLAnchorElement>(".calc__whatsapp");
 
   const saved = loadState();
-  inputs.area.value = saved.area ?? "";
+  // Площадь по умолчанию — 100 м², чтобы сумма была видна сразу. В заявку расчёт уходит,
+  // только если посетитель сам что-то ввёл (иначе менеджер увидит «100 м²», которых не было)
+  inputs.area.value = saved.area ?? "100";
+  let touched = saved.area !== undefined || saved.length !== undefined;
+  calc.addEventListener("input", () => (touched = true));
+  calc.addEventListener("click", (e) => {
+    if ((e.target as Element).closest("[data-calc-step], input[type=radio]")) touched = true;
+  });
   inputs.length.value = saved.length ?? "";
   inputs.width.value = saved.width ?? "";
   setRadio("calc-mode", saved.mode);
   setRadio("calc-slope", saved.slope);
   setRadio("calc-roof", saved.roof);
+
+  // Кнопки «−» и «+» у площади: шаг 10 м²
+  calc.querySelectorAll<HTMLButtonElement>("[data-calc-step]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const next = Math.max(
+        10,
+        Math.round((num(inputs.area.value) || 0) + Number(btn.dataset.calcStep)),
+      );
+      inputs.area.value = String(next);
+      inputs.area.dispatchEvent(new Event("input", { bubbles: true }));
+    }),
+  );
 
   const error = $(".calc__error");
   const reset = (message = "") => {
@@ -108,7 +127,7 @@ export function initCalc() {
       slope: radio("calc-slope") as Slope,
       roof: radio("calc-roof") as RoofType,
     };
-    saveState(state);
+    if (touched) saveState(state);
     calc.querySelectorAll<HTMLElement>(".calc__mode").forEach((el) => {
       el.hidden = el.dataset.mode !== state.mode;
     });
@@ -201,7 +220,8 @@ export function initCalc() {
 
     const summary = `${source}, ${roof.label.toLowerCase()}; ${sheets} м² листа, примерно ${tenge(sum)}`;
     const trimsText = trimLines.length ? `; доборные: ${trimLines.join(", ")}` : "";
-    if (productField) productField.value = `${baseProduct}; ${summary}${trimsText}`;
+    if (productField)
+      productField.value = touched ? `${baseProduct}; ${summary}${trimsText}` : baseProduct;
     if (orderText) orderText.textContent = "Получить точный расчёт";
     const message =
       `Здравствуйте! Расчёт с сайта velum.kz:\n${baseProduct}\n${summary}${trimsText}\n` +
