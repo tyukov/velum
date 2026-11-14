@@ -24,6 +24,13 @@ const { title, description, path, noindex, lead = false } = Astro.props;
     <slot />
   </main>
   <Footer />
-  {lead && <LeadModal id="ex1" title="Оставьте заявку" submitText="Отправить заявку" withMessage />}
+  {lead && (
+    <LeadModal
+      id="ex1"
+      title="Оставьте заявку — перезвоним"
+      submitText="Отправить заявку"
+      withMessage
+    />
+  )}
   <LeadModal id="ex2" title="Заказать звонок" submitText="Заказать звонок" />
 </Base>

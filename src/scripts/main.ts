@@ -204,7 +204,7 @@ function initPhoneMasks() {
 // ---------- FAQ ----------
 function initFaq() {
   document.querySelectorAll<HTMLElement>(".faq-list__question").forEach((question) => {
-    question.setAttribute("aria-expanded", "false");
+    question.setAttribute("aria-expanded", String(question.classList.contains("active")));
     question.addEventListener("click", () => {
       const active = document.querySelector<HTMLElement>(".faq-list__question.active");
       if (active && active !== question) {

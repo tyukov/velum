@@ -144,6 +144,31 @@ const jsonLd = {
   .a-list__grid li[hidden] {
     display: none;
   }
+  /* Первая статья — крупно, во всю ширину: картинка слева, текст справа */
+  .a-list__first {
+    grid-column: 1 / -1;
+  }
+  .a-list__first :global(.a-card) {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    align-items: center;
+  }
+  .a-list__first :global(.a-card__art img) {
+    aspect-ratio: auto;
+    height: 100%;
+    max-height: 360px;
+    object-fit: contain;
+  }
+  .a-list__first :global(.a-card__body) {
+    padding: 28px 36px;
+    gap: 10px;
+  }
+  .a-list__first :global(.a-card__title) {
+    font-size: clamp(22px, 2.4vw, 30px);
+  }
+  .a-list__first :global(.a-card__text) {
+    font-size: 16px;
+  }
   .a-list__ask {
     display: flex;
     flex-wrap: wrap;
@@ -153,14 +178,14 @@ const jsonLd = {
     margin-top: clamp(32px, 4vw, 56px);
     padding: clamp(22px, 3vw, 36px);
     border-radius: 24px;
-    background: var(--ink);
-    color: #d6d0c8;
+    background: var(--paper);
+    color: var(--muted);
   }
   .a-list__ask h2 {
     margin: 0 0 6px;
     font-size: 22px;
     font-weight: 600;
-    color: #ffffff;
+    color: var(--ink);
   }
   .a-list__ask p {
     margin: 0;
@@ -171,17 +196,15 @@ const jsonLd = {
     flex-wrap: wrap;
     gap: 10px;
   }
+  @media (max-width: 760px) {
+    .a-list__first :global(.a-card) {
+      display: flex;
+    }
+    .a-list__first :global(.a-card__body) {
+      padding: 18px 20px 22px;
+    }
+  }
   @media (max-width: 640px) {
-    .a-list__filter {
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      margin-inline: calc(var(--gutter) * -1);
-      padding-inline: var(--gutter);
-      scrollbar-width: none;
-    }
-    .a-list__filter button {
-      flex: none;
-    }
     .a-list__ask-actions {
       display: grid;
       width: 100%;

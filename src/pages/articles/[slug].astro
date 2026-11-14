@@ -6,6 +6,7 @@ import Breadcrumbs from "../../components/catalog/Breadcrumbs.astro";
 import ArticleCard from "../../components/articles/ArticleCard.astro";
 import {
   ARTICLES_UPDATED,
+  SHORT,
   articleBySlug,
   articles,
   formatDate,
@@ -61,7 +62,7 @@ const title = article.title.length > 50 ? article.title : `${article.title} | Ve
       items={[
         { name: "Главная", href: "/" },
         { name: "Статьи", href: "/articles" },
-        { name: article.title, href: `/articles/${article.slug}` },
+        { name: SHORT[article.slug] ?? article.title, href: `/articles/${article.slug}` },
       ]}
     />
     <header class="a-head">
@@ -149,6 +150,32 @@ const title = article.title.length > 50 ? article.title : `${article.title} | Ve
   </div>
 </PageLayout>
 
+<script>
+  // Оглавление: подсвечиваем раздел, который сейчас на экране
+  document.addEventListener("astro:page-load", () => {
+    const links = [...document.querySelectorAll<HTMLAnchorElement>(".a-toc a")];
+    if (!links.length) return;
+    const heads = links
+      .map((a) => document.getElementById(a.hash.slice(1)))
+      .filter((h): h is HTMLElement => !!h);
+    const update = () => {
+      const top = window.innerHeight * 0.3;
+      let current = heads[0];
+      for (const h of heads) if (h.getBoundingClientRect().top < top) current = h;
+      links.forEach((a) => a.classList.toggle("is-active", a.hash === `#${current?.id}`));
+    };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    document.addEventListener(
+      "astro:before-swap",
+      () => window.removeEventListener("scroll", update),
+      {
+        once: true,
+      },
+    );
+  });
+</script>
+
 <style>
   .a-page {
     padding-top: 24px;
@@ -160,9 +187,6 @@ const title = article.title.length > 50 ? article.title : `${article.title} | Ve
     grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
     align-items: center;
     gap: 24px 48px;
-    padding: clamp(22px, 4vw, 48px);
-    border-radius: 28px;
-    background: var(--paper);
   }
   .a-head__meta {
     margin: 0 0 12px;
@@ -187,6 +211,11 @@ const title = article.title.length > 50 ? article.title : `${article.title} | Ve
     font-size: 17px;
     line-height: 1.6;
     color: var(--text);
+  }
+  .a-head__art {
+    border-radius: 24px;
+    background: var(--paper);
+    padding: 12px;
   }
   .a-head__art img {
     display: block;
@@ -287,10 +316,12 @@ const title = article.title.length > 50 ? article.title : `${article.title} | Ve
   }
   .a-body :global(.a-formula) {
     margin: 4px 0 20px;
-    padding: 16px 20px;
-    border-left: 3px solid var(--accent);
-    border-radius: 0 14px 14px 0;
-    background: var(--paper);
+    padding: 18px 22px;
+    border-left: 4px solid var(--accent);
+    border-radius: 0 16px 16px 0;
+    background: #fbefe2;
+    font-size: 19px;
+    line-height: 1.45;
     font-weight: 600;
     color: var(--ink);
   }
@@ -320,8 +351,20 @@ const title = article.title.length > 50 ? article.title : `${article.title} | Ve
     white-space: nowrap;
   }
   .a-body :global(tbody th) {
-    font-weight: 500;
+    font-weight: 400;
+    color: var(--muted);
+  }
+  .a-body :global(tbody td) {
+    font-weight: 600;
     color: var(--ink);
+  }
+  .a-body :global(tbody tr:nth-child(even)) {
+    background: var(--paper-2);
+  }
+  .a-toc a.is-active {
+    border-left-color: var(--accent);
+    color: var(--ink);
+    font-weight: 600;
   }
   .a-body :global(tbody tr:first-child th),
   .a-body :global(tbody tr:first-child td) {
@@ -427,14 +470,8 @@ const title = article.title.length > 50 ? article.title : `${article.title} | Ve
     .a-help {
       display: none;
     }
-    .a-toc {
-      padding: 16px 18px;
-      border-radius: 18px;
-      background: var(--paper);
-    }
-    .a-toc a {
-      border-left: 0;
-      padding-left: 0;
+    .a-aside {
+      display: none;
     }
     .a-related ul {
       grid-template-columns: minmax(0, 1fr);
@@ -443,13 +480,11 @@ const title = article.title.length > 50 ? article.title : `${article.title} | Ve
   @media (max-width: 640px) {
     .a-head {
       grid-template-columns: minmax(0, 1fr);
-      gap: 8px;
-      padding: 18px 20px 22px;
+      gap: 16px;
     }
     .a-head__art {
-      order: -1;
-      margin: -4px auto 0;
-      width: min(320px, 100%);
+      width: 100%;
+      box-sizing: border-box;
     }
     .a-head__lead {
       font-size: 16px;

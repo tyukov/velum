@@ -41,15 +41,22 @@ const wa = `https://wa.me/${business.phoneE164.replace("+", "")}?text=${encodeUR
     <h2 id="faq-title" class="s-h2">
       Частые вопросы
     </h2>
-    <p>Не нашли ответ — напишите нам, ответим в течение рабочего дня.</p>
-    <a class="s-btn s-btn--wa" href={wa} target="_blank" rel="noopener">
-      Спросить в WhatsApp
-    </a>
+    <p>
+      Не нашли ответ —{" "}
+      <a class="faq__wa" href={wa} target="_blank" rel="noopener">
+        напишите нам в WhatsApp
+      </a>
+    </p>
   </div>
   <ul class="faq-list">
     {faq.map(({ q, a }, i) => (
       <li class="faq-list__item">
-        <button type="button" class="faq-list__question" aria-controls={`faq-a${i}`}>
+        <button
+          type="button"
+          class:list={["faq-list__question", { active: i === 0 }]}
+          aria-controls={`faq-a${i}`}
+          data-open={i === 0 ? "" : undefined}
+        >
           {q}
           <svg
             class="faq-list_icon_close"
@@ -58,12 +65,16 @@ const wa = `https://wa.me/${business.phoneE164.replace("+", "")}?text=${encodeUR
             height="24"
             viewBox="0 0 24 24"
           >
-            <g stroke-width="2" fill="none" stroke-linecap="square">
-              <path d="M1 12h22M12 1v22"></path>
+            <g stroke-width="1.8" fill="none" stroke-linecap="round">
+              <path d="M7 12h10M12 7v10"></path>
             </g>
           </svg>
         </button>
-        <div class="faq-list__answer" id={`faq-a${i}`}>
+        <div
+          class="faq-list__answer"
+          id={`faq-a${i}`}
+          style={i === 0 ? "max-height: none" : undefined}
+        >
           <p>{a}</p>
         </div>
       </li>
@@ -100,7 +111,7 @@ const wa = `https://wa.me/${business.phoneE164.replace("+", "")}?text=${encodeUR
     display: block;
     width: 100%;
     min-height: 56px;
-    padding: 18px 40px 18px 0;
+    padding: 18px 48px 18px 0;
     border: 0;
     background: none;
     font: inherit;
@@ -114,8 +125,24 @@ const wa = `https://wa.me/${business.phoneE164.replace("+", "")}?text=${encodeUR
     outline: 2px solid var(--ink);
     outline-offset: 2px;
   }
+  /* Плюс в кружке; у открытого вопроса поворачивается в крестик */
   .faq-list_icon_close {
-    stroke: #8a8279;
+    width: 32px;
+    height: 32px;
+    padding: 3px;
+    box-sizing: border-box;
+    border: 1px solid #e3ddd3;
+    border-radius: 50%;
+    stroke: var(--ink);
+    top: calc(50% - 16px);
+  }
+  .faq-list__question.active .faq-list_icon_close {
+    stroke: var(--ink);
+    background: var(--paper);
+  }
+  .faq__wa {
+    color: var(--wa);
+    font-weight: 600;
   }
   .faq-list__answer p {
     margin: 0;
