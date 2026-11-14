@@ -1,28 +1,11 @@
 // Главная: показ частей дома по очереди, рисунки товаров на холстах и мини-калькулятор крыши.
 // Сайт переходит между страницами без перезагрузки, поэтому всё подключаем на astro:page-load.
-import { paintArt } from "../lib/product-art";
+import { paint } from "./art";
 
 const TOUR_MS = 2600;
 let tour: ReturnType<typeof setInterval> | undefined;
-let resize: ResizeObserver | undefined;
 
 const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-function paint(canvas: HTMLCanvasElement) {
-  if (!canvas.clientWidth || !canvas.clientHeight) return;
-  const d = canvas.dataset;
-  paintArt(canvas, { kind: d.kind, model: d.model, color: d.color, wash: d.wash !== "false" });
-}
-
-function initArt() {
-  resize?.disconnect();
-  const canvases = document.querySelectorAll<HTMLCanvasElement>("canvas[data-art]");
-  if (!canvases.length) return;
-  resize = new ResizeObserver((entries) =>
-    entries.forEach((e) => paint(e.target as HTMLCanvasElement)),
-  );
-  canvases.forEach((c) => resize!.observe(c));
-}
 
 function initHero() {
   clearInterval(tour);
@@ -95,11 +78,9 @@ function initCalc() {
 }
 
 document.addEventListener("astro:page-load", () => {
-  initArt();
   initHero();
   initCalc();
 });
 document.addEventListener("astro:before-swap", () => {
   clearInterval(tour);
-  resize?.disconnect();
 });
