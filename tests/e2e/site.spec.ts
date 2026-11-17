@@ -797,3 +797,13 @@ test("меню на телефоне: разделы, контакты, WhatsApp
   await expect(page.locator(".s-menu")).not.toHaveAttribute("open");
   await expect(page.locator("#contacts")).toBeInViewport();
 });
+
+test("код подтверждения Google только на главной", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.locator('meta[name="google-site-verification"]')).toHaveAttribute(
+    "content",
+    "180-WP4DX2sOUQQrOI0fPe4ImmTmAwE8YA_yGfivgRo",
+  );
+  await page.goto("/catalog");
+  await expect(page.locator('meta[name="google-site-verification"]')).toHaveCount(0);
+});

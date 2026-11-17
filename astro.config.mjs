@@ -47,10 +47,12 @@ export default defineConfig({
         access: "public",
         optional: true,
       }),
+      // Код не секретный (виден в разметке главной), поэтому задан здесь; переменная в Vercel его заменит
       PUBLIC_GOOGLE_VERIFICATION: envField.string({
         context: "client",
         access: "public",
         optional: true,
+        default: "180-WP4DX2sOUQQrOI0fPe4ImmTmAwE8YA_yGfivgRo",
       }),
       PUBLIC_BING_VERIFICATION: envField.string({
         context: "client",
